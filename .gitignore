@@ -1,0 +1,9 @@
+/3rdparty
+/bin
+/ipch
+/junk
+/lib
+*.sdf
+*.opensdf
+*.aps
+*.suo
