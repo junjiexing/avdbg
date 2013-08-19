@@ -50,9 +50,12 @@ void CAsmView::OnPaint()
 {
 	//__super::OnPaint();
 	CPaintDC dc(this); // device context for painting
-	RECT	rc;
-	GetClientRect(&rc);
-	dc.FillRect(&rc,&CBrush(0xB2F7FF));
+	RECT	rcClient;
+	RECT	rcLine = {0};
+	GetClientRect(&rcClient);
+	rcLine.right = rcClient.right;
+
+	dc.FillRect(&rcClient,&CBrush(0xB2F7FF));
 
 	if (dbg_krnl_ptr_ == NULL)
 	{
@@ -61,17 +64,19 @@ void CAsmView::OnPaint()
 
 	m_vecAddress.clear();
 
-	byte buffer[rc.bottom/20*15+1];
+	byte buffer[rcClient.bottom/20*15+1];
 	SIZE_T num_read;
-	if (!dbg_krnl_ptr_->read_memory(m_AddrToShow,buffer,rc.bottom/20*15,&num_read))
+	if (!dbg_krnl_ptr_->read_memory(m_AddrToShow,buffer,rcClient.bottom/20*15,&num_read))
 	{
 		int y = 0;
-		for (int i=0;i<rc.bottom/20;++i)
+		for (int i=0;i<rcClient.bottom/20;++i)
 		{
 			char szInsn1[20];
 			sprintf(szInsn1,"%08X  ???",m_AddrToShow+i);
 			m_vecAddress.push_back(m_AddrToShow+i);
-			dc.ExtTextOut(0,y,NULL,NULL,szInsn1,strlen(szInsn1),NULL);
+			rcLine.top = y;
+			rcLine.bottom = y+20;
+			dc.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn1,strlen(szInsn1),NULL);
 			y+=20;
 		}
 
@@ -94,7 +99,7 @@ void CAsmView::OnPaint()
 		char szInsn[100];
 		sprintf(szInsn, "%08X  %s",curAddr.addr32.offset, pcsIns);
 		m_vecAddress.push_back(curAddr.addr32.offset);
-		if (y<rc.bottom && curAddr.addr32.offset >= (uint32)m_AddrToShow-5)
+		if (y<rcClient.bottom && curAddr.addr32.offset >= (uint32)m_AddrToShow-5)
 		{
 			debug_kernel::breakpoint* bp;
 			if (curAddr.addr32.offset == (uint32)m_Eip)
@@ -120,7 +125,10 @@ void CAsmView::OnPaint()
 			{
 				dc.SetBkColor(0x00FF33);
 			}
-			dc.ExtTextOut(0,y,NULL,NULL,szInsn,strlen(szInsn),NULL);
+
+			rcLine.top = y;
+			rcLine.bottom = y+20;
+			dc.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn,strlen(szInsn),NULL);
 			y+=20;
 
 		}
