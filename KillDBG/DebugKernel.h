@@ -2,54 +2,130 @@
 
 class CMainFrame;
 
-class DebugKernel : public std::enable_shared_from_this<DebugKernel>
+extern CMainFrame* main_frame;
+
+class debug_kernel
 {
 public:
-	DebugKernel(void);
-	~DebugKernel(void);
+	debug_kernel(void);
+	~debug_kernel(void);
 
-	bool load_exe(const std::string& exe_path,const std::string& command_str,const std::string& current_path);
-	bool attach_process(DWORD process_id);
-	bool read_debugee_memory(const void* address,void* buffer,size_t size);
-
-	enum OutputType
+public:
+	enum debug_status
 	{
-		OUT_INFO,
-		OUT_WARNING,
-		OUT_ERROR
+		STOP,
+		RUN,
+		BREAK
 	};
 
-	CMainFrame* main_frm_ptr_;
-	void output_string(const std::string& str,OutputType type = OUT_INFO);
-
-	void set_output_func(const std::function<void(const std::string&,OutputType)>& fn)
-	{output_message_ = fn;}
-
-	DWORD get_process_id(){return process_id_;}
-
-	SIZE_T virtual_query_ex(const void* address,MEMORY_BASIC_INFORMATION& mem_info)
+	struct  breakpoint
 	{
-		return VirtualQueryEx(process_handle_,address,&mem_info,sizeof(mem_info));
+		DWORD address;	//断点地址
+		byte org_data;	//断点处的原始数据
+		bool valid;	//断点实际上是否起作用
+		bool user_enable;	//用户是否启用了该断点
+
+		int hits;	// 命中次数
+		bool is_once; // 是否是一次性的
+	};
+
+	// 加载一个exe并开始调试
+	bool load_exe(std::string& exe_path, std::string& command_str,std::string& current_path);
+	// 附加到指定的进程并开始调试
+	bool attach_process(DWORD pid);
+
+	// 单步步入
+	bool step_in();
+
+	// 继续调试，运行被调试进程
+	bool continue_debug(DWORD continue_status)
+	{
+		breakpoint* bp = find_breakpoint_by_address(context_.Eip);
+		if (bp)
+		{
+			invalid_breakpoint(bp);
+		}
+
+
+		return SetEvent(continue_event_);
 	}
+
+	bool add_breakpoint(DWORD address,bool is_once = false);
+
+
+	bool read_memory(DWORD address,void* buffer,size_t size,SIZE_T* num_read = NULL );
+	bool write_memory(DWORD address,void* data,SIZE_T size, SIZE_T* num_written = NULL);
+	bool modify_memory_prop(DWORD address,SIZE_T size,DWORD new_protect,DWORD* old_protect = NULL);
+	bool virtual_query_ex(DWORD address,MEMORY_BASIC_INFORMATION& info);
+	breakpoint* find_breakpoint_by_address(DWORD address);
+	// 用户启用断点
+	bool enable_breakpoint(breakpoint* bp);
+	bool enable_breakpoint(DWORD address);
+	// 用户禁用断点
+	bool disable_breakpoint(breakpoint* bp);
+	bool disable_breakpoint(DWORD address);
+	// 使断点有效
+	bool valid_breakpoint(breakpoint* bp);
+	bool valid_breakpoint(DWORD address);
+	// 使断点无效（为了进行单步等操作时不受断点的影响，但并不是禁用断点）
+	bool invalid_breakpoint(breakpoint* bp);
+	bool invalid_breakpoint(DWORD address);
+	bool delete_breakpoint(DWORD address);
+	void update_breakpoint_starus()
+	{
+		for (int i=0;i<bp_vec_.size();++i)
+		{
+			breakpoint& bp = bp_vec_[i];
+			if (bp.user_enable == true && bp.valid == false)
+			{
+				valid_breakpoint(&bp);
+			}
+			else if(bp.user_enable == true && bp.valid == true)
+			{
+				invalid_breakpoint(&bp);
+			}
+		}
+	}
+
+
+private:
+	// 最后一次WaitForDebugEvent获取到的调试事件
+	DEBUG_EVENT debug_event_;
+	// 最后一次调试事件时的线程context
+	CONTEXT context_;
+	// 异常是否已经处理
+	DWORD	continue_status_;
+	// 继续调试所用的事件
+	HANDLE continue_event_;
+	//HANDLE process_handle_;
+	bool debugee_exit_;
+	//DWORD process_id_;
+	debug_status debug_status_;
+
+	std::vector<breakpoint> bp_vec_;
+
+	// 被调试进程的进程句柄
+	HANDLE handle_;
+	// 被调试进程的进程ID
+	DWORD pid_;
+
+
+// 	std::string exe_path_;
+// 	std::string command_str_;
+// 	std::string current_path_;
 
 private:
 	void debug_thread_proc();
-	void on_create_process_event(const CREATE_PROCESS_DEBUG_INFO& create_process_info);
-	void on_exit_process_event(const EXIT_PROCESS_DEBUG_INFO& exit_process);
-	void on_create_thread_event(const CREATE_THREAD_DEBUG_INFO& create_thread);
-	void on_exit_thread_event(const EXIT_THREAD_DEBUG_INFO& exit_thread);
-	void on_load_dll_event(const LOAD_DLL_DEBUG_INFO& load_dll);
-	void on_unload_dll_event(const UNLOAD_DLL_DEBUG_INFO& unload_dll);
-	void on_output_debug_string_event(const OUTPUT_DEBUG_STRING_INFO& debug_string);
-	void on_rip_event(const RIP_INFO& rip_info);
-	void on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
+	bool on_create_process_event(const CREATE_PROCESS_DEBUG_INFO& create_process_info);
+	bool on_exit_process_event(const EXIT_PROCESS_DEBUG_INFO& exit_process);
+	bool on_create_thread_event(const CREATE_THREAD_DEBUG_INFO& create_thread);
+	bool on_exit_thread_event(const EXIT_THREAD_DEBUG_INFO& exit_thread);
+	bool on_load_dll_event(const LOAD_DLL_DEBUG_INFO& load_dll);
+	bool on_unload_dll_event(const UNLOAD_DLL_DEBUG_INFO& unload_dll);
+	bool on_output_debug_string_event(const OUTPUT_DEBUG_STRING_INFO& debug_string);
+	bool on_rip_event(const RIP_INFO& rip_info);
+	bool on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
 
-
-	DWORD continue_status_;
-	HANDLE process_handle_;
-	bool debugee_exit_;
-	DWORD process_id_;
-	std::function<void(const std::string&,OutputType)> output_message_;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 	//memory map相关

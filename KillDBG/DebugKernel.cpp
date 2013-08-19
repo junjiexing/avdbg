@@ -4,22 +4,21 @@
 #include "MainFrm.h"
 #include "DebugUtils.h"
 
-DebugKernel::DebugKernel(void)
-	:continue_status_(DBG_CONTINUE),main_frm_ptr_(NULL)
+debug_kernel::debug_kernel(void)
+	:continue_status_(DBG_CONTINUE),debug_status_(STOP)
 {
+	continue_event_ = CreateEvent(NULL,FALSE,TRUE,NULL);
 }
 
 
-DebugKernel::~DebugKernel(void)
+debug_kernel::~debug_kernel(void)
 {
 }
 
-bool DebugKernel::load_exe( const std::string& exe_path,const std::string& command_str,const std::string& current_path )
+bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std::string& current_path)
 {
 	std::thread debug_thread([this,exe_path,command_str,current_path]()
 	{
-		DebugSetProcessKillOnExit(TRUE);
-
 		STARTUPINFO si = {0};
 		si.cb = sizeof(si);
 		PROCESS_INFORMATION pi = {0};
@@ -31,11 +30,11 @@ bool DebugKernel::load_exe( const std::string& exe_path,const std::string& comma
 		if (!CreateProcess(exe_path.c_str(), command_copy, 
 			NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, current_path.c_str(), &si, &pi))
 		{
-			output_string(std::string("创建调试进程失败！！"),OUT_ERROR);
+			main_frame->m_wndOutputWnd.output_string(std::string("创建调试进程失败！！"),COutputWindow::OUT_ERROR);
 			return;
 		}
 
-		process_id_ = pi.dwProcessId;
+		pid_ = pi.dwProcessId;
 		CloseHandle(pi.hThread);
 		CloseHandle(pi.hProcess);
 
@@ -47,18 +46,17 @@ bool DebugKernel::load_exe( const std::string& exe_path,const std::string& comma
 	return true;
 }
 
-bool DebugKernel::attach_process( DWORD process_id )
+bool debug_kernel::attach_process(DWORD pid)
 {
-	std::thread debug_thread([this,process_id]()
+	pid_ = pid;
+	std::thread debug_thread([this]()
 	{
 		DebugSetProcessKillOnExit(FALSE);
-		if (!DebugActiveProcess(process_id))
+		if (!DebugActiveProcess(pid_))
 		{
-			output_string(std::string("附加指定进程失败！！"),OUT_ERROR);
+			main_frame->m_wndOutputWnd.output_string(std::string("附加指定进程失败！！"),COutputWindow::OUT_ERROR);
 			return;
-		}
-		process_id_ = process_id;
-		
+		}		
 		debug_thread_proc();
 	});
 
@@ -67,114 +65,150 @@ bool DebugKernel::attach_process( DWORD process_id )
 	return true;
 }
 
-void DebugKernel::debug_thread_proc()
+void debug_kernel::debug_thread_proc()
 {
-	DEBUG_EVENT debug_event;
 	debugee_exit_ = false;
 	while (!debugee_exit_)
 	{
-		BOOL ret = WaitForDebugEvent(&debug_event,0);
-		if (!ret)
-		{
-			//OnIdle();
-			continue;
-		}
+		BOOL ret = WaitForDebugEvent(&debug_event_,INFINITE);
 
-		BOOL	bContinue = TRUE;
-		switch(debug_event.dwDebugEventCode)
+		HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
+		context_.ContextFlags = CONTEXT_ALL;
+		GetThreadContext(thd_handle,&context_);
+		CloseHandle(thd_handle);
+
+		bool continue_debug = true;
+		switch(debug_event_.dwDebugEventCode)
 		{
 		case CREATE_PROCESS_DEBUG_EVENT:	//创建被调试进程
-			on_create_process_event(debug_event.u.CreateProcessInfo);
+			continue_debug = on_create_process_event(debug_event_.u.CreateProcessInfo);
 			break;
 		case EXIT_PROCESS_DEBUG_EVENT:
-			on_exit_process_event(debug_event.u.ExitProcess);
+			continue_debug = on_exit_process_event(debug_event_.u.ExitProcess);
 			continue;
 			break;
 		case CREATE_THREAD_DEBUG_EVENT:
-			on_create_thread_event(debug_event.u.CreateThread);
+			continue_debug = on_create_thread_event(debug_event_.u.CreateThread);
 			break;
 		case EXIT_THREAD_DEBUG_EVENT:
-			on_exit_thread_event(debug_event.u.ExitThread);
+			continue_debug = on_exit_thread_event(debug_event_.u.ExitThread);
 			//continue;
 			break;
 		case LOAD_DLL_DEBUG_EVENT:		//加载DLL
-			on_load_dll_event(debug_event.u.LoadDll);
+			continue_debug = on_load_dll_event(debug_event_.u.LoadDll);
 			break;
 		case UNLOAD_DLL_DEBUG_EVENT:
-			on_unload_dll_event(debug_event.u.UnloadDll);
+			continue_debug = on_unload_dll_event(debug_event_.u.UnloadDll);
 			break;
 		case OUTPUT_DEBUG_STRING_EVENT:
-			on_output_debug_string_event(debug_event.u.DebugString);
+			continue_debug = on_output_debug_string_event(debug_event_.u.DebugString);
 			break;
 		case RIP_EVENT:
-			on_rip_event(debug_event.u.RipInfo);
+			continue_debug = on_rip_event(debug_event_.u.RipInfo);
 			break;
 		case EXCEPTION_DEBUG_EVENT:
-			on_exception_event(debug_event.u.Exception);
+			continue_debug = on_exception_event(debug_event_.u.Exception);
 			break;
 		}
-		BOOL bRet = ContinueDebugEvent(debug_event.dwProcessId, debug_event.dwThreadId, continue_status_);
-		ASSERT(bRet);
 
+
+		update_breakpoint_starus();
+
+		if (!continue_debug)
+		{
+			debug_status_ = BREAK;
+
+			ResetEvent(continue_event_);
+			WaitForSingleObject(continue_event_,INFINITE);
+		}
+		ContinueDebugEvent(debug_event_.dwProcessId,debug_event_.dwThreadId,continue_status_);
+		
+		debug_status_ = RUN;
 	}
 
 }
 
-void DebugKernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )
+bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )
 {
 	std::string program_path;
 	debug_utils::get_file_name_frome_handle(create_process_info.hFile,program_path);
 	boost::format fmter("加载程序：“%s”");
 	fmter % program_path;
-	output_string( fmter.str());
+	main_frame->m_wndOutputWnd.output_string( fmter.str());
 
 	CloseHandle(create_process_info.hFile);
-	process_handle_ = create_process_info.hProcess;
+
+	handle_ = create_process_info.hProcess;
+
+	IMAGE_DOS_HEADER dos_header;
+	DWORD base = (DWORD)create_process_info.lpBaseOfImage;
+	read_memory(base,&dos_header,sizeof(IMAGE_DOS_HEADER));
+	IMAGE_NT_HEADERS nt_header;
+	read_memory(base + dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS));
+	add_breakpoint( base + nt_header.OptionalHeader.AddressOfEntryPoint,true);
 	CloseHandle(create_process_info.hThread);
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_process )
+bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_process )
 {
 	boost::format fmter("被调试进程退出,退出代码为: %u");
 	fmter % exit_process.dwExitCode;
-	output_string(fmter.str());
+	main_frame->m_wndOutputWnd.output_string(fmter.str());
 	debugee_exit_ = true;
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_create_thread_event( const CREATE_THREAD_DEBUG_INFO& create_thread )
+bool debug_kernel::on_create_thread_event( const CREATE_THREAD_DEBUG_INFO& create_thread )
 {
 	boost::format fmter("创建线程，起始地址为：0x%08X");
 	fmter % create_thread.lpStartAddress;
-	output_string(fmter.str());
+	main_frame->m_wndOutputWnd.output_string(fmter.str());
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_exit_thread_event( const EXIT_THREAD_DEBUG_INFO& exit_thread )
+bool debug_kernel::on_exit_thread_event( const EXIT_THREAD_DEBUG_INFO& exit_thread )
 {
 	boost::format fmter("线程退出，退出代码为：%u");
 	fmter % exit_thread.dwExitCode;
-	output_string(fmter.str());
+	main_frame->m_wndOutputWnd.output_string(fmter.str());
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
+bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 {
 	std::string dll_path;
 	debug_utils::get_file_name_frome_handle(load_dll.hFile,dll_path);
 
 	boost::format fmter("加载模块:\"%s\"");
 	fmter % dll_path;
-	output_string(fmter.str());
+	main_frame->m_wndOutputWnd.output_string(fmter.str());
 
 	CloseHandle(load_dll.hFile);
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll )
+bool debug_kernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll )
 {
 	boost::format fmter("卸载模块:\"0x%08X\"");
 	fmter % unload_dll.lpBaseOfDll;
-	output_string(fmter.str());
+	main_frame->m_wndOutputWnd.output_string(fmter.str());
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& debug_string )
+bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& debug_string )
 {
 	int str_len = debug_string.nDebugStringLength;		//字符串的长度（字节）
 	BYTE read_buffer[str_len];
@@ -183,10 +217,10 @@ void DebugKernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& 
 
 	SIZE_T bytesRead;
 
-	if (!read_debugee_memory(debug_string.lpDebugStringData,read_buffer,str_len))
+	if (!read_memory((DWORD)debug_string.lpDebugStringData,read_buffer,str_len))
 	{
-		output_string(std::string("获取调试字符串失败"),OUT_WARNING);
-		return;
+		main_frame->m_wndOutputWnd.output_string(std::string("获取调试字符串失败"),COutputWindow::OUT_WARNING);
+		return false;
 	}
 
 	//据说这里永远是多字节字符，
@@ -203,80 +237,211 @@ void DebugKernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& 
 	{
 		sprintf(output_str,"调试字符串：“%s”\n",read_buffer);
 	}
-	output_string(std::string(output_str));
+	main_frame->m_wndOutputWnd.output_string(std::string(output_str));
+
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_rip_event( const RIP_INFO& rip_info )
+bool debug_kernel::on_rip_event( const RIP_INFO& rip_info )
 {
-
+	continue_status_= DBG_CONTINUE;
+	return true;
 }
 
-void DebugKernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_exception )
+bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_exception )
 {
-	if (debug_exception.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
+
+	switch (debug_exception.ExceptionRecord.ExceptionCode)
 	{
-		const void* addr = debug_exception.ExceptionRecord.ExceptionAddress;
-		boost::format fmter("断点异常，地址：0x%08X,异常代码：0x%08X\n");
-		fmter % addr % debug_exception.ExceptionRecord.ExceptionCode;
-		output_string(fmter.str());
-
-		memory_region_info_t info;
-		bool ret = this->get_memory_info_by_addr(addr,info);
-		if (!ret)
+	case EXCEPTION_ACCESS_VIOLATION:
 		{
-			output_string(std::string("异常地址无法访问。"),OUT_ERROR);
-			return;
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ACCESS_VIOLATION"));
+		}
+		break;
+	case EXCEPTION_DATATYPE_MISALIGNMENT:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_DATATYPE_MISALIGNMENT"));
+		}
+		break;
+	case EXCEPTION_BREAKPOINT:
+		{
+			void* addr = debug_exception.ExceptionRecord.ExceptionAddress;
+			boost::format fmter("断点异常，地址：0x%08X,异常代码：0x%08X\n");
+			fmter % addr % debug_exception.ExceptionRecord.ExceptionCode;
+			main_frame->m_wndOutputWnd.output_string(fmter.str());
+
+			breakpoint* bp = find_breakpoint_by_address((DWORD)addr);
+			if (bp)	// 调试器设置的断点
+			{
+				if (bp->is_once)
+				{
+					delete_breakpoint(bp->address);
+				}
+
+				HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
+				context_.Eip -= 1;
+				SetThreadContext(thd_handle,&context_);
+				CloseHandle(thd_handle);
+				main_frame->m_wndAsmView.SetEIP((DWORD)addr);
+				
+			}
+			else
+			{
+				// 系统断点或程序自己写的断点
+				main_frame->m_wndAsmView.SetEIP((DWORD)addr+1);
+			}
+
+			main_frame->m_wndAsmView.Invalidate(FALSE);
+			
+			continue_status_= DBG_CONTINUE;
+			// 		memory_region_info_t info;
+			// 		bool ret = this->get_memory_info_by_addr(addr,info);
+			// 		if (!ret)
+			// 		{
+			// 			output_string(std::string("异常地址无法访问。"),OUT_ERROR);
+			// 			return;
+			// 		}
+			// 
+			// // 		std::thread([this,info,addr]()
+			// // 		{
+			// 			std::vector<byte> buffer(info.size);
+			// 			SIZE_T	nRead = 0;
+			// 			read_debugee_memory(info.start_addr,buffer.data(),info.size);
+			// 			//ASSERT(nRead == info.dwSize);
+			// 
+			// 			std::shared_ptr<x86Analysis> analy(new x86Analysis(buffer.data(),info.size,(unsigned long)(info.start_addr),shared_from_this())) ;
+			// 			analy->add_entry((uint32)addr);
+			// 			std::vector<std::string> asmcode;
+			// 			analy->process(asmcode);
+			// 			main_frm_ptr_->m_wndAsmView.SetAnalysiser(analy);
+			// 		}).detach();
 		}
 
-// 		std::thread([this,info,addr]()
-// 		{
-			std::vector<byte> buffer(info.size);
-			SIZE_T	nRead = 0;
-			read_debugee_memory(info.start_addr,buffer.data(),info.size);
-			//ASSERT(nRead == info.dwSize);
+		break;
 
-			std::shared_ptr<x86Analysis> analy(new x86Analysis(buffer.data(),info.size,(unsigned long)(info.start_addr),shared_from_this())) ;
-			analy->add_entry((uint32)addr);
-			std::vector<std::string> asmcode;
-			analy->process(asmcode);
-			main_frm_ptr_->m_wndAsmView.SetAnalysiser(analy);
+	case EXCEPTION_SINGLE_STEP:
+		{
+			void* addr = debug_exception.ExceptionRecord.ExceptionAddress;
+			main_frame->m_wndAsmView.SetEIP((DWORD)addr);
+			main_frame->m_wndAsmView.Invalidate(FALSE);
 
-
-// 		}).detach();
+			continue_status_= DBG_CONTINUE;
+		}
+		break;
+	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"));
+		}
+		break;
+	case EXCEPTION_FLT_DENORMAL_OPERAND:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_DENORMAL_OPERAND"));
+		}
+		break;
+	case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_DIVIDE_BY_ZERO"));
+		}
+		break;
+	case EXCEPTION_FLT_INEXACT_RESULT:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_INEXACT_RESULT"));
+		}
+		break;
+	case EXCEPTION_FLT_INVALID_OPERATION:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_INVALID_OPERATION"));
+		}
+		break;
+	case EXCEPTION_FLT_OVERFLOW:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_OVERFLOW"));
+		}
+		break;
+	case EXCEPTION_FLT_STACK_CHECK:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_STACK_CHECK"));
+		}
+		break;
+	case EXCEPTION_FLT_UNDERFLOW:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_UNDERFLOW"));
+		}
+		break;
+	case EXCEPTION_INT_DIVIDE_BY_ZERO:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INT_DIVIDE_BY_ZERO"));
+		}
+		break;
+	case EXCEPTION_INT_OVERFLOW:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INT_OVERFLOW"));
+		}
+		break;
+	case EXCEPTION_PRIV_INSTRUCTION:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_PRIV_INSTRUCTION"));
+		}
+		break;
+	case EXCEPTION_IN_PAGE_ERROR:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_IN_PAGE_ERROR"));
+		}
+		break;
+	case EXCEPTION_ILLEGAL_INSTRUCTION:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ILLEGAL_INSTRUCTION"));
+		}
+		break;
+	case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_NONCONTINUABLE_EXCEPTION"));
+		}
+		break;
+	case EXCEPTION_STACK_OVERFLOW:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_STACK_OVERFLOW"));
+		}
+		break;
+	case EXCEPTION_INVALID_DISPOSITION:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INVALID_DISPOSITION"));
+		}
+		break;
+	case EXCEPTION_GUARD_PAGE:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_GUARD_PAGE"));
+		}
+		break;
+	case EXCEPTION_INVALID_HANDLE:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INVALID_HANDLE"));
+		}
+		break;
+// 	case EXCEPTION_POSSIBLE_DEADLOCK:
+// 		break;
+	case CONTROL_C_EXIT:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("CONTROL_C_EXIT"));
+		}
+		break;
+	default:
+		{
+			main_frame->m_wndOutputWnd.output_string(std::string("未知异常"));
+		}
+		break;
 	}
-}
-
-bool DebugKernel::read_debugee_memory( const void* address,void* buffer,size_t size )
-{
-	if ((DWORD)address>=0x80000000 || (DWORD)address<0xff)
-	{
-		return false;
-	}
-
-	SIZE_T num_read = 0;
-	if (ReadProcessMemory(process_handle_,address,buffer,size,&num_read)
-		&& num_read == size)
-	{
-		return true;
-	}
-
-
-	std::string message;
-	debug_utils::get_error_msg(GetLastError(),message);
-	
-	boost::format fmt("读取被调试进程内存失败，地址：0x%08X,大小：%u错误信息：%s");
-	fmt % address % size % message;
-
-	output_string(fmt.str(),OUT_ERROR);
 	return false;
 }
 
-void DebugKernel::refresh_memory_map( void )
+
+void debug_kernel::refresh_memory_map( void )
 {
 	memory_info_vector_.clear();
 
 	//获取进程中所有模块和模块信息
-	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,get_process_id());
+	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,pid_);
 	debug_utils::ScopeExit  close_hsnap([&hsnap](){CloseHandle(hsnap);hsnap = NULL;});
 	if (hsnap == INVALID_HANDLE_VALUE)
 	{
@@ -300,7 +465,7 @@ void DebugKernel::refresh_memory_map( void )
 
 		//读取dos头
 		IMAGE_DOS_HEADER dos_header;
-		if (!read_debugee_memory(module_entry.modBaseAddr,&dos_header,sizeof(IMAGE_DOS_HEADER))
+		if (!read_memory((DWORD)module_entry.modBaseAddr,&dos_header,sizeof(IMAGE_DOS_HEADER))
 			|| dos_header.e_magic != IMAGE_DOS_SIGNATURE)
 		{
 			return;
@@ -308,7 +473,7 @@ void DebugKernel::refresh_memory_map( void )
 
 		//读取PE文件头
 		IMAGE_NT_HEADERS nt_header;
-		if (!read_debugee_memory(module_entry.modBaseAddr+dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS)) 
+		if (!read_memory((DWORD)module_entry.modBaseAddr+dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS)) 
 			|| nt_header.Signature != IMAGE_NT_SIGNATURE)
 		{
 			return;
@@ -331,7 +496,7 @@ void DebugKernel::refresh_memory_map( void )
 
 		//读取所有的区段头
 		IMAGE_SECTION_HEADER* sectionHeaders = new IMAGE_SECTION_HEADER[nt_header.FileHeader.NumberOfSections];
-		if (!read_debugee_memory(module_entry.modBaseAddr+dos_header.e_lfanew+sizeof(IMAGE_NT_HEADERS),sectionHeaders,sizeof(IMAGE_SECTION_HEADER)*nt_header.FileHeader.NumberOfSections))
+		if (!read_memory((DWORD)module_entry.modBaseAddr+dos_header.e_lfanew+sizeof(IMAGE_NT_HEADERS),sectionHeaders,sizeof(IMAGE_SECTION_HEADER)*nt_header.FileHeader.NumberOfSections))
 		{
 			return;
 		}
@@ -350,7 +515,7 @@ void DebugKernel::refresh_memory_map( void )
 
 	PBYTE	Address = NULL;
 	MEMORY_BASIC_INFORMATION	info = {0};
-	while (VirtualQueryEx(process_handle_,Address,&info,sizeof(info)) == sizeof(info))
+	while (VirtualQueryEx(handle_,Address,&info,sizeof(info)) == sizeof(info))
 	{
 		//AtlTrace("%08X\n",Address);
 		memory_region_info_t	MemInfo = {0};
@@ -420,16 +585,227 @@ void DebugKernel::refresh_memory_map( void )
 
 }
 
-void DebugKernel::output_string( const std::string& str,OutputType type /*= OUT_INFO*/ )
+bool debug_kernel::step_in()
 {
-	// 		if (!output_message_)
-	// 		{
-	// 			return;
-	// 		}
-	// 		output_message_(str,type);
-	if (!main_frm_ptr_)
+	if (debug_status_ != BREAK)
 	{
-		return;
+		return false;
 	}
-	main_frm_ptr_->m_wndOutputWnd.AddLine(str);
+
+	HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
+	if (!thd_handle)
+	{
+		return false;
+	}
+	
+	CONTEXT	context;
+	context.ContextFlags = CONTEXT_CONTROL;
+	if (!GetThreadContext(thd_handle,&context))
+	{
+		CloseHandle(thd_handle);
+		return false;
+	}
+	
+	context.EFlags  |= (1 << 8);
+	
+	if (!SetThreadContext(thd_handle,&context))
+	{
+		CloseHandle(thd_handle);
+		return false;
+	}
+	CloseHandle(thd_handle);
+	continue_debug(DBG_CONTINUE);
+	return true;
+}
+
+bool debug_kernel::add_breakpoint( DWORD address,bool is_once /*= false*/ )
+{
+	breakpoint bp;
+	bp.address = address;
+	bp.user_enable = true;
+	bp.valid = true;
+	if (!read_memory(address,&bp.org_data,1))
+	{
+		return false;
+	}
+
+	byte bp_code = 0xCC;
+	if (!write_memory(bp.address,&bp_code,1))
+	{
+		return false;
+	}
+
+	bp.is_once = is_once;
+	bp_vec_.push_back(bp);
+
+	return true;
+}
+
+bool debug_kernel::read_memory( DWORD address,void* buffer,size_t size,SIZE_T* num_read /*= NULL */ )
+{
+	if ((DWORD)address>=0x80000000 || (DWORD)address<0xff)
+	{
+		return false;
+	}
+
+	BOOL ret = ReadProcessMemory(handle_,(LPVOID)address,buffer,size,num_read);
+	if (!ret)
+	{
+		DWORD old_protect = 0;
+		if (!modify_memory_prop(address,size,PAGE_EXECUTE_READ,&old_protect))
+		{
+			return false;
+		}
+		ret = ReadProcessMemory(handle_,(LPVOID)address,buffer,size,num_read);
+		modify_memory_prop(address,size,old_protect);
+	}
+
+	if (!ret)
+	{
+		return false;
+	}
+
+	for each (breakpoint bp in bp_vec_)
+	{
+		if (bp.address >= address && bp.address <= address+size)
+		{
+			((byte*)buffer)[bp.address-address] = bp.org_data;
+		}
+	}
+
+
+	// 	std::string message;
+	// 	debug_utils::get_error_msg(GetLastError(),message);
+	// 	
+	// 	boost::format fmt("读取被调试进程内存失败，地址：0x%08X,大小：%u错误信息：%s");
+	// 	fmt % address % size % message;
+	// 
+	// 	output_string(fmt.str(),OUT_ERROR);
+	return true;
+}
+
+bool debug_kernel::write_memory( DWORD address,void* data,SIZE_T size, SIZE_T* num_written /*= NULL*/ )
+{
+	return WriteProcessMemory(handle_,(LPVOID)address,data,size,num_written);
+}
+
+bool debug_kernel::modify_memory_prop( DWORD address,SIZE_T size,DWORD new_protect,DWORD* old_protect /*= NULL*/ )
+{
+	return VirtualProtectEx(handle_,(LPVOID)address,size,new_protect,old_protect);
+}
+
+bool debug_kernel::virtual_query_ex(DWORD address,MEMORY_BASIC_INFORMATION& info)
+{
+	return VirtualQueryEx(handle_,(LPCVOID)address,&info,sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION);
+}
+
+debug_kernel::breakpoint* debug_kernel::find_breakpoint_by_address( DWORD address )
+{
+	for (int i=0;i<bp_vec_.size();++i)
+	{
+		if (bp_vec_[i].address == address)
+		{
+			return &bp_vec_[i];
+		}
+	}
+
+	return NULL;
+}
+
+bool debug_kernel::enable_breakpoint( breakpoint* bp )
+{
+	if (!bp)
+	{
+		return false;
+	}
+
+	if (!valid_breakpoint(bp))
+	{
+		return false;
+	}
+
+	bp->user_enable = true;
+	return true;
+}
+
+bool debug_kernel::enable_breakpoint( DWORD address )
+{
+	return enable_breakpoint(find_breakpoint_by_address(address));
+}
+
+bool debug_kernel::disable_breakpoint( breakpoint* bp )
+{
+	if (!bp)
+	{
+		return false;
+	}
+
+	if (!invalid_breakpoint(bp))
+	{
+		return false;
+	}
+
+	bp->user_enable = false;
+	return true;
+}
+
+bool debug_kernel::disable_breakpoint( DWORD address )
+{
+	return disable_breakpoint(find_breakpoint_by_address(address));
+}
+
+bool debug_kernel::valid_breakpoint( breakpoint* bp )
+{
+	if (!bp)
+	{
+		return false;
+	}
+
+	byte bp_code = 0xCC;
+	if (write_memory(bp->address,&bp_code,1))
+	{
+		bp->valid = true;
+		return true;
+	}
+	return false;
+}
+
+bool debug_kernel::valid_breakpoint( DWORD address )
+{
+	return valid_breakpoint(find_breakpoint_by_address(address));
+}
+
+bool debug_kernel::invalid_breakpoint( breakpoint* bp )
+{
+	if (!bp)
+	{
+		return false;
+	}
+
+	if (write_memory(bp->address,&bp->org_data,1))
+	{
+		bp->valid = false;
+		return true;
+	}
+	return false;
+}
+
+bool debug_kernel::invalid_breakpoint( DWORD address )
+{
+	return invalid_breakpoint(find_breakpoint_by_address(address));
+}
+
+bool debug_kernel::delete_breakpoint( DWORD address )
+{
+	for (auto it = bp_vec_.begin();it!=bp_vec_.end();++it)
+	{
+		if (it->address == address)
+		{
+			disable_breakpoint(address);
+			bp_vec_.erase(it);
+			return true;
+		}
+	}
+
+	return false;
 }

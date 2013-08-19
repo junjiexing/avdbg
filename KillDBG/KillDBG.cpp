@@ -32,7 +32,7 @@ CKillDBGApp::CKillDBGApp()
 // The one and only CKillDBGApp object
 
 CKillDBGApp theApp;
-
+CMainFrame* main_frame = NULL;
 
 // CKillDBGApp initialization
 
@@ -92,16 +92,16 @@ BOOL CKillDBGApp::InitInstance()
 	}
 
 	//创建主窗口
-	CMainFrame* pFrame = new CMainFrame;
-	if (!pFrame)
+	main_frame = new CMainFrame;
+	if (!main_frame)
 		return FALSE;
-	m_pMainWnd = pFrame;
+	m_pMainWnd = main_frame;
 	// create and load the frame with its resources
-	pFrame->LoadFrame(IDR_MAINFRAME,WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,NULL);
+	main_frame->LoadFrame(IDR_MAINFRAME,WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,NULL);
 
 	// The one and only window has been initialized, so show and update it
-	pFrame->ShowWindow(SW_SHOW);
-	pFrame->UpdateWindow();
+	main_frame->ShowWindow(SW_SHOW);
+	main_frame->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	return TRUE;

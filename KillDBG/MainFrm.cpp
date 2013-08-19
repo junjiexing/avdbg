@@ -7,6 +7,7 @@
 #include "DebugKernel.h"
 #include "FileOpenDlg.h"
 #include "AttachProcessDlg.h"
+#include "FollowAddressDlg.h"
 
 
 #ifdef _DEBUG
@@ -31,6 +32,13 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_VIEW_OUTPUT, &CMainFrame::OnViewOutput)
 	ON_COMMAND(ID_VIEW_PESTRUCT, &CMainFrame::OnViewPEStruct)
 	ON_COMMAND(ID_VIEW_MEMORYMAP, &CMainFrame::OnViewMemoryMap)
+
+	
+	ON_COMMAND(ID_STEP_IN, &CMainFrame::OnStepIn)
+	ON_COMMAND(ID_STEP_OVER, &CMainFrame::OnStepOver)
+	ON_COMMAND(ID_RUN, &CMainFrame::OnDebugRun)
+	ON_COMMAND(ID_FOLLOW_ADDR, &CMainFrame::OnFollowAddr)
+	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
 //	ON_WM_DESTROY()
 	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
 	ON_COMMAND(ID_FILE_ATTACH, &CMainFrame::OnFileAttach)
@@ -59,6 +67,7 @@ static UINT uHideCmds[] =
 // CMainFrame construction/destruction
 
 CMainFrame::CMainFrame()
+	:m_hAcc(NULL)
 {
 	// TODO: add member initialization code here
 }
@@ -127,7 +136,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// Set Office 2003 Theme
-	CXTPPaintManager::SetTheme(xtpThemeOffice2003);
+	CXTPPaintManager::SetTheme(xtpThemeVisualStudio2008);
 
 	// Hide array of commands
 	pCommandBars->HideCommands(uHideCmds, _countof(uHideCmds));
@@ -142,6 +151,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	SetupDockPane();
 
+	ACCEL acc[] = 
+	{
+		{ FCONTROL | FVIRTKEY, 'G', ID_FOLLOW_ADDR }, 
+		{ FVIRTKEY, VK_F7,ID_STEP_IN},
+		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
+		{ FVIRTKEY,VK_F9,ID_RUN},
+		{ FVIRTKEY,VK_F2,ID_SET_BREAKPOINT},
+	};
+	m_hAcc = CreateAcceleratorTable(acc,5);
 	return 0;
 }
 
@@ -162,18 +180,9 @@ BOOL CMainFrame::SetupDockPane(void)
 	rectDummy.SetRectEmpty();
 	// Create docking panes.
 	CXTPDockingPane* pPaneMemoryMap = m_paneManager.CreatePane(IDR_PANE_MEMORYMAP, rectDummy, xtpPaneDockRight);
-	m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
-	pPaneMemoryMap->Attach(&m_wndPEStruct);
-
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(1223, rectDummy, xtpPaneDockBottom);
-	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-		rectDummy, this, AFX_IDW_PANE_FIRST, NULL);
-	pPaneOutputWnd->Attach(&m_wndOutputWnd);
 	pPaneOutputWnd->SetTitle("Output Window");
-
 	CXTPDockingPane* pPaneAsmView = m_paneManager.CreatePane(1224, rectDummy, xtpPaneDockTop);
-	m_wndAsmView.Create(NULL,rectDummy,this,0);
-	pPaneAsmView->Attach(&m_wndAsmView);
 	pPaneAsmView->SetTitle("Asm View");
 
 	// Set the icons for the docking pane tabs.
@@ -182,7 +191,12 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	// Load the previous state for docking panes.
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
-	if (layoutNormal.LoadFromFile("FrameLayout","Default"))
+// 	if (layoutNormal.LoadFromFile("FrameLayout","Default"))
+// 	{
+// 		m_paneManager.SetLayout(&layoutNormal);
+// 	}
+
+	if (layoutNormal.Load(_T("NormalLayout")))
 	{
 		m_paneManager.SetLayout(&layoutNormal);
 	}
@@ -192,32 +206,37 @@ BOOL CMainFrame::SetupDockPane(void)
 
 LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 {
-// 	if (wParam == XTP_DPN_SHOWWINDOW)
-// 	{
-// 		CXTPDockingPane* pPane = (CXTPDockingPane*)lParam;
-// 		if (!pPane->IsValid())
-// 		{
-// 			switch (pPane->GetID())
-// 			{
-// 			case IDR_PANE_MEMORYMAP:
-// 				{
-// 					CRect rectDummy;
-// 					m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
-// 					pPane->Attach(&m_wndPEStruct);
-// 				}
-// 				break;
-// 			case 1223:
-// 				{
-// 					CRect rectDummy;
-// 					m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-// 						CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
-// 					pPane->Attach(&m_wndPEStruct);
-// 				}
-// 				break;
-// 			}
-// 			return TRUE;
-// 		}
-// 	}
+	if (wParam == XTP_DPN_SHOWWINDOW)
+	{
+		CXTPDockingPane* pPane = (CXTPDockingPane*)lParam;
+		if (!pPane->IsValid())
+		{
+			CRect rectDummy;
+			switch (pPane->GetID())
+			{
+			case IDR_PANE_MEMORYMAP:
+				{
+					m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
+					pPane->Attach(&m_wndPEStruct);
+				}
+				break;
+			case 1223:
+				{
+					m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
+						rectDummy, this, AFX_IDW_PANE_FIRST, NULL);
+					pPane->Attach(&m_wndOutputWnd);;
+				}
+				break;
+			case 1224:
+				{
+					m_wndAsmView.Create(NULL,rectDummy,this,0);
+					pPane->Attach(&m_wndAsmView);
+				}
+				break;
+			}
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 
@@ -273,8 +292,9 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainFrame::OnClose()
 {
-// 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
-// 	layoutNormal.SaveToFile("FrameLayout","Default");
+	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
+	m_paneManager.GetLayout(&layoutNormal);
+	layoutNormal.Save(_T("NormalLayout"));
  	CFrameWnd::OnClose();
 }
 
@@ -364,10 +384,10 @@ void CMainFrame::OnFileOpen()
 		return;
 	}
 
-	debug_kernel_ptr_.reset(new DebugKernel());
+	debug_kernel_ptr_.reset(new debug_kernel());
 	//debug_kernel_ptr_->set_output_func(std::bind(OnOutputString,this,std::placeholders::_1,std::placeholders::_2));
-	debug_kernel_ptr_->main_frm_ptr_ = this;
 	debug_kernel_ptr_->load_exe(dlg.get_path(),dlg.get_param(),dlg.get_run_dir());
+	m_wndAsmView.SetDebugKernel(debug_kernel_ptr_);
 }
 
 void CMainFrame::OnFileAttach()
@@ -406,21 +426,66 @@ void CMainFrame::OnUpdateFileStop(CCmdUI *pCmdUI)
 {
 }
 
-// void CMainFrame::OnOutputString(const std::string& str,DebugKernel::OutputType type)
-// {
-// 	boost::format fmt("%s:%s。");
-// 	switch (type)
-// 	{
-// 	case DebugKernel::OUT_INFO:
-// 		fmt % "INFO";
-// 		break;
-// 	case DebugKernel::OUT_WARNING:
-// 		fmt % "WARNING";
-// 		break;
-// 	case DebugKernel::OUT_ERROR:
-// 		fmt % "ERROR";
-// 		break;
-// 	}
-// 	fmt % str;
-// 	m_wndOutputWnd.AddLine(fmt.str());
-// }
+
+
+BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
+{
+	if (TranslateAccelerator(GetSafeHwnd(),m_hAcc,pMsg))
+	{
+		return TRUE;
+	}
+
+	return CXTPFrameWnd::PreTranslateMessage(pMsg);
+}
+
+void CMainFrame::OnStepIn()
+{
+	if (!debug_kernel_ptr_)
+	{
+		return;
+	}
+	debug_kernel_ptr_->step_in();
+}
+
+void CMainFrame::OnStepOver()
+{
+
+}
+
+void CMainFrame::OnFollowAddr()
+{
+	CFollowAddressDlg dlg;
+	if (dlg.DoModal() != IDOK)
+	{
+		return;
+	}
+	m_wndAsmView.SetTopAddr(dlg.m_dwAddr);
+}
+
+void CMainFrame::OnDebugRun()
+{
+	if (!debug_kernel_ptr_)
+	{
+		return;
+	}
+	debug_kernel_ptr_->continue_debug(DBG_CONTINUE);
+}
+
+void CMainFrame::OnSetBreakPoint()
+{
+	debug_kernel::breakpoint* bp = debug_kernel_ptr_->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
+	if (bp)
+	{
+		debug_kernel_ptr_->delete_breakpoint(bp->address);
+		m_wndAsmView.Invalidate();
+		return;
+	}
+
+	if (!debug_kernel_ptr_->add_breakpoint(m_wndAsmView.m_dwSelAddrStart))
+	{
+		char buffer[50];
+		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);
+		m_wndOutputWnd.output_string(std::string(buffer),COutputWindow::OUT_ERROR);
+		m_wndAsmView.Invalidate();
+	}
+}

@@ -3,6 +3,11 @@
 // π© KillDBG.rc  π”√
 //
 #define IDD_ABOUTBOX                    100
+#define ID_STEP_IN                      101
+#define ID_STEP_OVER                    102
+#define ID_RUN                          103
+#define ID_FOLLOW_ADDR                  104
+#define ID_SET_BREAKPOINT               105
 #define IDR_MAINFRAME                   128
 #define IDR_KillDBGTYPE                 129
 #define IDB_BITMAP_ICONS                130
@@ -11,6 +16,7 @@
 #define IDD_DIALOG1                     134
 #define IDD_DIALOGATTACH                134
 #define IDR_MENU_MEMORYMAP              135
+#define IDD_DIALOG_FLOADDR              136
 #define IDC_EDITFILEPATH                1000
 #define IDC_BUTTONBROWSE                1001
 #define IDC_EDIT2                       1002
@@ -18,6 +24,7 @@
 #define IDC_EDITPARAM2                  1003
 #define IDC_EDITRUNDIR                  1003
 #define IDC_LISTPROCESS                 1003
+#define IDC_EDIT_ADDR                   1004
 #define IDR_PANE_MEMORYMAP              4006
 #define ID_BUTTONDISWND                 32772
 #define ID_VIEW_32773                   32773
@@ -47,9 +54,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
-#define _APS_NEXT_COMMAND_VALUE         32796
-#define _APS_NEXT_CONTROL_VALUE         1004
-#define _APS_NEXT_SYMED_VALUE           101
+#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_COMMAND_VALUE         32798
+#define _APS_NEXT_CONTROL_VALUE         1005
+#define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

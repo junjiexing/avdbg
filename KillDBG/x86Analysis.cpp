@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string.h>
 
-x86Analysis::x86Analysis( byte* code_to_analy, unsigned code_size, unsigned long code_start_va, std::shared_ptr<DebugKernel>& debug_kernel_ptr)
+x86Analysis::x86Analysis( byte* code_to_analy, unsigned code_size, unsigned long code_start_va, std::shared_ptr<debug_kernel>& debug_kernel_ptr)
 	:disasmbler_(X86_OPSIZE32,X86_ADDRSIZE32),
 	code_to_analy_(code_to_analy),code_size_(code_size),
 	code_start_va_(code_start_va),cache_insn(10),debug_kernel_wp_(debug_kernel_ptr)
@@ -109,7 +109,7 @@ void x86Analysis::get_block( uint32 entry_addr )
 
 					BYTE index_tab_cpy[index_tab_size*index_size];
 					//BOOL ret = ReadProcessMemory(hProcess,pIndexTabAddr,pIndexTabCpy,nIndexTabSize*nIndexSize,&nRead);
-					std::shared_ptr<DebugKernel> debug_kernel_ptr = debug_kernel_wp_.lock();
+					std::shared_ptr<debug_kernel> debug_kernel_ptr = debug_kernel_wp_.lock();
 					debug_kernel_ptr->read_debugee_memory(index_tab_addr,index_tab_cpy,index_tab_size*index_size);
 
 					int index = 0;
@@ -255,7 +255,7 @@ CPU_ADDR x86Analysis::branch_addr(x86dis_insn *opcode)
 			if (opcode->op[0].mem.hasdisp)
 			{
 				//addr.addr32.offset = opcode->op[0].mem.disp;
-				std::shared_ptr<DebugKernel> debug_kernel_ptr = debug_kernel_wp_.lock();
+				std::shared_ptr<debug_kernel> debug_kernel_ptr = debug_kernel_wp_.lock();
 				debug_kernel_ptr->read_debugee_memory((LPVOID)opcode->op[0].mem.disp,&addr.addr32.offset,4);
 			}
 			break;

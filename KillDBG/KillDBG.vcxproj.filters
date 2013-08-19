@@ -48,6 +48,9 @@
     <ClCompile Include="x86Analysis.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="FollowAddressDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttachProcessDlg.h">
@@ -89,6 +92,9 @@
     <ClInclude Include="x86Analysis.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="FollowAddressDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KillDBG.rc">
@@ -97,5 +103,19 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\toolbar1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\PaneIcons.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\KillDBG.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

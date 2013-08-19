@@ -6,7 +6,7 @@
 #include <deque>
 #include "DebugKernel.h"
 
-class DebugKernel;
+class debug_kernel;
 
 class x86Analysis
 {
@@ -55,10 +55,10 @@ public:
 	void add_block(const code_block& block);
 	void disasm_block(const code_block& block,std::vector<std::string>& asmcode);
 
-	std::weak_ptr<DebugKernel> debug_kernel_wp_;
+	std::weak_ptr<debug_kernel> debug_kernel_wp_;
 
 public:
-	x86Analysis(byte* code_to_analy, unsigned code_size, unsigned long block_start_addr, std::shared_ptr<DebugKernel>& debug_kernel_ptr);
+	x86Analysis(byte* code_to_analy, unsigned code_size, unsigned long block_start_addr, std::shared_ptr<debug_kernel>& debug_kernel_ptr);
 	~x86Analysis(void);
 
 	bool is_addr_valid(uint32 addr)

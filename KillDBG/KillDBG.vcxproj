@@ -98,11 +98,15 @@
     <ClCompile Include="DebugKernel.cpp" />
     <ClCompile Include="DebugUtils.cpp" />
     <ClCompile Include="FileOpenDlg.cpp" />
+    <ClCompile Include="FollowAddressDlg.cpp" />
     <ClCompile Include="KillDBG.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OutputWindow.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="x86Analysis.cpp" />
+    <ClCompile Include="x86Analysis.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AsmView.h" />
@@ -111,6 +115,7 @@
     <ClInclude Include="DebugKernel.h" />
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="FileOpenDlg.h" />
+    <ClInclude Include="FollowAddressDlg.h" />
     <ClInclude Include="kd_utils.h" />
     <ClInclude Include="KillDBG.h" />
     <ClInclude Include="MainFrm.h" />
@@ -124,6 +129,12 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\KillDBG.ico" />
+    <Image Include="res\PaneIcons.bmp" />
+    <Image Include="res\Toolbar.bmp" />
+    <Image Include="res\toolbar1.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

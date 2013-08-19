@@ -10,7 +10,7 @@
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
-class DebugKernel;
+class debug_kernel;
 
 class CMainFrame : public CXTPFrameWnd
 {
@@ -39,6 +39,8 @@ protected:  // control bar embedded members
 	CChildView    m_wndView;
 	CXTPDockingPaneManager m_paneManager;
 
+	HACCEL m_hAcc;
+
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -55,7 +57,16 @@ public:
 	afx_msg void OnViewOutput();
 	afx_msg void OnViewPEStruct();
 	afx_msg void OnViewMemoryMap();
-//	afx_msg void OnDestroy();
+
+	
+	afx_msg void OnStepIn();
+	afx_msg void OnStepOver();
+	afx_msg void OnDebugRun();
+	afx_msg void OnFollowAddr();
+	afx_msg void OnSetBreakPoint();
+
+	
+	//	afx_msg void OnDestroy();
 	afx_msg void OnFileOpen();
 	// 创建可停靠窗口
 	BOOL SetupDockPane(void);
@@ -68,8 +79,8 @@ public:
 	afx_msg void OnUpdateFileStop(CCmdUI *pCmdUI);
 
 private:
-	std::shared_ptr<DebugKernel> debug_kernel_ptr_;
+	std::shared_ptr<debug_kernel> debug_kernel_ptr_;
 
 public:
-	//void OnOutputString(const std::string& str,DebugKernel::OutputType type);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

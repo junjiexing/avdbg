@@ -21,6 +21,34 @@ public:
 private:
 	TextView m_TextView;
 public:
+
+	enum OutputType
+	{
+		OUT_INFO,
+		OUT_WARNING,
+		OUT_ERROR
+	};
+
+	void output_string( const std::string& str,OutputType type = OUT_INFO )
+	{
+		std::string line;
+
+		switch (type)
+		{
+		case OUT_INFO:
+			line = "INFO";
+			break;
+		case OUT_WARNING:
+			line = "WARNING";
+			break;
+		default:
+			line = "ERROR";
+			break;
+		}
+
+		line += str;
+		m_TextView.add_line(line,true);
+	}
 	void AddLine(const std::string& line)
 	{
 		m_TextView.add_line(line,true);
