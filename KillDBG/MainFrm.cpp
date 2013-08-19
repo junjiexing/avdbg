@@ -158,8 +158,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
 		{ FVIRTKEY,VK_F9,ID_RUN},
 		{ FVIRTKEY,VK_F2,ID_SET_BREAKPOINT},
+		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
 	};
-	m_hAcc = CreateAcceleratorTable(acc,5);
+	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc));
 	return 0;
 }
 
@@ -449,7 +450,7 @@ void CMainFrame::OnStepIn()
 
 void CMainFrame::OnStepOver()
 {
-
+	debug_kernel_ptr_->step_over();
 }
 
 void CMainFrame::OnFollowAddr()

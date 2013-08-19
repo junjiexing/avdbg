@@ -36,6 +36,8 @@ public:
 
 	// 单步步入
 	bool step_in();
+	// 单步步过
+	bool step_over();
 
 	// 继续调试，运行被调试进程
 	bool continue_debug(DWORD continue_status)

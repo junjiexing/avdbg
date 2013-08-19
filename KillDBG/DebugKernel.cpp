@@ -809,3 +809,38 @@ bool debug_kernel::delete_breakpoint( DWORD address )
 
 	return false;
 }
+
+bool debug_kernel::step_over()
+{
+	x86dis decoder(X86_OPSIZE32,X86_ADDRSIZE32);
+	byte buffer[15];
+	SIZE_T num_read = 0;
+	if (!read_memory(context_.Eip,buffer,15,&num_read))
+	{
+		return false;
+	}
+
+	CPU_ADDR cur_addr = {0};
+	cur_addr.addr32.offset = context_.Eip;
+	x86dis_insn* insn = (x86dis_insn*)decoder.decode(buffer,num_read,cur_addr);
+
+	const char *opcode_str = insn->name;
+	if (opcode_str[0] == '~')
+	{
+		opcode_str++;
+	}
+	if (opcode_str[0] == '|')
+	{
+		opcode_str++;
+	}
+
+	if ((opcode_str[0]=='c') && (opcode_str[1]=='a'))
+	{
+		if (!add_breakpoint(context_.Eip + insn->size,true))
+		{
+			return false;
+		}
+		return continue_debug(DBG_CONTINUE);
+	}
+	return step_in();
+}
