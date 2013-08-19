@@ -1,0 +1,3 @@
+[submodule "3rdparty/XTP"]
+	path = 3rdparty/XTP
+	url = https://bitbucket.org/avdbg/xtp.git
