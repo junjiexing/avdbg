@@ -6,7 +6,8 @@
 #include "DebugKernel.h"
 #include "AsmView.h"
 #include "x86dis.h"
-#include "kd_utils.h"
+#include "DebugUtils.h"
+#include "AssemblyDlg.h"
 
 // CAsmView
 
@@ -29,6 +30,7 @@ BEGIN_MESSAGE_MAP(CAsmView, CWnd)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_VSCROLL()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_CHAR()
 END_MESSAGE_MAP()
 
 BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
@@ -150,7 +152,7 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 void CAsmView::SetEIP( DWORD eip )
 {
 
-	kd_utils::scope_exit on_return([this](){UpdateScrollInfo();});
+	debug_utils::scope_exit on_return([this](){UpdateScrollInfo();});
 
 	m_Eip = eip;
 
@@ -297,6 +299,7 @@ void CAsmView::PreviousCode( DWORD TargetAddr,DWORD* PreInsn )
 
 void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	SetFocus();
 	int index = point.y/20;
 	if (index<m_vecAddress.size())
 	{
@@ -321,5 +324,34 @@ void CAsmView::UpdateScrollInfo()
 
 	SetScrollInfo(SB_VERT,&scroll_info,TRUE);
 
+	Invalidate(FALSE);
+}
+
+
+void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	debug_utils::scope_exit on_exit([this,nChar,nRepCnt,nFlags](){CWnd::OnChar(nChar, nRepCnt, nFlags);});
+	if (nChar != ' ' || m_AddrToShow == 0)
+	{
+		return;
+	}
+
+	CAssemblyDlg dlg;
+	dlg.m_dwAddress = m_dwSelAddrStart;
+	if (!debug_kernel_ptr->read_memory(m_dwSelAddrStart,dlg.m_OrgOpcode,15))
+	{
+		return;
+	}
+
+	if (dlg.DoModal() != IDOK)
+	{
+		return;
+	}
+
+	if (!debug_kernel_ptr->write_memory(m_dwSelAddrStart,dlg.m_NewOpcode,dlg.m_NewOpcSize))
+	{
+		MessageBox("向目标进程写入代码失败","错误",MB_OK|MB_ICONERROR);
+		return;
+	}
 	Invalidate(FALSE);
 }

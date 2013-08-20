@@ -29,7 +29,7 @@ void x86Analysis::get_block( uint32 entry_addr )
 	current_addr.addr32.offset = entry_addr;
 	uint32 end_addr = 0;
 
-	debug_utils::ScopeExit add_block_on_exit([entry_addr,&end_addr,this]()
+	debug_utils::scope_exit add_block_on_exit([entry_addr,&end_addr,this]()
 	{
 		assert(entry_addr != 0);
 		assert(end_addr != 0);

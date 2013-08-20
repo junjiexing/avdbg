@@ -22,6 +22,8 @@
 #define IDD_DIALOG1                     134
 #define IDD_DIALOGATTACH                134
 #define IDD_DIALOG_FLOADDR              136
+#define IDD_DIALOG2                     138
+#define IDD_DIALOG_ASM                  138
 #define IDC_EDITFILEPATH                1000
 #define IDC_BUTTONBROWSE                1001
 #define IDC_EDIT2                       1002
@@ -30,6 +32,8 @@
 #define IDC_EDITRUNDIR                  1003
 #define IDC_LISTPROCESS                 1003
 #define IDC_EDIT_ADDR                   1004
+#define IDC_EDIT_ASM                    1005
+#define IDC_COMBO_OPCODE                1006
 #define IDR_PANE_MEMORYMAP              4006
 #define ID_BUTTONDISWND                 32772
 #define ID_VIEW_32773                   32773
@@ -58,9 +62,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        138
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1005
+#define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           112
 #endif
 #endif

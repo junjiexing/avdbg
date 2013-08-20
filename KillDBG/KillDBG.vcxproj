@@ -93,6 +93,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AsmView.cpp" />
+    <ClCompile Include="AssemblyDlg.cpp" />
     <ClCompile Include="AttachProcessDlg.cpp" />
     <ClCompile Include="BreakpointList.cpp" />
     <ClCompile Include="ChildView.cpp" />
@@ -112,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AsmView.h" />
+    <ClInclude Include="AssemblyDlg.h" />
     <ClInclude Include="AttachProcessDlg.h" />
     <ClInclude Include="BreakpointList.h" />
     <ClInclude Include="ChildView.h" />
@@ -119,7 +121,6 @@
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="FileOpenDlg.h" />
     <ClInclude Include="FollowAddressDlg.h" />
-    <ClInclude Include="kd_utils.h" />
     <ClInclude Include="KillDBG.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="ModuleList.h" />

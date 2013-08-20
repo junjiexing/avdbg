@@ -89,4 +89,3 @@
 
 #include "resource.h"
 
-#include "kd_utils.h"

@@ -57,6 +57,9 @@
     <ClCompile Include="BreakpointList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="AssemblyDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttachProcessDlg.h">
@@ -66,9 +69,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FileOpenDlg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="kd_utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="KillDBG.h">
@@ -105,6 +105,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BreakpointList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AssemblyDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -447,7 +447,7 @@ void debug_kernel::refresh_memory_map( void )
 
 	//获取进程中所有模块和模块信息
 	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,pid_);
-	debug_utils::ScopeExit  close_hsnap([&hsnap](){CloseHandle(hsnap);hsnap = NULL;});
+	debug_utils::scope_exit  close_hsnap([&hsnap](){CloseHandle(hsnap);hsnap = NULL;});
 	if (hsnap == INVALID_HANDLE_VALUE)
 	{
 		return;
