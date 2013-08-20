@@ -14,6 +14,7 @@
 #define new DEBUG_NEW
 #endif
 
+extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 
 // CMainFrame
 
@@ -384,10 +385,8 @@ void CMainFrame::OnFileOpen()
 		return;
 	}
 
-	debug_kernel_ptr_.reset(new debug_kernel());
-	//debug_kernel_ptr_->set_output_func(std::bind(OnOutputString,this,std::placeholders::_1,std::placeholders::_2));
-	debug_kernel_ptr_->load_exe(dlg.get_path(),dlg.get_param(),dlg.get_run_dir());
-	m_wndAsmView.SetDebugKernel(debug_kernel_ptr_);
+	debug_kernel_ptr.reset(new debug_kernel());
+	debug_kernel_ptr->load_exe(dlg.get_path(),dlg.get_param(),dlg.get_run_dir());
 }
 
 void CMainFrame::OnFileAttach()
@@ -440,16 +439,20 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 void CMainFrame::OnStepIn()
 {
-	if (!debug_kernel_ptr_)
+	if (!debug_kernel_ptr)
 	{
 		return;
 	}
-	debug_kernel_ptr_->step_in();
+	debug_kernel_ptr->step_in();
 }
 
 void CMainFrame::OnStepOver()
 {
-	debug_kernel_ptr_->step_over();
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+	debug_kernel_ptr->step_over();
 }
 
 void CMainFrame::OnFollowAddr()
@@ -464,24 +467,29 @@ void CMainFrame::OnFollowAddr()
 
 void CMainFrame::OnDebugRun()
 {
-	if (!debug_kernel_ptr_)
+	if (!debug_kernel_ptr)
 	{
 		return;
 	}
-	debug_kernel_ptr_->continue_debug(DBG_CONTINUE);
+	debug_kernel_ptr->continue_debug(DBG_CONTINUE);
 }
 
 void CMainFrame::OnSetBreakPoint()
 {
-	debug_kernel::breakpoint* bp = debug_kernel_ptr_->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	debug_kernel::breakpoint* bp = debug_kernel_ptr->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
 	if (bp)
 	{
-		debug_kernel_ptr_->delete_breakpoint(bp->address);
+		debug_kernel_ptr->delete_breakpoint(bp->address);
 		m_wndAsmView.Invalidate();
 		return;
 	}
 
-	if (!debug_kernel_ptr_->add_breakpoint(m_wndAsmView.m_dwSelAddrStart))
+	if (!debug_kernel_ptr->add_breakpoint(m_wndAsmView.m_dwSelAddrStart))
 	{
 		char buffer[50];
 		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);

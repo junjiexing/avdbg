@@ -1,6 +1,7 @@
 #pragma once
 #include "x86Analysis.h"
 
+extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 // CAsmView
 
 class CAsmView : public CWnd
@@ -17,13 +18,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-
-	void SetDebugKernel(std::shared_ptr<debug_kernel> dbg_krnl_ptr)
-	{
-		dbg_krnl_ptr_ = dbg_krnl_ptr;
-		Invalidate(TRUE);
-	}
-
 	void SetEIP(DWORD eip);
 	void SetTopAddr(DWORD addr)
 	{
@@ -34,7 +28,6 @@ public:
 	DWORD m_AddrToShow;
 	DWORD m_Eip;
 	x86dis m_Decoder;
-	std::shared_ptr<debug_kernel> dbg_krnl_ptr_;
 	DWORD m_dwSelAddrStart;
 	DWORD m_dwSelAddrEnd;
 

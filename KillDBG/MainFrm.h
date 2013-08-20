@@ -80,9 +80,6 @@ public:
 	afx_msg void OnFileStop();
 	afx_msg void OnUpdateFileStop(CCmdUI *pCmdUI);
 
-private:
-	std::shared_ptr<debug_kernel> debug_kernel_ptr_;
-
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

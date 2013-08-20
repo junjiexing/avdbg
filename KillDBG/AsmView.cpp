@@ -58,7 +58,7 @@ void CAsmView::OnPaint()
 
 	dc.FillRect(&rcClient,&CBrush(0xB2F7FF));
 
-	if (dbg_krnl_ptr_ == NULL)
+	if (debug_kernel_ptr == NULL)
 	{
 		return;
 	}
@@ -67,7 +67,7 @@ void CAsmView::OnPaint()
 
 	byte buffer[rcClient.bottom/20*15+1];
 	SIZE_T num_read;
-	if (!dbg_krnl_ptr_->read_memory(m_AddrToShow,buffer,rcClient.bottom/20*15,&num_read))
+	if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,rcClient.bottom/20*15,&num_read))
 	{
 		int y = 0;
 		for (int i=0;i<rcClient.bottom/20;++i)
@@ -111,7 +111,7 @@ void CAsmView::OnPaint()
 			{
 				dc.SetBkColor(0x00FFFF);
 			}
-			else if (bp = dbg_krnl_ptr_->find_breakpoint_by_address(curAddr.addr32.offset))
+			else if (bp = debug_kernel_ptr->find_breakpoint_by_address(curAddr.addr32.offset))
 			{
 				if (bp->user_enable)
 				{
@@ -161,7 +161,7 @@ void CAsmView::SetEIP( DWORD eip )
 
 	byte buffer[15*5];
 	SIZE_T	num_read = 0;
-	if (!dbg_krnl_ptr_ || !dbg_krnl_ptr_->read_memory(m_AddrToShow,buffer,15*5,&num_read))
+	if (!debug_kernel_ptr || !debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15*5,&num_read))
 	{
 		m_AddrToShow = m_Eip;
 		return;
@@ -221,7 +221,7 @@ void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 			byte buffer[15];
 			SIZE_T	num_read = 0;
-			if (!dbg_krnl_ptr_ || !dbg_krnl_ptr_->read_memory(m_AddrToShow,buffer,15,&num_read))
+			if (!debug_kernel_ptr || !debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15,&num_read))
 			{
 				m_AddrToShow += 1;
 				return;
@@ -272,7 +272,7 @@ void CAsmView::PreviousCode( DWORD TargetAddr,DWORD* PreInsn )
 
 	byte buffer[41];
 	SIZE_T nRead = 0;
-	if (!dbg_krnl_ptr_->read_memory(TmpAddr,buffer,40,&nRead) || nRead != 40)
+	if (!debug_kernel_ptr->read_memory(TmpAddr,buffer,40,&nRead) || nRead != 40)
 	{
 		*PreInsn = TargetAddr - 1;
 		return;

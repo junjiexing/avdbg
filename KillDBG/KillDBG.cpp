@@ -11,6 +11,8 @@
 #define new DEBUG_NEW
 #endif
 
+class debug_kernel;
+std::shared_ptr<debug_kernel> debug_kernel_ptr;
 
 // CKillDBGApp
 
