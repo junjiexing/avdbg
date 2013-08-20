@@ -271,12 +271,17 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 			fmter % addr % debug_exception.ExceptionRecord.ExceptionCode;
 			main_frame->m_wndOutputWnd.output_string(fmter.str());
 
-			breakpoint* bp = find_breakpoint_by_address((DWORD)addr);
+			breakpoint_t* bp = find_breakpoint_by_address((DWORD)addr);
 			if (bp)	// 调试器设置的断点
 			{
 				if (bp->is_once)
 				{
 					delete_breakpoint(bp->address);
+				}
+				else
+				{
+					bp->hits++;
+					main_frame->m_wndBpList.Refresh();
 				}
 
 				HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
@@ -455,7 +460,7 @@ void debug_kernel::refresh_memory_map( void )
 		return;
 	}
 
-	std::vector<module_info_t>	module_vector;
+	module_vector_.clear();
 	do 
 	{
 		module_info_t module_info = {0};
@@ -495,7 +500,7 @@ void debug_kernel::refresh_memory_map( void )
 			+ sizeof(IMAGE_SECTION_HEADER)*module_info.section_nums;
 
 		//读取所有的区段头
-		IMAGE_SECTION_HEADER* sectionHeaders = new IMAGE_SECTION_HEADER[nt_header.FileHeader.NumberOfSections];
+		IMAGE_SECTION_HEADER sectionHeaders[nt_header.FileHeader.NumberOfSections];
 		if (!read_memory((DWORD)module_entry.modBaseAddr+dos_header.e_lfanew+sizeof(IMAGE_NT_HEADERS),sectionHeaders,sizeof(IMAGE_SECTION_HEADER)*nt_header.FileHeader.NumberOfSections))
 		{
 			return;
@@ -508,8 +513,8 @@ void debug_kernel::refresh_memory_map( void )
 			//ModuleInfo.stSections[i].nSize = sectionHeaders[i].SizeOfRawData;
 			module_info.section_info[i].size = sectionHeaders[i].Misc.VirtualSize;
 		}
-		delete[] sectionHeaders;
-		module_vector.push_back(module_info);
+
+		module_vector_.push_back(module_info);
 	} while (Module32Next(hsnap,&module_entry));
 
 
@@ -529,8 +534,8 @@ void debug_kernel::refresh_memory_map( void )
 		byte*	pRgnEnd = pRgnStart + MemInfo.size;
 
 		//查找该段内存属于哪个模块
-		for (std::vector<module_info_t>::iterator it=module_vector.begin();
-			it!=module_vector.end();++it)
+		for (std::vector<module_info_t>::iterator it=module_vector_.begin();
+			it!=module_vector_.end();++it)
 		{
 			module_info_t& info = *it;
 			//查找该段内存属于哪个模块
@@ -620,7 +625,7 @@ bool debug_kernel::step_in()
 
 bool debug_kernel::add_breakpoint( DWORD address,bool is_once /*= false*/ )
 {
-	breakpoint bp;
+	breakpoint_t bp = {0};
 	bp.address = address;
 	bp.user_enable = true;
 	bp.valid = true;
@@ -637,6 +642,8 @@ bool debug_kernel::add_breakpoint( DWORD address,bool is_once /*= false*/ )
 
 	bp.is_once = is_once;
 	bp_vec_.push_back(bp);
+
+	main_frame->m_wndBpList.Refresh();
 
 	return true;
 }
@@ -665,7 +672,7 @@ bool debug_kernel::read_memory( DWORD address,void* buffer,size_t size,SIZE_T* n
 		return false;
 	}
 
-	for each (breakpoint bp in bp_vec_)
+	for each (breakpoint_t bp in bp_vec_)
 	{
 		if (bp.address >= address && bp.address <= address+size)
 		{
@@ -699,7 +706,7 @@ bool debug_kernel::virtual_query_ex(DWORD address,MEMORY_BASIC_INFORMATION& info
 	return VirtualQueryEx(handle_,(LPCVOID)address,&info,sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION);
 }
 
-debug_kernel::breakpoint* debug_kernel::find_breakpoint_by_address( DWORD address )
+debug_kernel::breakpoint_t* debug_kernel::find_breakpoint_by_address( DWORD address )
 {
 	for (int i=0;i<bp_vec_.size();++i)
 	{
@@ -712,7 +719,7 @@ debug_kernel::breakpoint* debug_kernel::find_breakpoint_by_address( DWORD addres
 	return NULL;
 }
 
-bool debug_kernel::enable_breakpoint( breakpoint* bp )
+bool debug_kernel::enable_breakpoint( breakpoint_t* bp )
 {
 	if (!bp)
 	{
@@ -725,6 +732,7 @@ bool debug_kernel::enable_breakpoint( breakpoint* bp )
 	}
 
 	bp->user_enable = true;
+	main_frame->m_wndBpList.Refresh();
 	return true;
 }
 
@@ -733,7 +741,7 @@ bool debug_kernel::enable_breakpoint( DWORD address )
 	return enable_breakpoint(find_breakpoint_by_address(address));
 }
 
-bool debug_kernel::disable_breakpoint( breakpoint* bp )
+bool debug_kernel::disable_breakpoint( breakpoint_t* bp )
 {
 	if (!bp)
 	{
@@ -746,6 +754,7 @@ bool debug_kernel::disable_breakpoint( breakpoint* bp )
 	}
 
 	bp->user_enable = false;
+	main_frame->m_wndBpList.Refresh();
 	return true;
 }
 
@@ -754,7 +763,7 @@ bool debug_kernel::disable_breakpoint( DWORD address )
 	return disable_breakpoint(find_breakpoint_by_address(address));
 }
 
-bool debug_kernel::valid_breakpoint( breakpoint* bp )
+bool debug_kernel::valid_breakpoint( breakpoint_t* bp )
 {
 	if (!bp)
 	{
@@ -775,7 +784,7 @@ bool debug_kernel::valid_breakpoint( DWORD address )
 	return valid_breakpoint(find_breakpoint_by_address(address));
 }
 
-bool debug_kernel::invalid_breakpoint( breakpoint* bp )
+bool debug_kernel::invalid_breakpoint( breakpoint_t* bp )
 {
 	if (!bp)
 	{
@@ -803,6 +812,7 @@ bool debug_kernel::delete_breakpoint( DWORD address )
 		{
 			disable_breakpoint(address);
 			bp_vec_.erase(it);
+			main_frame->m_wndBpList.Refresh();
 			return true;
 		}
 	}

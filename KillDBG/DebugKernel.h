@@ -18,7 +18,7 @@ public:
 		BREAK
 	};
 
-	struct  breakpoint
+	struct  breakpoint_t
 	{
 		DWORD address;	//断点地址
 		byte org_data;	//断点处的原始数据
@@ -42,7 +42,7 @@ public:
 	// 继续调试，运行被调试进程
 	bool continue_debug(DWORD continue_status)
 	{
-		breakpoint* bp = find_breakpoint_by_address(context_.Eip);
+		breakpoint_t* bp = find_breakpoint_by_address(context_.Eip);
 		if (bp)
 		{
 			invalid_breakpoint(bp);
@@ -59,34 +59,39 @@ public:
 	bool write_memory(DWORD address,void* data,SIZE_T size, SIZE_T* num_written = NULL);
 	bool modify_memory_prop(DWORD address,SIZE_T size,DWORD new_protect,DWORD* old_protect = NULL);
 	bool virtual_query_ex(DWORD address,MEMORY_BASIC_INFORMATION& info);
-	breakpoint* find_breakpoint_by_address(DWORD address);
+	breakpoint_t* find_breakpoint_by_address(DWORD address);
 	// 用户启用断点
-	bool enable_breakpoint(breakpoint* bp);
+	bool enable_breakpoint(breakpoint_t* bp);
 	bool enable_breakpoint(DWORD address);
 	// 用户禁用断点
-	bool disable_breakpoint(breakpoint* bp);
+	bool disable_breakpoint(breakpoint_t* bp);
 	bool disable_breakpoint(DWORD address);
 	// 使断点有效
-	bool valid_breakpoint(breakpoint* bp);
+	bool valid_breakpoint(breakpoint_t* bp);
 	bool valid_breakpoint(DWORD address);
 	// 使断点无效（为了进行单步等操作时不受断点的影响，但并不是禁用断点）
-	bool invalid_breakpoint(breakpoint* bp);
+	bool invalid_breakpoint(breakpoint_t* bp);
 	bool invalid_breakpoint(DWORD address);
 	bool delete_breakpoint(DWORD address);
 	void update_breakpoint_starus()
 	{
 		for (int i=0;i<bp_vec_.size();++i)
 		{
-			breakpoint& bp = bp_vec_[i];
+			breakpoint_t& bp = bp_vec_[i];
 			if (bp.user_enable == true && bp.valid == false)
 			{
 				valid_breakpoint(&bp);
 			}
-			else if(bp.user_enable == true && bp.valid == true)
-			{
-				invalid_breakpoint(&bp);
-			}
+// 			else if(bp.user_enable == true && bp.valid == true)
+// 			{
+// 				invalid_breakpoint(&bp);
+// 			}
 		}
+	}
+
+	std::vector<breakpoint_t>& get_bp_list()
+	{
+		return bp_vec_;
 	}
 
 
@@ -104,7 +109,7 @@ private:
 	//DWORD process_id_;
 	debug_status debug_status_;
 
-	std::vector<breakpoint> bp_vec_;
+	std::vector<breakpoint_t> bp_vec_;
 
 	// 被调试进程的进程句柄
 	HANDLE handle_;
@@ -168,6 +173,7 @@ public:
 	};
 
 	std::vector<memory_region_info_t>	memory_info_vector_;
+	std::vector<module_info_t>	module_vector_;
 
 	void refresh_memory_map(void);
 	bool get_memory_info_by_addr(const void* addr,memory_region_info_t& info)

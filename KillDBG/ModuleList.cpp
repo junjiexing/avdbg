@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "KillDBG.h"
 #include "ModuleList.h"
+#include "DebugKernel.h"
 
+extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 
 // CModuleList
 
@@ -61,5 +63,20 @@ void CModuleList::OnRButtonDown(UINT nFlags, CPoint point)
 
 void CModuleList::OnRefresh()
 {
-	MessageBox(NULL);
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	debug_kernel_ptr->refresh_memory_map();
+
+	int i = 0;
+	for each (debug_kernel::module_info_t info in debug_kernel_ptr->module_vector_)
+	{
+		char buffer[10];
+		sprintf(buffer,"%08X",info.module_base_addr);
+		InsertItem(i,buffer);
+		sprintf(buffer,"%d",info.module_base_size);
+		SetItemText(i,1,buffer);
+	}
 }

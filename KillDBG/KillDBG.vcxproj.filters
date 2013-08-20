@@ -54,6 +54,9 @@
     <ClCompile Include="ModuleList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="BreakpointList.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttachProcessDlg.h">
@@ -99,6 +102,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ModuleList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BreakpointList.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

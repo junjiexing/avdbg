@@ -102,7 +102,7 @@ void CAsmView::OnPaint()
 		m_vecAddress.push_back(curAddr.addr32.offset);
 		if (y<rcClient.bottom && curAddr.addr32.offset >= (uint32)m_AddrToShow-5)
 		{
-			debug_kernel::breakpoint* bp;
+			debug_kernel::breakpoint_t* bp;
 			if (curAddr.addr32.offset == (uint32)m_Eip)
 			{
 				dc.SetBkColor(0x0000FF);
@@ -219,7 +219,7 @@ void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	case SB_LINEDOWN:
 		{
-			byte buffer[15];
+			byte buffer[16];
 			SIZE_T	num_read = 0;
 			if (!debug_kernel_ptr || !debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15,&num_read))
 			{

@@ -179,19 +179,20 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	CRect rectDummy(0,0,200,120);
  	//rectDummy.SetRectEmpty();
-	m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
 	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
 		rectDummy, this, AFX_IDW_PANE_FIRST, 0);
 	m_wndAsmView.Create(NULL,rectDummy,this,0);
 	m_wndModuleList.Create(rectDummy,this,0);
+	m_wndBpList.Create(rectDummy,this,0);
 	// Create docking panes.
-	CXTPDockingPane* pPaneMemoryMap = m_paneManager.CreatePane(IDR_PANE_MEMORYMAP, rectDummy, xtpPaneDockRight);
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
 	pPaneOutputWnd->SetTitle("Output Window");
 	CXTPDockingPane* pPaneAsmView = m_paneManager.CreatePane(IDR_PANE_DISASMWND, rectDummy, xtpPaneDockTop);
 	pPaneAsmView->SetTitle("Asm View");
 	CXTPDockingPane* pPaneModuleList = m_paneManager.CreatePane(IDR_PANE_MODULELIST, rectDummy, xtpPaneDockTop);
 	pPaneModuleList->SetTitle("Module List");
+	CXTPDockingPane* pPaneBpList = m_paneManager.CreatePane(IDR_PANE_BPLIST, rectDummy, xtpPaneDockTop);
+	pPaneBpList->SetTitle("BreakPoint List");
 
 	// Set the icons for the docking pane tabs.
 // 	int nIDIcons[] = {IDR_PANE_REGISTER, IDR_PANE_DISASM};
@@ -222,9 +223,6 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 			CRect rectDummy;
 			switch (pPane->GetID())
 			{
-			case IDR_PANE_MEMORYMAP:
-				pPane->Attach(&m_wndPEStruct);
-				break;
 			case IDR_PANE_OUTPUTWND:
 				pPane->Attach(&m_wndOutputWnd);;
 				break;
@@ -233,6 +231,9 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 				break;
 			case IDR_PANE_MODULELIST:
 				pPane->Attach(&m_wndModuleList);
+				break;
+			case IDR_PANE_BPLIST:
+				pPane->Attach(&m_wndBpList);
 				break;
 			}
 			return TRUE;
@@ -481,7 +482,7 @@ void CMainFrame::OnSetBreakPoint()
 		return;
 	}
 
-	debug_kernel::breakpoint* bp = debug_kernel_ptr->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
+	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
 	if (bp)
 	{
 		debug_kernel_ptr->delete_breakpoint(bp->address);

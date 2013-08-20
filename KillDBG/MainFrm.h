@@ -8,6 +8,7 @@
 #include "OutputWindow.h"
 #include "AsmView.h"
 #include "ModuleList.h"
+#include "BreakpointList.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -26,10 +27,10 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 
-	CXTPOfficeBorder<CMFCPropertyGridCtrl> m_wndPEStruct;
 	CXTPOfficeBorder<COutputWindow> m_wndOutputWnd;
 	CXTPOfficeBorder<CAsmView> m_wndAsmView;
 	CXTPOfficeBorder<CModuleList> m_wndModuleList;
+	CXTPOfficeBorder<CBreakpointList> m_wndBpList;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
