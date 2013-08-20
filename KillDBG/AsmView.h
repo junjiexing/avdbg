@@ -28,7 +28,7 @@ public:
 	void SetTopAddr(DWORD addr)
 	{
 		m_AddrToShow = addr;
-		Invalidate(FALSE);
+		UpdateScrollInfo();
 	}
 
 	DWORD m_AddrToShow;
@@ -43,6 +43,7 @@ private:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnPaint();
 	void PreviousCode(DWORD TargetAddr,DWORD* PreInsn);
+	void UpdateScrollInfo();
 
 	std::vector<DWORD> m_vecAddress;
 public:

@@ -101,6 +101,7 @@
     <ClCompile Include="FollowAddressDlg.cpp" />
     <ClCompile Include="KillDBG.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="ModuleList.cpp" />
     <ClCompile Include="OutputWindow.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="x86Analysis.cpp">
@@ -119,6 +120,7 @@
     <ClInclude Include="kd_utils.h" />
     <ClInclude Include="KillDBG.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="ModuleList.h" />
     <ClInclude Include="OutputWindow.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />

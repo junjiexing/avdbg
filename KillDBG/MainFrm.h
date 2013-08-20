@@ -7,6 +7,7 @@
 #include "ChildView.h"
 #include "OutputWindow.h"
 #include "AsmView.h"
+#include "ModuleList.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -28,6 +29,7 @@ public:
 	CXTPOfficeBorder<CMFCPropertyGridCtrl> m_wndPEStruct;
 	CXTPOfficeBorder<COutputWindow> m_wndOutputWnd;
 	CXTPOfficeBorder<CAsmView> m_wndAsmView;
+	CXTPOfficeBorder<CModuleList> m_wndModuleList;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;

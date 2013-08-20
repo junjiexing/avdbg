@@ -4,10 +4,10 @@
 
 namespace kd_utils
 {
-	struct ScopeExit
+	struct scope_exit
 	{
-		ScopeExit(std::function<void (void)> f) : f_(f) {}
-		~ScopeExit(void) { f_(); }
+		scope_exit(std::function<void (void)> f) : f_(f) {}
+		~scope_exit(void) { f_(); }
 		void Reset(std::function<void (void)> f){f_ = f;}
 	private:
 		std::function<void (void)> f_;

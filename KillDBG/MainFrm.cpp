@@ -135,8 +135,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	// Set Office 2003 Theme
-	CXTPPaintManager::SetTheme(xtpThemeVisualStudio2008);
+	CXTPPaintManager::SetTheme(xtpThemeVisualStudio2010);
 
 	// Hide array of commands
 	pCommandBars->HideCommands(uHideCmds, _countof(uHideCmds));
@@ -160,7 +159,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{ FVIRTKEY,VK_F2,ID_SET_BREAKPOINT},
 		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
 	};
-	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc));
+	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc)/sizeof(ACCEL));
 	return 0;
 }
 
@@ -174,17 +173,24 @@ BOOL CMainFrame::SetupDockPane(void)
 	m_paneManager.HideClient(TRUE);		//不显示客户区
 	m_paneManager.SetAlphaDockingContext(TRUE);		//显示透明停靠Context
 	m_paneManager.SetShowDockingContextStickers(TRUE);		//显示停靠导航
-	m_paneManager.SetTheme(xtpPaneThemeVisualStudio2005);	//VS2008风格
+	m_paneManager.SetTheme(xtpPaneThemeVisualStudio2010);	//VS2008风格
 	m_paneManager.SetStickyFloatingFrames(TRUE);	//可以边缘吸附
 
 	CRect rectDummy(0,0,200,120);
-	rectDummy.SetRectEmpty();
+ 	//rectDummy.SetRectEmpty();
+	m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
+	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
+		rectDummy, this, AFX_IDW_PANE_FIRST, 0);
+	m_wndAsmView.Create(NULL,rectDummy,this,0);
+	m_wndModuleList.Create(rectDummy,this,0);
 	// Create docking panes.
 	CXTPDockingPane* pPaneMemoryMap = m_paneManager.CreatePane(IDR_PANE_MEMORYMAP, rectDummy, xtpPaneDockRight);
-	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(1223, rectDummy, xtpPaneDockBottom);
+	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
 	pPaneOutputWnd->SetTitle("Output Window");
-	CXTPDockingPane* pPaneAsmView = m_paneManager.CreatePane(1224, rectDummy, xtpPaneDockTop);
+	CXTPDockingPane* pPaneAsmView = m_paneManager.CreatePane(IDR_PANE_DISASMWND, rectDummy, xtpPaneDockTop);
 	pPaneAsmView->SetTitle("Asm View");
+	CXTPDockingPane* pPaneModuleList = m_paneManager.CreatePane(IDR_PANE_MODULELIST, rectDummy, xtpPaneDockTop);
+	pPaneModuleList->SetTitle("Module List");
 
 	// Set the icons for the docking pane tabs.
 // 	int nIDIcons[] = {IDR_PANE_REGISTER, IDR_PANE_DISASM};
@@ -216,23 +222,16 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 			switch (pPane->GetID())
 			{
 			case IDR_PANE_MEMORYMAP:
-				{
-					m_wndPEStruct.Create(WS_CHILD | WS_VISIBLE, rectDummy, this, 0);
-					pPane->Attach(&m_wndPEStruct);
-				}
+				pPane->Attach(&m_wndPEStruct);
 				break;
-			case 1223:
-				{
-					m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-						rectDummy, this, AFX_IDW_PANE_FIRST, NULL);
-					pPane->Attach(&m_wndOutputWnd);;
-				}
+			case IDR_PANE_OUTPUTWND:
+				pPane->Attach(&m_wndOutputWnd);;
 				break;
-			case 1224:
-				{
-					m_wndAsmView.Create(NULL,rectDummy,this,0);
-					pPane->Attach(&m_wndAsmView);
-				}
+			case IDR_PANE_DISASMWND:
+				pPane->Attach(&m_wndAsmView);
+				break;
+			case IDR_PANE_MODULELIST:
+				pPane->Attach(&m_wndModuleList);
 				break;
 			}
 			return TRUE;
@@ -361,7 +360,7 @@ void CMainFrame::OnViewStack()
 
 void CMainFrame::OnViewOutput()
 {
-// 	m_paneManager.ShowPane(IDR_PANE_OUTPUT);
+ 	m_paneManager.ShowPane(IDR_PANE_OUTPUTWND);
 }
 
 

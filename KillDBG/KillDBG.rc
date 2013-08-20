@@ -142,14 +142,6 @@ BEGIN
     END
 END
 
-IDR_MENU_MEMORYMAP MENU
-BEGIN
-    POPUP "Memory map view menu"
-    BEGIN
-        MENUITEM "Ë¢ÐÂ",                          ID_MENU_REFRESH
-    END
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //

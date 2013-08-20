@@ -6,6 +6,7 @@
 #include "DebugKernel.h"
 #include "AsmView.h"
 #include "x86dis.h"
+#include "kd_utils.h"
 
 // CAsmView
 
@@ -148,6 +149,9 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CAsmView::SetEIP( DWORD eip )
 {
+
+	kd_utils::scope_exit on_return([this](){UpdateScrollInfo();});
+
 	m_Eip = eip;
 
 	if (m_AddrToShow == eip)
@@ -246,20 +250,7 @@ void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		break;
 	}
 
-	RECT rc = {0};
-	GetClientRect(&rc);
-
-	SCROLLINFO scroll_info = {sizeof(SCROLLINFO)};
-	scroll_info.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
-
-	scroll_info.nMin = 0;
-	scroll_info.nMax = 0x7FFEFFFF;
-	scroll_info.nPos = m_AddrToShow;
-	scroll_info.nPage = rc.bottom / 20;
-
-	SetScrollInfo(SB_VERT,&scroll_info,TRUE);
-
-	Invalidate(FALSE);
+	UpdateScrollInfo();
 
 	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
@@ -313,4 +304,22 @@ void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	Invalidate();
 	CWnd::OnLButtonDown(nFlags, point);
+}
+
+void CAsmView::UpdateScrollInfo()
+{
+	RECT rc = {0};
+	GetClientRect(&rc);
+
+	SCROLLINFO scroll_info = {sizeof(SCROLLINFO)};
+	scroll_info.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
+
+	scroll_info.nMin = 0;
+	scroll_info.nMax = 0x7FFEFFFF;
+	scroll_info.nPos = m_AddrToShow;
+	scroll_info.nPage = rc.bottom / 20;
+
+	SetScrollInfo(SB_VERT,&scroll_info,TRUE);
+
+	Invalidate(FALSE);
 }

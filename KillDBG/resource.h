@@ -8,6 +8,11 @@
 #define ID_RUN                          103
 #define ID_FOLLOW_ADDR                  104
 #define ID_SET_BREAKPOINT               105
+#define IDR_PANE_OUTPUTWND              106
+#define IDR_PANE_MODULELIST             107
+#define IDR_PANE_DISASMWND              108
+#define IDR_PANE_BREAKPOINT             109
+#define IDR_REFRESH                     110
 #define IDR_MAINFRAME                   128
 #define IDR_KillDBGTYPE                 129
 #define IDB_BITMAP_ICONS                130
@@ -15,7 +20,6 @@
 #define IDD_DIALOGOPEN                  133
 #define IDD_DIALOG1                     134
 #define IDD_DIALOGATTACH                134
-#define IDR_MENU_MEMORYMAP              135
 #define IDD_DIALOG_FLOADDR              136
 #define IDC_EDITFILEPATH                1000
 #define IDC_BUTTONBROWSE                1001
@@ -46,7 +50,6 @@
 #define ID_VIEW_MEMORYMAP               32790
 #define ID_TEST_TEST1                   32791
 #define ID_TEST_TEST2                   32792
-#define ID_MENU_REFRESH                 32793
 #define ID_32794                        32794
 #define ID_FILE_STOP                    32795
 
@@ -54,9 +57,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        137
-#define _APS_NEXT_COMMAND_VALUE         32798
+#define _APS_NEXT_RESOURCE_VALUE        138
+#define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1005
-#define _APS_NEXT_SYMED_VALUE           106
+#define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
