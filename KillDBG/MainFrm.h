@@ -9,6 +9,7 @@
 #include "AsmView.h"
 #include "ModuleList.h"
 #include "BreakpointList.h"
+#include "RegisterWnd.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -31,6 +32,7 @@ public:
 	CXTPOfficeBorder<CAsmView> m_wndAsmView;
 	CXTPOfficeBorder<CModuleList> m_wndModuleList;
 	CXTPOfficeBorder<CBreakpointList> m_wndBpList;
+	CXTPOfficeBorder<CRegisterWnd> m_wndRegister;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;

@@ -77,6 +77,8 @@ void debug_kernel::debug_thread_proc()
 		GetThreadContext(thd_handle,&context_);
 		CloseHandle(thd_handle);
 
+		main_frame->m_wndRegister.PostMessage(WM_USER_SETCONTEXT,(WPARAM)&context_);
+
 		bool continue_debug = true;
 		switch(debug_event_.dwDebugEventCode)
 		{
@@ -439,7 +441,6 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 	}
 	return false;
 }
-
 
 void debug_kernel::refresh_memory_map( void )
 {
