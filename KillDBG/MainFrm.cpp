@@ -180,12 +180,21 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	CRect rectDummy(0,0,200,120);
  	//rectDummy.SetRectEmpty();
-	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-		rectDummy, this, AFX_IDW_PANE_FIRST, 0);
+	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,rectDummy, this, AFX_IDW_PANE_FIRST, 0);
+	m_wndOutputWnd.ShowWindow(FALSE);
+
 	m_wndAsmView.Create(NULL,rectDummy,this,0);
+	m_wndAsmView.ShowWindow(FALSE);
+
 	m_wndModuleList.Create(rectDummy,this,0);
+	m_wndModuleList.ShowWindow(FALSE);
+
 	m_wndBpList.Create(rectDummy,this,0);
+	m_wndBpList.ShowWindow(FALSE);
+
 	m_wndRegister.Create(WS_VISIBLE | WS_CHILD,rectDummy,this,0);
+	m_wndRegister.ShowWindow(FALSE);
+
 	// Create docking panes.
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
 	pPaneOutputWnd->SetTitle("Output Window");
