@@ -203,16 +203,16 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	// Load the previous state for docking panes.
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
-// 	if (layoutNormal.LoadFromFile("FrameLayout","Default"))
-// 	{
-// 		m_paneManager.SetLayout(&layoutNormal);
-// 	}
-
-	if (layoutNormal.Load(_T("NormalLayout")))
+	if (layoutNormal.LoadFromFile("FrameLayout","Default"))
 	{
 		m_paneManager.SetLayout(&layoutNormal);
 	}
 
+// 	if (layoutNormal.Load(_T("NormalLayout")))
+// 	{
+// 		m_paneManager.SetLayout(&layoutNormal);
+// 	}
+// 
 	return 0;
 }
 
@@ -301,7 +301,8 @@ void CMainFrame::OnClose()
 {
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
 	m_paneManager.GetLayout(&layoutNormal);
-	layoutNormal.Save(_T("NormalLayout"));
+	layoutNormal.SaveToFile("FrameLayout","Default");
+	//layoutNormal.Save(_T("NormalLayout"));
  	CFrameWnd::OnClose();
 }
 
