@@ -53,12 +53,27 @@ void CAsmView::OnPaint()
 {
 	//__super::OnPaint();
 	CPaintDC dc(this); // device context for painting
+
 	RECT	rcClient;
 	RECT	rcLine = {0};
 	GetClientRect(&rcClient);
 	rcLine.right = rcClient.right;
 
-	dc.FillRect(&rcClient,&CBrush(0xB2F7FF));
+	CDC dcMem;
+	dcMem.CreateCompatibleDC(&dc);
+	CBitmap bmpMem;
+	bmpMem.CreateCompatibleBitmap(&dc,rcClient.right,rcClient.bottom);
+	CBitmap* pOldBmp = dcMem.SelectObject(&bmpMem);
+
+	dcMem.FillRect(&rcClient,&CBrush(0xB2F7FF));
+
+	debug_utils::scope_exit on_exit([this,&dc,&rcClient,&dcMem,&pOldBmp]()
+	{
+		dc.BitBlt(0,0,rcClient.right,rcClient.bottom,&dcMem,0,0,SRCCOPY);
+		dcMem.SelectObject(pOldBmp);
+
+	});
+
 
 	if (debug_kernel_ptr == NULL)
 	{
@@ -79,7 +94,7 @@ void CAsmView::OnPaint()
 			m_vecAddress.push_back(m_AddrToShow+i);
 			rcLine.top = y;
 			rcLine.bottom = y+20;
-			dc.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn1,strlen(szInsn1),NULL);
+			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn1,strlen(szInsn1),NULL);
 			y+=20;
 		}
 
@@ -107,37 +122,36 @@ void CAsmView::OnPaint()
 			debug_kernel::breakpoint_t* bp;
 			if (curAddr.addr32.offset == (uint32)m_Eip)
 			{
-				dc.SetBkColor(0x0000FF);
+				dcMem.SetBkColor(0x0000FF);
 			}
 			else if (curAddr.addr32.offset >= m_dwSelAddrStart && curAddr.addr32.offset <= m_dwSelAddrEnd)
 			{
-				dc.SetBkColor(0x00FFFF);
+				dcMem.SetBkColor(0x00FFFF);
 			}
 			else if (bp = debug_kernel_ptr->find_breakpoint_by_address(curAddr.addr32.offset))
 			{
 				if (bp->user_enable)
 				{
-					dc.SetBkColor(0xFFFFFF);
+					dcMem.SetBkColor(0xFFFFFF);
 				}
 				else
 				{
-					dc.SetBkColor(0xFFFF00);
+					dcMem.SetBkColor(0xFFFF00);
 				}
 			}
 			else
 			{
-				dc.SetBkColor(0x00FF33);
+				dcMem.SetBkColor(0x00FF33);
 			}
 
 			rcLine.top = y;
 			rcLine.bottom = y+20;
-			dc.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn,strlen(szInsn),NULL);
+			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn,strlen(szInsn),NULL);
 			y+=20;
 
 		}
 		i += insn->size;
 		curAddr.addr32.offset += insn->size;
-
 	}
 }
 
@@ -338,7 +352,7 @@ void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		m_dwSelAddrEnd = m_dwSelAddrStart = m_vecAddress[index];
 	}
-	Invalidate();
+	Invalidate(FALSE);
 	CWnd::OnLButtonDown(nFlags, point);
 }
 

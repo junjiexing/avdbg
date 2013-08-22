@@ -77,7 +77,6 @@ CMainFrame::~CMainFrame()
 {
 }
 
-
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -262,7 +261,6 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
-
 // CMainFrame diagnostics
 
 #ifdef _DEBUG
@@ -277,7 +275,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 }
 
 #endif //_DEBUG
-
 
 // CMainFrame message handlers
 
@@ -297,8 +294,6 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
 
-
-
 void CMainFrame::OnClose()
 {
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
@@ -308,7 +303,6 @@ void CMainFrame::OnClose()
 	//layoutNormal.Save(_T("NormalLayout"));
  	CFrameWnd::OnClose();
 }
-
 
 void CMainFrame::OnCustomize()
 {
@@ -343,49 +337,40 @@ void CMainFrame::OnCustomize()
 	}
 }
 
-
-
 void CMainFrame::OnButtondiswnd()
 {
 // 	m_paneManager.ShowPane(IDR_PANE_DISASM);
 }
-
 
 void CMainFrame::OnViewRegister()
 {
 // 	m_paneManager.ShowPane(IDR_PANE_REGISTER);
 }
 
-
 void CMainFrame::OnViewMemory()
 {
 // 	m_paneManager.ShowPane(IDR_PANE_MEMORY);
 }
-
 
 void CMainFrame::OnViewStack()
 {
 // 	m_paneManager.ShowPane(IDR_PANE_STACK);
 }
 
-
 void CMainFrame::OnViewOutput()
 {
  	m_paneManager.ShowPane(IDR_PANE_OUTPUTWND);
 }
-
 
 void CMainFrame::OnViewPEStruct()
 {
 // 	m_paneManager.ShowPane(IDR_PANE_PESTRUCT);
 }
 
-
 void CMainFrame::OnViewMemoryMap()
 {
 	m_paneManager.ShowPane(IDR_PANE_MEMORYMAP);
 }
-
 
 void CMainFrame::OnFileOpen()
 {
@@ -407,6 +392,9 @@ void CMainFrame::OnFileAttach()
 	{
 		return;
 	}
+
+	debug_kernel_ptr.reset(new debug_kernel());
+	debug_kernel_ptr->attach_process(dlg.m_dwPID);
 }
 
 LRESULT CMainFrame::OnDebugStop( WPARAM wParam, LPARAM lParam )
@@ -418,24 +406,18 @@ void CMainFrame::OnUpdateFileOpen(CCmdUI *pCmdUI)
 {
 }
 
-
 void CMainFrame::OnUpdateFileAttach(CCmdUI *pCmdUI)
 {
 	OnUpdateFileOpen(pCmdUI);
 }
 
-
-
 void CMainFrame::OnFileStop()
 {
 }
 
-
 void CMainFrame::OnUpdateFileStop(CCmdUI *pCmdUI)
 {
 }
-
-
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -495,7 +477,7 @@ void CMainFrame::OnSetBreakPoint()
 	if (bp)
 	{
 		debug_kernel_ptr->delete_breakpoint(bp->address);
-		m_wndAsmView.Invalidate();
+		m_wndAsmView.Invalidate(FALSE);
 		return;
 	}
 
@@ -504,6 +486,6 @@ void CMainFrame::OnSetBreakPoint()
 		char buffer[50];
 		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);
 		m_wndOutputWnd.output_string(std::string(buffer),COutputWindow::OUT_ERROR);
-		m_wndAsmView.Invalidate();
+		m_wndAsmView.Invalidate(FALSE);
 	}
 }
