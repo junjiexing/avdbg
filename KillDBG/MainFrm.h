@@ -43,6 +43,7 @@ protected:  // control bar embedded members
 	CXTPStatusBar  m_wndStatusBar;
 	CChildView    m_wndView;
 	CXTPDockingPaneManager m_paneManager;
+	CXTPCommandBars* m_pCommandBars;
 
 	HACCEL m_hAcc;
 

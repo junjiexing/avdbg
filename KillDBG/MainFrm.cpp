@@ -105,15 +105,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// Get a pointer to the command bars object.
-	CXTPCommandBars* pCommandBars = GetCommandBars();
-	if(pCommandBars == NULL)
+	m_pCommandBars = GetCommandBars();
+	if(m_pCommandBars == NULL)
 	{
 		TRACE0("Failed to create command bars object.\n");
 		return -1;      // fail to create
 	}
 
 	// Add the menu bar
-	CXTPCommandBar* pMenuBar = pCommandBars->SetMenu(
+	CXTPCommandBar* pMenuBar = m_pCommandBars->SetMenu(
 		_T("Menu Bar"), IDR_MAINFRAME);
 	if(pMenuBar == NULL)
 	{
@@ -122,34 +122,36 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// Create ToolBar
-	CXTPToolBar* pToolBarNoraml = pCommandBars->Add(_T("Standard"), xtpBarTop);
+	CXTPToolBar* pToolBarNoraml = m_pCommandBars->Add(_T("Standard"), xtpBarTop);
 	if (!pToolBarNoraml || !pToolBarNoraml->LoadToolBar(IDR_MAINFRAME))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;
 	}
 
-	CXTPToolBar* pToolBarWnd = pCommandBars->Add(_T("Window"), xtpBarTop);
+	CXTPToolBar* pToolBarWnd = m_pCommandBars->Add(_T("Window"), xtpBarTop);
 	if (!pToolBarWnd || !pToolBarWnd->LoadToolBar(IDR_TOOLBARWND))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;
 	}
 
+	m_pCommandBars->LoadBarState("BarState");
+
 	CXTPPaintManager::SetTheme(xtpThemeVisualStudio2010);
 
 	// Hide array of commands
-	pCommandBars->HideCommands(uHideCmds, _countof(uHideCmds));
+	//pCommandBars->HideCommands(uHideCmds, _countof(uHideCmds));
 
 	// Set "Always Show Full Menus" option to the FALSE
-	pCommandBars->GetCommandBarsOptions()->bAlwaysShowFullMenus = FALSE;
+	//pCommandBars->GetCommandBarsOptions()->bAlwaysShowFullMenus = FALSE;
 
-	pCommandBars->GetShortcutManager()->SetAccelerators(IDR_MAINFRAME);
+	//pCommandBars->GetShortcutManager()->SetAccelerators(IDR_MAINFRAME);
 
 	// Load the previous state for toolbars and menus.
-	LoadCommandBars(_T("CommandBars"));
 
 	SetupDockPane();
+//	LoadCommandBars(_T("CommandBars"));
 
 	ACCEL acc[] = 
 	{
@@ -302,6 +304,7 @@ void CMainFrame::OnClose()
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
 	m_paneManager.GetLayout(&layoutNormal);
 	layoutNormal.SaveToFile("FrameLayout","Default");
+	m_pCommandBars->SaveBarState("BarState");
 	//layoutNormal.Save(_T("NormalLayout"));
  	CFrameWnd::OnClose();
 }
