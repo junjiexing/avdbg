@@ -175,6 +175,15 @@ void CRegisterWnd::SetContextToShow( const CONTEXT* context )
 	pEip->SetValue(context->Eip);
 
 	pEflag->SetValue(context->EFlags);
+
+	pCf->SetValue(context->EFlags & 1);
+	pPf->SetValue(context->EFlags & (1<<1));
+	pAf->SetValue(context->EFlags & (1<<2));
+	pZf->SetValue(context->EFlags & (1<<3));
+	pSf->SetValue(context->EFlags & (1<<4));
+	pTf->SetValue(context->EFlags & (1<<5));
+	pDf->SetValue(context->EFlags & (1<<7));
+	pOf->SetValue(context->EFlags & (1<<8));
 }
 
 CRegisterWnd::CRegItem::CRegItem( char* szName, item_type type )
