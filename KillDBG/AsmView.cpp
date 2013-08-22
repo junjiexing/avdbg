@@ -144,8 +144,43 @@ void CAsmView::OnPaint()
 
 BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	MessageBox(NULL);
+	do 
+	{
+		if (!debug_kernel_ptr)
+		{
+			break;
+		}
+
+		if (zDelta<0)
+		{
+			byte buffer[15*5];
+			SIZE_T	num_read = 0;
+			if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15*5,&num_read))
+			{
+				break;
+			}
+
+			CPU_ADDR	curAddr = {0};
+			curAddr.addr32.offset = (uint32)m_AddrToShow;
+			for (int i=0,j=0;i<3 && j<num_read;++i)
+			{
+				x86dis_insn* insn = (x86dis_insn*)m_Decoder.decode(buffer+j,num_read-j,curAddr);
+				j+=insn->size;
+				curAddr.addr32.offset += insn->size;
+			}
+			m_AddrToShow = curAddr.addr32.offset;
+			break;
+		}
+
+		DWORD dwTmpAddr = m_AddrToShow;
+		for (int i=0;i<3;++i)
+		{
+			PreviousCode(dwTmpAddr,&dwTmpAddr);
+		}
+		m_AddrToShow = dwTmpAddr;
+	} while (0);
+
+	Invalidate(FALSE);
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -196,8 +231,6 @@ void CAsmView::SetEIP( DWORD eip )
 		m_AddrToShow += insn->size;
 	}
 }
-
-
 
 void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
@@ -257,26 +290,26 @@ void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CAsmView::PreviousCode( DWORD TargetAddr,DWORD* PreInsn )
+void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 {
-	if (TargetAddr == 0)
+	if (dwTargetAddr == 0)
 	{
-		*PreInsn = 0;
+		*pdwPreInsn = 0;
 		return;
 	}
 
-	if (TargetAddr < 40)
+	if (dwTargetAddr < 40)
 	{
-		*PreInsn = TargetAddr - 1;
+		*pdwPreInsn = dwTargetAddr - 1;
 	}
 
-	DWORD TmpAddr = TargetAddr - 40;
+	DWORD TmpAddr = dwTargetAddr - 40;
 
 	byte buffer[41];
 	SIZE_T nRead = 0;
 	if (!debug_kernel_ptr->read_memory(TmpAddr,buffer,40,&nRead) || nRead != 40)
 	{
-		*PreInsn = TargetAddr - 1;
+		*pdwPreInsn = dwTargetAddr - 1;
 		return;
 	}
 
@@ -286,10 +319,10 @@ void CAsmView::PreviousCode( DWORD TargetAddr,DWORD* PreInsn )
 	{
 		x86dis_insn* insn = (x86dis_insn*)m_Decoder.decode(buffer+i,40-i,curAddr);
 		i += insn->size;
-		*PreInsn = curAddr.addr32.offset;
+		*pdwPreInsn = curAddr.addr32.offset;
 		curAddr.addr32.offset += insn->size;
 
-		if (curAddr.addr32.offset >= TargetAddr)
+		if (curAddr.addr32.offset >= dwTargetAddr)
 		{
 			return;
 		}

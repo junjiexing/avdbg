@@ -35,7 +35,7 @@ private:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnPaint();
-	void PreviousCode(DWORD TargetAddr,DWORD* PreInsn);
+	void PreviousCode(DWORD dwTargetAddr,DWORD* pdwPreInsn);
 	void UpdateScrollInfo();
 
 	std::vector<DWORD> m_vecAddress;
