@@ -61,7 +61,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\XTP\$(Configuration)\;$(SolutionDir)lib\TextView\$(Configuration)\;$(SolutionDir)lib\libasmx86\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ToolkitPro.lib;TextView.lib;libasmx86.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
