@@ -195,6 +195,9 @@ BOOL CMainFrame::SetupDockPane(void)
 	m_wndRegister.Create(WS_VISIBLE | WS_CHILD,rectDummy,this,0);
 	m_wndRegister.ShowWindow(FALSE);
 
+	m_wndMemView.Create("Memory View",rectDummy,this,0);
+	m_wndMemView.ShowWindow(FALSE);
+
 	// Create docking panes.
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
 	pPaneOutputWnd->SetTitle("Output Window");
@@ -206,6 +209,8 @@ BOOL CMainFrame::SetupDockPane(void)
 	pPaneBpList->SetTitle("BreakPoint List");
 	CXTPDockingPane* pPaneRegister = m_paneManager.CreatePane(IDR_PANE_REGISTER, rectDummy, xtpPaneDockTop);
 	pPaneRegister->SetTitle("Register");
+	CXTPDockingPane* pPaneMemView = m_paneManager.CreatePane(IDR_PANE_MEMVIEW, rectDummy, xtpPaneDockTop);
+	pPaneMemView->SetTitle("Memory View");
 
 	// Set the icons for the docking pane tabs.
 // 	int nIDIcons[] = {IDR_PANE_REGISTER, IDR_PANE_DISASM};
@@ -250,6 +255,10 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 				break;
 			case IDR_PANE_REGISTER:
 				pPane->Attach(&m_wndRegister);
+				break;
+			case IDR_PANE_MEMVIEW:
+				pPane->Attach(&m_wndMemView);
+				break;
 			}
 			return TRUE;
 		}

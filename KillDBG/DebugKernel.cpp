@@ -148,6 +148,7 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	IMAGE_NT_HEADERS nt_header;
 	read_memory(base + dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS));
 	add_breakpoint( base + nt_header.OptionalHeader.AddressOfEntryPoint,true);
+	main_frame->m_wndMemView.SetAddrToView(base + nt_header.OptionalHeader.AddressOfEntryPoint);
 	CloseHandle(create_process_info.hThread);
 
 	continue_status_= DBG_CONTINUE;

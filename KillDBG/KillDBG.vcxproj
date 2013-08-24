@@ -104,6 +104,7 @@
     <ClCompile Include="FollowAddressDlg.cpp" />
     <ClCompile Include="KillDBG.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MemoryView.cpp" />
     <ClCompile Include="ModuleList.cpp" />
     <ClCompile Include="OutputWindow.cpp" />
     <ClCompile Include="RegisterWnd.cpp" />
@@ -125,6 +126,7 @@
     <ClInclude Include="FollowAddressDlg.h" />
     <ClInclude Include="KillDBG.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MemoryView.h" />
     <ClInclude Include="ModuleList.h" />
     <ClInclude Include="OutputWindow.h" />
     <ClInclude Include="RegisterWnd.h" />
