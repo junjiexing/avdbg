@@ -8,6 +8,7 @@
 #include "FileOpenDlg.h"
 #include "AttachProcessDlg.h"
 #include "FollowAddressDlg.h"
+#include "ConfigDlg.h"
 
 
 #ifdef _DEBUG
@@ -24,9 +25,15 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_WM_CLOSE()
+
 	ON_COMMAND(XTP_ID_CUSTOMIZE, OnCustomize)
-	ON_MESSAGE(XTPWM_DOCKINGPANE_NOTIFY, OnDockingPaneNotify)
 	ON_COMMAND(ID_BUTTONDISWND, &CMainFrame::OnButtondiswnd)
+
+	ON_MESSAGE(XTPWM_DOCKINGPANE_NOTIFY, OnDockingPaneNotify)
+
+	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
+	ON_COMMAND(ID_FILE_ATTACH, &CMainFrame::OnFileAttach)
+	ON_COMMAND(ID_FILE_STOP, &CMainFrame::OnFileStop)
 	ON_COMMAND(ID_VIEW_REGISTER, &CMainFrame::OnViewRegister)
 	ON_COMMAND(ID_VIEW_MEMORY, &CMainFrame::OnViewMemory)
 	ON_COMMAND(ID_VIEW_STACK, &CMainFrame::OnViewStack)
@@ -34,20 +41,18 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_VIEW_PESTRUCT, &CMainFrame::OnViewPEStruct)
 	ON_COMMAND(ID_VIEW_MEMORYMAP, &CMainFrame::OnViewMemoryMap)
 
+	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateFileOpen)
+	ON_UPDATE_COMMAND_UI(ID_FILE_ATTACH, &CMainFrame::OnUpdateFileAttach)
+	ON_UPDATE_COMMAND_UI(ID_FILE_STOP, &CMainFrame::OnUpdateFileStop)
 	
 	ON_COMMAND(ID_STEP_IN, &CMainFrame::OnStepIn)
 	ON_COMMAND(ID_STEP_OVER, &CMainFrame::OnStepOver)
 	ON_COMMAND(ID_RUN, &CMainFrame::OnDebugRun)
 	ON_COMMAND(ID_FOLLOW_ADDR, &CMainFrame::OnFollowAddr)
 	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
-//	ON_WM_DESTROY()
-	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
-	ON_COMMAND(ID_FILE_ATTACH, &CMainFrame::OnFileAttach)
-	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateFileOpen)
-	ON_UPDATE_COMMAND_UI(ID_FILE_ATTACH, &CMainFrame::OnUpdateFileAttach)
+
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
-	ON_COMMAND(ID_FILE_STOP, &CMainFrame::OnFileStop)
-	ON_UPDATE_COMMAND_UI(ID_FILE_STOP, &CMainFrame::OnUpdateFileStop)
+	ON_COMMAND(ID_CONFIG_UICFG, &CMainFrame::OnConfigUicfg)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -506,4 +511,11 @@ void CMainFrame::OnSetBreakPoint()
 		m_wndOutputWnd.output_string(std::string(buffer),COutputWindow::OUT_ERROR);
 		m_wndAsmView.Invalidate(FALSE);
 	}
+}
+
+
+void CMainFrame::OnConfigUicfg()
+{
+	CConfigDlg dlg;
+	dlg.DoModal();
 }

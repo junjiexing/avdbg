@@ -98,10 +98,12 @@
     <ClCompile Include="AttachProcessDlg.cpp" />
     <ClCompile Include="BreakpointList.cpp" />
     <ClCompile Include="ChildView.cpp" />
+    <ClCompile Include="ConfigDlg.cpp" />
     <ClCompile Include="DebugKernel.cpp" />
     <ClCompile Include="DebugUtils.cpp" />
     <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="FollowAddressDlg.cpp" />
+    <ClCompile Include="FontPropPage.cpp" />
     <ClCompile Include="KillDBG.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MemoryView.cpp" />
@@ -120,10 +122,12 @@
     <ClInclude Include="AttachProcessDlg.h" />
     <ClInclude Include="BreakpointList.h" />
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="ConfigDlg.h" />
     <ClInclude Include="DebugKernel.h" />
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="FileOpenDlg.h" />
     <ClInclude Include="FollowAddressDlg.h" />
+    <ClInclude Include="FontPropPage.h" />
     <ClInclude Include="KillDBG.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MemoryView.h" />

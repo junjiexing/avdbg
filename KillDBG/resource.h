@@ -4,6 +4,7 @@
 //
 #define IDD_ABOUTBOX                    100
 #define ID_STEP_IN                      101
+#define IDD_FORMVIEW_FONT               101
 #define ID_STEP_OVER                    102
 #define ID_RUN                          103
 #define ID_FOLLOW_ADDR                  104
@@ -26,6 +27,7 @@
 #define IDD_DIALOG_FLOADDR              136
 #define IDD_DIALOG2                     138
 #define IDD_DIALOG_ASM                  138
+#define IDD_DIALOG_CONFIG               139
 #define IDC_EDITFILEPATH                1000
 #define IDC_BUTTONBROWSE                1001
 #define IDC_EDIT2                       1002
@@ -36,6 +38,9 @@
 #define IDC_EDIT_ADDR                   1004
 #define IDC_EDIT_ASM                    1005
 #define IDC_COMBO_OPCODE                1006
+#define IDC_TAB_CONFIG                  1007
+#define IDC_LIST_FONT                   1008
+#define IDC_EDIT1                       1009
 #define IDR_PANE_MEMORYMAP              4006
 #define ID_BUTTONDISWND                 32772
 #define ID_VIEW_32773                   32773
@@ -59,14 +64,17 @@
 #define ID_TEST_TEST2                   32792
 #define ID_32794                        32794
 #define ID_FILE_STOP                    32795
+#define ID_32799                        32799
+#define ID_MENU_CONFIG                  32800
+#define ID_CONFIG_UICFG                 32801
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
-#define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1007
+#define _APS_NEXT_RESOURCE_VALUE        142
+#define _APS_NEXT_COMMAND_VALUE         32802
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           114
 #endif
 #endif
