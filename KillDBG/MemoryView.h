@@ -36,14 +36,8 @@ public:
 	afx_msg void OnHdnEndtrack(NMHDR *pNMHDR, LRESULT *pResult);
 	BOOL SetPaintFont(const LOGFONT& font)
 	{
-		if (font.lfPitchAndFamily & FF_MODERN)
-		{
-			m_Font.Detach();
-			m_Font.CreateFontIndirect(&font);
-			return TRUE;
-		}
-
-		return FALSE;
+		m_Font.Detach();
+		return m_Font.CreateFontIndirect(&font);
 	}
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
