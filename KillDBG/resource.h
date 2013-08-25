@@ -41,6 +41,7 @@
 #define IDC_TAB_CONFIG                  1007
 #define IDC_LIST_FONT                   1008
 #define IDC_EDIT1                       1009
+#define IDC_EDIT_SIZE                   1009
 #define IDR_PANE_MEMORYMAP              4006
 #define ID_BUTTONDISWND                 32772
 #define ID_VIEW_32773                   32773

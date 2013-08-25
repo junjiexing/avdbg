@@ -28,6 +28,7 @@ void CFontPropPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CFontPropPage, CDialogEx)
+//	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -38,6 +39,7 @@ BOOL CFontPropPage::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	SetDlgItemInt(IDC_EDIT_SIZE,10);
 	CDC* pDC = GetDC();
 	LOGFONT lf = {0};
 	EnumFontFamiliesEx(pDC->GetSafeHdc(),&lf,&CFontPropPage::FontCallback,(LPARAM)this,0);
@@ -58,5 +60,43 @@ void CFontPropPage::FontCallback( const LOGFONT* pFont )
 	{
 		return;
 	}
+
+	m_vecFont.push_back(*pFont);
 	m_FontList.AddString(pFont->lfFaceName);
 }
+
+LOGFONT CFontPropPage::GetLogFont()
+{
+	int index = m_FontList.GetCurSel();
+	if (index<0 || index>= m_vecFont.size())
+	{
+		index = 0;
+	}
+
+	LOGFONT SelFont = m_vecFont[index];
+	
+	HDC hdc      = ::GetDC(0);
+	SelFont.lfHeight = -MulDiv(GetDlgItemInt(IDC_EDIT_SIZE), GetDeviceCaps(hdc, LOGPIXELSY), 72);
+	::ReleaseDC(0, hdc);
+
+	SelFont.lfWidth = 0;
+
+	return SelFont;
+}
+
+
+//void CFontPropPage::OnClose()
+//{
+//	int index = m_FontList.GetCurSel();
+//	if (index<0 || index>= m_vecFont.size())
+//	{
+//		return;
+//	}
+//	m_SelFont = m_vecFont[index];
+//
+//	HDC hdc      = ::GetDC(0);
+//	m_SelFont.lfHeight = -MulDiv(GetDlgItemInt(IDC_EDIT_SIZE), GetDeviceCaps(hdc, LOGPIXELSY), 72);
+//	::ReleaseDC(0, hdc);
+//
+//	CDialogEx::OnClose();
+//}

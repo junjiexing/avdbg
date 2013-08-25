@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "ConfigDlg.h"
 #include "afxdialogex.h"
+#include "MainFrm.h"
 
+extern CMainFrame* main_frame;
 
 // CConfigDlg 对话框
 
@@ -38,7 +40,7 @@ END_MESSAGE_MAP()
 
 void CConfigDlg::OnBnClickedOk()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	main_frame->m_wndMemView.SetPaintFont(m_FontPage.GetLogFont());
 	CDialogEx::OnOK();
 }
 
