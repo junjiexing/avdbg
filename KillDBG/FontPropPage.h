@@ -18,15 +18,13 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
 
-	static int CALLBACK FontCallback( CONST LOGFONT* pFont, CONST TEXTMETRIC *, DWORD, LPARAM lParam);
-	void FontCallback(const LOGFONT* pFont);
-	std::vector<LOGFONT> m_vecFont;
-
 	DECLARE_MESSAGE_MAP()
-public:
-	virtual BOOL OnInitDialog();
-	CListBox m_FontList;
 
-	LOGFONT GetLogFont();
-//	afx_msg void OnClose();
+public:
+	afx_msg void OnBnClickedButtonChoosememviewFont();
+
+	LOGFONT m_AsmViewFont;
+	LOGFONT m_MemViewFont;
+
+	afx_msg void OnBnClickedButtonChooseDasmFont();
 };

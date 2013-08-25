@@ -64,6 +64,7 @@ void CAsmView::OnPaint()
 	CBitmap bmpMem;
 	bmpMem.CreateCompatibleBitmap(&dc,rcClient.right,rcClient.bottom);
 	CBitmap* pOldBmp = dcMem.SelectObject(&bmpMem);
+	CFont* pOldFont = dcMem.SelectObject(&m_Font);
 
 	dcMem.FillRect(&rcClient,&CBrush(0xB2F7FF));
 

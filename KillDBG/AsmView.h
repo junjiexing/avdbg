@@ -39,9 +39,15 @@ private:
 	void UpdateScrollInfo();
 
 	std::vector<DWORD> m_vecAddress;
+	CFont m_Font;
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	BOOL SetPaintFont(const LOGFONT& font)
+	{
+		m_Font.Detach();
+		return m_Font.CreateFontIndirect(&font);
+	}
 };
 
 

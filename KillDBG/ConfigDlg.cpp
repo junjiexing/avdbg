@@ -40,7 +40,8 @@ END_MESSAGE_MAP()
 
 void CConfigDlg::OnBnClickedOk()
 {
-	main_frame->m_wndMemView.SetPaintFont(m_FontPage.GetLogFont());
+	main_frame->m_wndMemView.SetPaintFont(m_FontPage.m_MemViewFont);
+	main_frame->m_wndAsmView.SetPaintFont(m_FontPage.m_AsmViewFont);
 	CDialogEx::OnOK();
 }
 

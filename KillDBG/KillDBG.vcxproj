@@ -99,6 +99,7 @@
     <ClCompile Include="BreakpointList.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="ConfigDlg.cpp" />
+    <ClCompile Include="CustomFontDlg.cpp" />
     <ClCompile Include="DebugKernel.cpp" />
     <ClCompile Include="DebugUtils.cpp" />
     <ClCompile Include="FileOpenDlg.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="BreakpointList.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="ConfigDlg.h" />
+    <ClInclude Include="CustomFontDlg.h" />
     <ClInclude Include="DebugKernel.h" />
     <ClInclude Include="DebugUtils.h" />
     <ClInclude Include="FileOpenDlg.h" />
