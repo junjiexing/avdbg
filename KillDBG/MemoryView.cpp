@@ -136,7 +136,7 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
-		if (i*16>nSelStart && i*16+num<nSelEnd)
+		if (i*16>nSelStart && i*16+num<=nSelEnd)
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
@@ -153,7 +153,7 @@ void CMemoryView::OnPaint()
 			tmp.right = tmp.left+m_nFontWidth*(num-nSelStart);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<=nSelStart && i*16+num>=nSelEnd)
+		else if (i*16<=nSelStart && i*16+num>nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
