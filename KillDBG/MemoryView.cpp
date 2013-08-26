@@ -57,8 +57,10 @@ void CMemoryView::OnPaint()
 	RECT rcClient;
 	GetClientRect(&rcClient);
 
-	m_vecBuffer.resize(rcClient.bottom/m_nLineHight*16+1);
-	unsigned char* data = m_vecBuffer.data();
+	std::vector<unsigned char> vecBuffer(rcClient.bottom/m_nLineHight*16+1);
+	std::vector<unsigned char> vecCpy(rcClient.bottom/m_nLineHight*16+1);
+	unsigned char* data = vecBuffer.data();
+	unsigned char* cpy = vecCpy.data();
 	bool bReadSuc = debug_kernel_ptr?debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16):false;
 
 	CDC dcMem;
@@ -136,9 +138,9 @@ void CMemoryView::OnPaint()
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 
 		int num = 16;
-		if (i*16+16 > m_vecBuffer.size())
+		if (i*16+16 > vecBuffer.size())
 		{
-			num = m_vecBuffer.size() - i*16;
+			num = vecBuffer.size() - i*16;
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
@@ -146,7 +148,7 @@ void CMemoryView::OnPaint()
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
-		else if (i*16>=nSelStart && i*16<nSelEnd && i*16+15>nSelEnd)
+		else if (i*16>nSelStart && i*16<nSelEnd && i*16+15>nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
@@ -220,7 +222,6 @@ void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		m_bLBtnDwn = true;
 
-		unsigned char* data = m_vecBuffer.data();
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
@@ -244,7 +245,6 @@ void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		m_bLBtnDwn = false;
 
-		unsigned char* data = m_vecBuffer.data();
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
@@ -266,7 +266,6 @@ void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt) && m_bLBtnDwn)
 	{
-		unsigned char* data = m_vecBuffer.data();
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 

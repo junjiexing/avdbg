@@ -30,8 +30,6 @@ protected:
 	int m_nLineHight;
 	int m_nFontWidth;
 
-	std::vector<unsigned char> m_vecBuffer;
-
 	CMenu m_Menu;
 public:
 	afx_msg void OnPaint();
