@@ -66,10 +66,12 @@ void CAsmView::OnPaint()
 
 	dcMem.FillRect(&rcClient,&CBrush(0xB2F7FF));
 
-	debug_utils::scope_exit on_exit([this,&dc,&rcClient,&dcMem,&pOldBmp]()
+	debug_utils::scope_exit on_exit([this,&dc,&rcClient,&dcMem,&pOldBmp,&bmpMem,pOldFont]()
 	{
 		dc.BitBlt(0,0,rcClient.right,rcClient.bottom,&dcMem,0,0,SRCCOPY);
 		dcMem.SelectObject(pOldBmp);
+		dcMem.SelectObject(pOldFont);
+		bmpMem.DeleteObject();
 
 	});
 
