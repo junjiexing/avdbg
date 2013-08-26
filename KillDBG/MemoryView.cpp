@@ -82,7 +82,7 @@ void CMemoryView::OnPaint()
 	int nSelStart = std::min(m_dwSelStart,m_dwSelEnd);
 	int nSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
 
-	for (int i=0;i<rcClient.bottom;++i)
+	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 	{
 		int y = i * m_nLineHight + 20;
 
@@ -133,27 +133,28 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
-		if (i*16>=nSelStart && i*16<=nSelEnd && i*16+num>=nSelStart && i*16+num<=nSelEnd)
+		if (i*16>nSelStart && i*16+num<nSelEnd)
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
-		else if (nSelStart>=i*16 && nSelStart<=i*16+num && nSelEnd>=i*16 && nSelEnd<=i*16+num)
+		else if (i*16>=nSelStart && i*16<nSelEnd && i*16+num>nSelEnd)
+		{
+			RECT tmp = rc;
+			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
+			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
+		}
+		else if (i*16<nSelStart && i*16+num>nSelStart && i*16+num<nSelEnd)
+		{
+			RECT tmp = rc;
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
+			tmp.right = tmp.left+m_nFontWidth*(num-nSelStart);
+			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
+		}
+		else if (i*16<=nSelStart && i*16+num>=nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
 			tmp.right = tmp.left+m_nFontWidth*(nSelEnd-nSelStart+1);
-			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
-		}
-		else if (i*16<=nSelStart && i*16+num>=nSelStart && i*16+num<=nSelEnd)
-		{
-			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
-			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
-		}
-		else if (i*16>=nSelStart && i*16<=nSelEnd && i*16+num>=nSelEnd)
-		{
-			RECT tmp = rc;
-			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 
@@ -195,7 +196,7 @@ void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 	GetClientRect(&rc);
 	rc.top = 20;
 	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_HexWidth; 
+	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt))
 	{
@@ -219,7 +220,7 @@ void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
 	GetClientRect(&rc);
 	rc.top = 20;
 	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_HexWidth; 
+	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt))
 	{
@@ -243,7 +244,7 @@ void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
 	GetClientRect(&rc);
 	rc.top = 20;
 	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_HexWidth; 
+	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt) && m_bLBtnDwn)
 	{
