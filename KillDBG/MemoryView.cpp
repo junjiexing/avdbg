@@ -13,6 +13,7 @@
 #include "DebugKernel.h"
 #include "AppConfig.h"
 #include "DebugUtils.h"
+#include "FollowAddressDlg.h"
 
 extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 // CMemoryView
@@ -41,6 +42,8 @@ BEGIN_MESSAGE_MAP(CMemoryView, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
+	ON_WM_RBUTTONDOWN()
+	ON_COMMAND(IDR_FOLLOWADDR, &CMemoryView::OnFollowAddr)
 END_MESSAGE_MAP()
 
 
@@ -292,5 +295,28 @@ int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	SetPaintFont(app_cfg.asm_view_font);
 
+	m_Menu.CreatePopupMenu();
+	m_Menu.AppendMenu(MF_ENABLED,IDR_FOLLOWADDR,"×ªµ½µØÖ·");
+
 	return 0;
+}
+
+void CMemoryView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	POINT pt = {point.x,point.y};
+	ClientToScreen(&pt);
+	m_Menu.TrackPopupMenu(NULL,pt.x,pt.y,this);
+
+	CWnd::OnRButtonDown(nFlags, point);
+}
+
+void CMemoryView::OnFollowAddr()
+{
+	CFollowAddressDlg dlg;
+	if (dlg.DoModal() != IDOK)
+	{
+		return;
+	}
+	
+	SetAddrToView(dlg.m_dwAddr);
 }

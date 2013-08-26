@@ -31,6 +31,8 @@ protected:
 	int m_nFontWidth;
 
 	std::vector<unsigned char> m_vecBuffer;
+
+	CMenu m_Menu;
 public:
 	afx_msg void OnPaint();
 	afx_msg void OnHdnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
@@ -41,6 +43,7 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnFollowAddr();
 
 	BOOL Create(LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID);
 
@@ -77,6 +80,7 @@ public:
 		return TRUE;
 	}
 
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 };
 
 
