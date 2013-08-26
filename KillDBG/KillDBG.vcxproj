@@ -93,6 +93,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppConfig.cpp" />
     <ClCompile Include="AsmView.cpp" />
     <ClCompile Include="AssemblyDlg.cpp" />
     <ClCompile Include="AttachProcessDlg.cpp" />
@@ -118,6 +119,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppConfig.h" />
     <ClInclude Include="AsmView.h" />
     <ClInclude Include="AssemblyDlg.h" />
     <ClInclude Include="AttachProcessDlg.h" />

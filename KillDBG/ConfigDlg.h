@@ -1,6 +1,7 @@
 #pragma once
 #include "afxcmn.h"
 #include "FontPropPage.h"
+#include "AppConfig.h"
 
 
 // CConfigDlg ¶Ô»°¿ò
@@ -24,6 +25,7 @@ protected:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnTcnSelchangeTabConfig(NMHDR *pNMHDR, LRESULT *pResult);
 	CFontPropPage m_FontPage;
+
 public:
 	virtual BOOL OnInitDialog();
 };

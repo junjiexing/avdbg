@@ -75,6 +75,9 @@
     <ClCompile Include="CustomFontDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="AppConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttachProcessDlg.h">
@@ -138,6 +141,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CustomFontDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AppConfig.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

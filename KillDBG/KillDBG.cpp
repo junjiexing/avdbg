@@ -5,6 +5,7 @@
 #include "KillDBG.h"
 #include "MainFrm.h"
 #include "OutputWindow.h"
+#include "AppConfig.h"
 
 
 #ifdef _DEBUG
@@ -93,6 +94,12 @@ BOOL CKillDBGApp::InitInstance()
 		MessageBox(NULL,_T("提升进程权限到SE_DEBUG_NAME失败，可能会导致部分进程无法调试"),NULL,MB_OK | MB_ICONWARNING);
 	}
 
+	// 加载配置
+	if (!load_app_confgi())
+	{
+		load_default_config();
+	}
+
 	//创建主窗口
 	main_frame = new CMainFrame;
 	if (!main_frame)
@@ -165,5 +172,6 @@ void CKillDBGApp::OnAppAbout()
 
 int CKillDBGApp::ExitInstance()
 {
+	save_app_config();
 	return CWinApp::ExitInstance();
 }

@@ -23,7 +23,9 @@ protected:
 public:
 	afx_msg void OnBnClickedButtonChoosememviewFont();
 
+	BOOL m_bAsmViewFontChanged;
 	LOGFONT m_AsmViewFont;
+	BOOL m_bMemViewFontChanged;
 	LOGFONT m_MemViewFont;
 
 	afx_msg void OnBnClickedButtonChooseDasmFont();

@@ -12,7 +12,8 @@
 IMPLEMENT_DYNAMIC(CFontPropPage, CDialogEx)
 
 CFontPropPage::CFontPropPage(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CFontPropPage::IDD, pParent)
+	: CDialogEx(CFontPropPage::IDD, pParent),
+	m_bAsmViewFontChanged(FALSE),m_bMemViewFontChanged(FALSE)
 {
 
 }
@@ -40,22 +41,28 @@ END_MESSAGE_MAP()
 void CFontPropPage::OnBnClickedButtonChoosememviewFont()
 {
 	CCustomFontDlg dlg;
+
+	dlg.m_SelFont = m_MemViewFont;
 	if (dlg.DoModal()!=IDOK)
 	{
 		return;
 	}
 
 	m_MemViewFont = dlg.m_SelFont;
+	m_bMemViewFontChanged = TRUE;
 }
 
 
 void CFontPropPage::OnBnClickedButtonChooseDasmFont()
 {
 	CCustomFontDlg dlg;
+
+	dlg.m_SelFont = m_AsmViewFont;
 	if (dlg.DoModal()!=IDOK)
 	{
 		return;
 	}
 
 	m_AsmViewFont = dlg.m_SelFont;
+	m_bAsmViewFontChanged = TRUE;
 }

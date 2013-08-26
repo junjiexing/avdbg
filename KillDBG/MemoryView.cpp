@@ -11,6 +11,7 @@
 #endif
 #include <algorithm>
 #include "DebugKernel.h"
+#include "AppConfig.h"
 
 extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 // CMemoryView
@@ -313,6 +314,8 @@ int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	item.pszText = "ASCII";
 	m_Header.InsertItem(2,&item);
 	m_Header.ShowWindow(SW_SHOW);
+
+	SetPaintFont(app_cfg.asm_view_font);
 
 	return 0;
 }

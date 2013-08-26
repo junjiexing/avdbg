@@ -48,6 +48,7 @@ public:
 		m_Font.Detach();
 		return m_Font.CreateFontIndirect(&font);
 	}
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 

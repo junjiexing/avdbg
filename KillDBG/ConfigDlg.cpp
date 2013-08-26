@@ -15,7 +15,6 @@ IMPLEMENT_DYNAMIC(CConfigDlg, CDialogEx)
 CConfigDlg::CConfigDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CConfigDlg::IDD, pParent)
 {
-
 }
 
 CConfigDlg::~CConfigDlg()
@@ -40,8 +39,19 @@ END_MESSAGE_MAP()
 
 void CConfigDlg::OnBnClickedOk()
 {
-	main_frame->m_wndMemView.SetPaintFont(m_FontPage.m_MemViewFont);
-	main_frame->m_wndAsmView.SetPaintFont(m_FontPage.m_AsmViewFont);
+	if (m_FontPage.m_bAsmViewFontChanged)
+	{
+		app_cfg.asm_view_font = m_FontPage.m_AsmViewFont;
+		main_frame->m_wndAsmView.SetPaintFont(m_FontPage.m_AsmViewFont);
+	}
+
+	if (m_FontPage.m_bMemViewFontChanged)
+	{
+		app_cfg.mem_view_font = m_FontPage.m_MemViewFont;
+		main_frame->m_wndMemView.SetPaintFont(m_FontPage.m_MemViewFont);
+	}
+
+	save_app_config();
 	CDialogEx::OnOK();
 }
 
@@ -71,8 +81,9 @@ BOOL CConfigDlg::OnInitDialog()
 	m_Tab.InsertItem(0,"×ÖÌå");
 	m_Tab.InsertItem(1,"ÑÕÉ«");
 
+	m_FontPage.m_AsmViewFont = app_cfg.asm_view_font;
+	m_FontPage.m_MemViewFont = app_cfg.mem_view_font;
 	m_FontPage.Create(CFontPropPage::IDD,&m_Tab);
-
 	RECT rc;
 	m_Tab.GetClientRect(&rc);
 	rc.top += 22;

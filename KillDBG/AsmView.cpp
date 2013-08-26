@@ -8,6 +8,7 @@
 #include "x86dis.h"
 #include "DebugUtils.h"
 #include "AssemblyDlg.h"
+#include "AppConfig.h"
 
 // CAsmView
 
@@ -31,6 +32,7 @@ BEGIN_MESSAGE_MAP(CAsmView, CWnd)
 	ON_WM_VSCROLL()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CHAR()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
@@ -43,11 +45,7 @@ BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWn
 }
 
 
-
 // CAsmView 消息处理程序
-
-
-
 
 void CAsmView::OnPaint()
 {
@@ -155,7 +153,6 @@ void CAsmView::OnPaint()
 		curAddr.addr32.offset += insn->size;
 	}
 }
-
 
 BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
@@ -344,7 +341,6 @@ void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 	}
 }
 
-
 void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
@@ -375,7 +371,6 @@ void CAsmView::UpdateScrollInfo()
 	Invalidate(FALSE);
 }
 
-
 void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	debug_utils::scope_exit on_exit([this,nChar,nRepCnt,nFlags](){CWnd::OnChar(nChar, nRepCnt, nFlags);});
@@ -402,4 +397,15 @@ void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 	Invalidate(FALSE);
+}
+
+
+int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CWnd::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	SetPaintFont(app_cfg.asm_view_font);
+
+	return 0;
 }

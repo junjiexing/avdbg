@@ -44,6 +44,8 @@ BOOL CCustomFontDlg::OnInitDialog()
 	LOGFONT lf = {0};
 	EnumFontFamiliesEx(pDC->GetSafeHdc(),&lf,&CCustomFontDlg::FontCallback,(LPARAM)this,0);
 
+	m_FontList.SelectString(-1,m_SelFont.lfFaceName);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
