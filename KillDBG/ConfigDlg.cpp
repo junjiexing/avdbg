@@ -43,12 +43,14 @@ void CConfigDlg::OnBnClickedOk()
 	{
 		app_cfg.asm_view_font = m_FontPage.m_AsmViewFont;
 		main_frame->m_wndAsmView.SetPaintFont(m_FontPage.m_AsmViewFont);
+		main_frame->m_wndAsmView.Invalidate(FALSE);
 	}
 
 	if (m_FontPage.m_bMemViewFontChanged)
 	{
 		app_cfg.mem_view_font = m_FontPage.m_MemViewFont;
 		main_frame->m_wndMemView.SetPaintFont(m_FontPage.m_MemViewFont);
+		main_frame->m_wndMemView.Invalidate(FALSE);
 	}
 
 	save_app_config();

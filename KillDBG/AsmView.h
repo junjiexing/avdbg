@@ -40,13 +40,36 @@ private:
 
 	std::vector<DWORD> m_vecAddress;
 	CFont m_Font;
+	int m_nLineHight;
+	int m_nFontWidth;
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	BOOL SetPaintFont(const LOGFONT& font)
 	{
 		m_Font.Detach();
-		return m_Font.CreateFontIndirect(&font);
+
+		if (! m_Font.CreateFontIndirect(&font))
+		{
+			return FALSE;
+		}
+
+		CDC* pDC = GetDC();
+		CFont* pFont = pDC->SelectObject(&m_Font);
+		pFont->DeleteObject();
+		TEXTMETRIC	text_metrit = {0};
+		if (!pDC->GetTextMetrics(&text_metrit))
+		{
+			return FALSE;
+		}
+		;
+		// 默认行高
+		m_nLineHight = text_metrit.tmHeight + text_metrit.tmExternalLeading + 5 ;
+		// 默认字体宽度
+		m_nFontWidth = text_metrit.tmAveCharWidth;
+		ReleaseDC(pDC);
+
+		return TRUE;
 	}
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };

@@ -16,7 +16,7 @@ IMPLEMENT_DYNAMIC(CAsmView, CWnd)
 
 CAsmView::CAsmView()
 	:m_AddrToShow(NULL),m_Eip(NULL),m_Decoder(X86_OPSIZE32,X86_ADDRSIZE32),
-	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL)
+	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20)
 {
 
 }
@@ -83,20 +83,20 @@ void CAsmView::OnPaint()
 
 	m_vecAddress.clear();
 
-	byte buffer[rcClient.bottom/20*15+1];
+	byte buffer[rcClient.bottom/m_nLineHight*15+1];
 	SIZE_T num_read;
-	if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,rcClient.bottom/20*15,&num_read))
+	if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,rcClient.bottom/m_nLineHight*15,&num_read))
 	{
 		int y = 0;
-		for (int i=0;i<rcClient.bottom/20;++i)
+		for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 		{
 			char szInsn1[20];
 			sprintf(szInsn1,"%08X  ???",m_AddrToShow+i);
 			m_vecAddress.push_back(m_AddrToShow+i);
 			rcLine.top = y;
-			rcLine.bottom = y+20;
+			rcLine.bottom = y+m_nLineHight;
 			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn1,strlen(szInsn1),NULL);
-			y+=20;
+			y+=m_nLineHight;
 		}
 
 		return;
@@ -146,9 +146,9 @@ void CAsmView::OnPaint()
 			}
 
 			rcLine.top = y;
-			rcLine.bottom = y+20;
+			rcLine.bottom = y+m_nLineHight;
 			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn,strlen(szInsn),NULL);
-			y+=20;
+			y+=m_nLineHight;
 
 		}
 		i += insn->size;
@@ -346,7 +346,7 @@ void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
-	int index = point.y/20;
+	int index = point.y/m_nLineHight;
 	if (index<m_vecAddress.size())
 	{
 		m_dwSelAddrEnd = m_dwSelAddrStart = m_vecAddress[index];
@@ -366,7 +366,7 @@ void CAsmView::UpdateScrollInfo()
 	scroll_info.nMin = 0;
 	scroll_info.nMax = 0x7FFEFFFF;
 	scroll_info.nPos = m_AddrToShow;
-	scroll_info.nPage = rc.bottom / 20;
+	scroll_info.nPage = rc.bottom / m_nLineHight;
 
 	SetScrollInfo(SB_VERT,&scroll_info,TRUE);
 
