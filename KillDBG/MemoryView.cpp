@@ -23,7 +23,7 @@ IMPLEMENT_DYNAMIC(CMemoryView, CWnd)
 CMemoryView::CMemoryView()
 	:m_AddrWidth(0),m_HexWidth(0),m_AsciiWidth(0),
 	m_dwSelEnd(0),m_dwSelStart(0),m_bLBtnDwn(false),
-	m_nLineHight(20),m_nFontWidth(20)
+	m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0)
 {
 
 }
@@ -59,10 +59,7 @@ void CMemoryView::OnPaint()
 
 	m_vecBuffer.resize(rcClient.bottom/m_nLineHight*16+1);
 	unsigned char* data = m_vecBuffer.data();
-	if (!debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16))
-	{
-		return;
-	}
+	bool bReadSuc = debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16);
 
 	CDC dcMem;
 	dcMem.CreateCompatibleDC(&dc);
@@ -94,7 +91,7 @@ void CMemoryView::OnPaint()
 		rcLine.bottom = y + m_nLineHight;
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rcLine,NULL,0,NULL);
 		// 绘制地址
-		char buffer[10];
+		char buffer[20];
 		sprintf(buffer,"%08X",m_dwStartAddr + i*16);
 		RECT rc = {0};
 		rc.top = y;
@@ -107,7 +104,6 @@ void CMemoryView::OnPaint()
 		for (int j=0;j<16;++j)
 		{
 			DWORD pos = i*16+j;
-			sprintf(buffer,"%02X ",data[pos]);
 
 			rc.left = m_AddrWidth + width;
 			rc.right = m_AddrWidth + width + m_nFontWidth*3;
@@ -117,6 +113,16 @@ void CMemoryView::OnPaint()
 			{
 				dcMem.SetBkColor(0x00FF0000);
 			}
+
+			if (bReadSuc)
+			{
+				sprintf(buffer,"%02X ",data[pos]);
+			}
+			else
+			{
+				strcpy(buffer,"?? ");
+			}
+
 			dcMem.ExtTextOut(m_AddrWidth + width,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,3,NULL);
 			dcMem.SetBkColor(0x00FFFFFF);
 			width += m_nFontWidth*3;
@@ -124,7 +130,7 @@ void CMemoryView::OnPaint()
 
 		// 绘制字符数据
 		rc.left = m_AddrWidth+m_HexWidth;
-		rc.right = m_AddrWidth+m_HexWidth+m_AsciiWidth;
+		rc.right = m_AddrWidth+m_HexWidth+m_nFontWidth*16;
 		rc.top = y;
 		rc.bottom = y + m_nLineHight;
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
@@ -136,24 +142,24 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
-		if (i*16>nSelStart && i*16+num<=nSelEnd)
+		if (i*16>=nSelStart && i*16+15<=nSelEnd)
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
-		else if (i*16>=nSelStart && i*16<nSelEnd && i*16+num>nSelEnd)
+		else if (i*16>=nSelStart && i*16<nSelEnd && i*16+15>nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<nSelStart && i*16+num>nSelStart && i*16+num<nSelEnd)
+		else if (i*16<nSelStart && i*16+15>nSelStart && i*16+15<nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
 			tmp.right = tmp.left+m_nFontWidth*(num-nSelStart);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<=nSelStart && i*16+num>nSelEnd)
+		else if (i*16<=nSelStart && i*16+15>=nSelEnd)
 		{
 			RECT tmp = rc;
 			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
@@ -162,7 +168,16 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FFFFFF);
-		dcMem.ExtTextOut(m_AddrWidth+m_HexWidth,y,ETO_CLIPPED,&rc,(char*)data + (i*16),num,NULL);
+
+		if (bReadSuc)
+		{
+			memcpy(buffer,(char*)data + (i*16),num);
+		}
+		else
+		{
+			strcpy(buffer,"????????????????");
+		}
+		dcMem.ExtTextOut(m_AddrWidth+m_HexWidth,y,ETO_CLIPPED,&rc,buffer,num,NULL);
 	}
 }
 
