@@ -59,7 +59,7 @@ void CMemoryView::OnPaint()
 
 	m_vecBuffer.resize(rcClient.bottom/m_nLineHight*16+1);
 	unsigned char* data = m_vecBuffer.data();
-	bool bReadSuc = debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16);
+	bool bReadSuc = debug_kernel_ptr?debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16):false;
 
 	CDC dcMem;
 	dcMem.CreateCompatibleDC(&dc);
