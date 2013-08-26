@@ -21,7 +21,8 @@ IMPLEMENT_DYNAMIC(CMemoryView, CWnd)
 
 CMemoryView::CMemoryView()
 	:m_AddrWidth(0),m_HexWidth(0),m_AsciiWidth(0),
-	m_dwSelEnd(0),m_dwSelStart(0),m_bLBtnDwn(false)
+	m_dwSelEnd(0),m_dwSelStart(0),m_bLBtnDwn(false),
+	m_nLineHight(20),m_nFontWidth(20)
 {
 
 }
@@ -53,9 +54,9 @@ void CMemoryView::OnPaint()
 	RECT rcClient;
 	GetClientRect(&rcClient);
 
-	m_vecBuffer.resize(rcClient.bottom/20*16+1);
+	m_vecBuffer.resize(rcClient.bottom/m_nLineHight*16+1);
 	unsigned char* data = m_vecBuffer.data();
-	if (!debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/20*16))
+	if (!debug_kernel_ptr->read_memory(m_dwStartAddr,data,rcClient.bottom/m_nLineHight*16))
 	{
 		return;
 	}
@@ -83,18 +84,18 @@ void CMemoryView::OnPaint()
 
 	for (int i=0;i<rcClient.bottom;++i)
 	{
-		int y = i * 20 + 20;
+		int y = i * m_nLineHight + 20;
 
 		RECT  rcLine = rcClient;
 		rcLine.top = y;
-		rcLine.bottom = y + 20;
+		rcLine.bottom = y + m_nLineHight;
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rcLine,NULL,0,NULL);
 		// 绘制地址
 		char buffer[10];
 		sprintf(buffer,"%08X",m_dwStartAddr + i*16);
 		RECT rc = {0};
 		rc.top = y;
-		rc.bottom = rc.top + 20;
+		rc.bottom = rc.top + m_nLineHight;
 		rc.right = m_AddrWidth;
 		dcMem.ExtTextOut(0,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,8,NULL);
 
@@ -106,23 +107,23 @@ void CMemoryView::OnPaint()
 			sprintf(buffer,"%02X ",data[pos]);
 
 			rc.left = m_AddrWidth + width;
-			rc.right = m_AddrWidth + width + 25;
+			rc.right = m_AddrWidth + width + m_nFontWidth*3;
 			rc.top = y;
-			rc.bottom = rc.top + 20;
+			rc.bottom = rc.top + m_nLineHight;
 			if (pos>=nSelStart && pos<=nSelEnd)
 			{
 				dcMem.SetBkColor(0x00FF0000);
 			}
 			dcMem.ExtTextOut(m_AddrWidth + width,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,3,NULL);
 			dcMem.SetBkColor(0x00FFFFFF);
-			width += dcMem.GetTextExtent(buffer,3).cx;
+			width += m_nFontWidth*3;
 		}
 
 		// 绘制字符数据
 		rc.left = m_AddrWidth+m_HexWidth;
 		rc.right = m_AddrWidth+m_HexWidth+m_AsciiWidth;
 		rc.top = y;
-		rc.bottom = y + 20;
+		rc.bottom = y + m_nLineHight;
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 
 		int num = 16;
@@ -139,20 +140,20 @@ void CMemoryView::OnPaint()
 		else if (nSelStart>=i*16 && nSelStart<=i*16+num && nSelEnd>=i*16 && nSelEnd<=i*16+num)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+dcMem.GetTextExtent((char*)data+(i*16),nSelStart-i*16).cx;
-			tmp.right = tmp.left+dcMem.GetTextExtent((char*)data+nSelStart,nSelEnd-nSelStart+1).cx;
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
+			tmp.right = tmp.left+m_nFontWidth*(nSelEnd-nSelStart+1);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 		else if (i*16<=nSelStart && i*16+num>=nSelStart && i*16+num<=nSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+dcMem.GetTextExtent((char*)data+(i*16),nSelStart-i*16).cx;
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 		else if (i*16>=nSelStart && i*16<=nSelEnd && i*16+num>=nSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.right = m_AddrWidth+m_HexWidth+dcMem.GetTextExtent((char*)data+(i*16),nSelEnd-i*16).cx;
+			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 
@@ -163,13 +164,7 @@ void CMemoryView::OnPaint()
 
 BOOL CMemoryView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
-	__super::Create(NULL,lpszWindowName,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_VSCROLL,rect,pParentWnd,nID);
-
-	RECT rc = {0};
-	rc.bottom = 20;
-	rc.right = rect.right;
-
-	return TRUE;
+	return __super::Create(NULL,lpszWindowName,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_VSCROLL,rect,pParentWnd,nID);
 }
 
 void CMemoryView::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
@@ -207,22 +202,10 @@ void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 		m_bLBtnDwn = true;
 
 		unsigned char* data = m_vecBuffer.data();
-		int line = (point.y-20) / 20;
-		char buffer[5];
-		int width = m_AddrWidth;
-		CDC* dc = GetDC();
-		for (int j=0;j<16;++j)
-		{
-			sprintf(buffer,"%02X ",data[line*16+j]);
+		int line = (point.y-20) / m_nLineHight;
+		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-			width += dc->GetTextExtent(buffer,3).cx;
-			if (width>=point.x)
-			{
-				m_dwSelEnd = m_dwSelStart = line*16+j;
-				break;
-			}
-		}
-		ReleaseDC(dc);
+		m_dwSelEnd = m_dwSelStart = line*16+nChar;
 
 		Invalidate();
 	}
@@ -243,22 +226,10 @@ void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
 		m_bLBtnDwn = false;
 
 		unsigned char* data = m_vecBuffer.data();
-		int line = (point.y-20) / 20;
-		char buffer[5];
-		int width = m_AddrWidth;
-		CDC* dc = GetDC();
-		for (int j=0;j<16;++j)
-		{
-			sprintf(buffer,"%02X ",data[line*16+j]);
+		int line = (point.y-20) / m_nLineHight;
+		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-			width += dc->GetTextExtent(buffer,3).cx;
-			if (width>=point.x)
-			{
-				m_dwSelEnd = line*16+j;
-				break;
-			}
-		}
-		ReleaseDC(dc);
+		m_dwSelEnd = line*16+nChar;
 
 		Invalidate();
 	}
@@ -277,22 +248,10 @@ void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
 	if (PtInRect(&rc,pt) && m_bLBtnDwn)
 	{
 		unsigned char* data = m_vecBuffer.data();
-		int line = (point.y-20) / 20;
-		char buffer[5];
-		int width = m_AddrWidth;
-		CDC* dc = GetDC();
-		for (int j=0;j<16;++j)
-		{
-			sprintf(buffer,"%02X ",data[line*16+j]);
+		int line = (point.y-20) / m_nLineHight;
+		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-			width += dc->GetTextExtent(buffer,3).cx;
-			if (width>=point.x)
-			{
-				m_dwSelEnd = line*16+j;
-				break;
-			}
-		}
-		ReleaseDC(dc);
+		m_dwSelEnd = line*16+nChar;
 
 		Invalidate();
 	}

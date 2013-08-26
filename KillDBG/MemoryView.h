@@ -27,29 +27,56 @@ protected:
 
 	DWORD m_dwStartAddr;
 
+	int m_nLineHight;
+	int m_nFontWidth;
+
 	std::vector<unsigned char> m_vecBuffer;
 public:
 	afx_msg void OnPaint();
-	BOOL Create(LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	afx_msg void OnHdnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnHdnBegintrack(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnHdnEndtrack(NMHDR *pNMHDR, LRESULT *pResult);
-	BOOL SetPaintFont(const LOGFONT& font)
-	{
-		m_Font.Detach();
-		return m_Font.CreateFontIndirect(&font);
-	}
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+
+	BOOL Create(LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID);
 
 	void SetAddrToView(DWORD address)
 	{
 		m_dwStartAddr = address;
 		Invalidate();
 	}
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+
+	BOOL SetPaintFont(const LOGFONT& font)
+	{
+		m_Font.Detach();
+
+		if (! m_Font.CreateFontIndirect(&font))
+		{
+			return FALSE;
+		}
+
+		CDC* pDC = GetDC();
+		CFont* pFont = pDC->SelectObject(&m_Font);
+		pFont->DeleteObject();
+		TEXTMETRIC	text_metrit = {0};
+		if (!pDC->GetTextMetrics(&text_metrit))
+		{
+			return FALSE;
+		}
+		;
+		// 默认行高
+		m_nLineHight = text_metrit.tmHeight + text_metrit.tmExternalLeading + 5 ;
+		// 默认字体宽度
+		m_nFontWidth = text_metrit.tmAveCharWidth;
+		ReleaseDC(pDC);
+
+		return TRUE;
+	}
+
 };
 
 
