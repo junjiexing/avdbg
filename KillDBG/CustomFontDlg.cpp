@@ -39,12 +39,15 @@ BOOL CCustomFontDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	SetDlgItemInt(IDC_EDIT_SIZE,10);
 	CDC* pDC = GetDC();
 	LOGFONT lf = {0};
 	EnumFontFamiliesEx(pDC->GetSafeHdc(),&lf,&CCustomFontDlg::FontCallback,(LPARAM)this,0);
 
 	m_FontList.SelectString(-1,m_SelFont.lfFaceName);
+	HDC hdc      = ::GetDC(0);
+	int nFontSize = MulDiv(-m_SelFont.lfHeight,72,GetDeviceCaps(hdc, LOGPIXELSY));
+	::ReleaseDC(0, hdc);
+	SetDlgItemInt(IDC_EDIT_SIZE,nFontSize);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
