@@ -8,3 +8,5 @@
 *.suo
 *.user
 FrameLayout
+
+/KillDBG/Config
