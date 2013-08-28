@@ -203,6 +203,9 @@ BOOL CMainFrame::SetupDockPane(void)
 	m_wndMemView.Create("Memory View",rectDummy,this,0);
 	m_wndMemView.ShowWindow(FALSE);
 
+	m_wndStackView.Create(rectDummy,this,0);
+	m_wndStackView.ShowWindow(FALSE);
+
 	// Create docking panes.
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
 	pPaneOutputWnd->SetTitle("Output Window");
@@ -216,6 +219,8 @@ BOOL CMainFrame::SetupDockPane(void)
 	pPaneRegister->SetTitle("Register");
 	CXTPDockingPane* pPaneMemView = m_paneManager.CreatePane(IDR_PANE_MEMVIEW, rectDummy, xtpPaneDockTop);
 	pPaneMemView->SetTitle("Memory View");
+	CXTPDockingPane* pPaneStackView = m_paneManager.CreatePane(IDR_PANE_STACK, rectDummy, xtpPaneDockTop);
+	pPaneStackView->SetTitle("Stack View");
 
 	// Set the icons for the docking pane tabs.
 // 	int nIDIcons[] = {IDR_PANE_REGISTER, IDR_PANE_DISASM};
@@ -263,6 +268,9 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 				break;
 			case IDR_PANE_MEMVIEW:
 				pPane->Attach(&m_wndMemView);
+				break;
+			case  IDR_PANE_STACK:
+				pPane->Attach(&m_wndStackView);
 				break;
 			}
 			return TRUE;

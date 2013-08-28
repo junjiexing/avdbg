@@ -18,6 +18,7 @@
 #define IDR_PANE_REGISTER               112
 #define IDR_PANE_MEMVIEW                113
 #define IDR_FOLLOWADDR                  114
+#define IDR_PANE_STACK                  115
 #define IDR_MAINFRAME                   128
 #define IDR_KillDBGTYPE                 129
 #define IDB_BITMAP_ICONS                130
@@ -81,6 +82,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1016
-#define _APS_NEXT_SYMED_VALUE           115
+#define _APS_NEXT_SYMED_VALUE           116
 #endif
 #endif

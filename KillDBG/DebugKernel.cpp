@@ -78,6 +78,7 @@ void debug_kernel::debug_thread_proc()
 		CloseHandle(thd_handle);
 
 		main_frame->m_wndRegister.PostMessage(WM_USER_SETCONTEXT,(WPARAM)&context_);
+		main_frame->m_wndStackView.SetAddrToView(context_.Esp);
 
 		bool continue_debug = true;
 		switch(debug_event_.dwDebugEventCode)

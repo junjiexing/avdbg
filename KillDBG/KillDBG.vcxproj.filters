@@ -78,6 +78,9 @@
     <ClCompile Include="AppConfig.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="StackView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AttachProcessDlg.h">
@@ -144,6 +147,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="AppConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StackView.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
