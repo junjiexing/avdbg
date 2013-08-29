@@ -2,8 +2,12 @@
 
 struct app_config_t 
 {
-	LOGFONT asm_view_font;
-	LOGFONT mem_view_font;
+	struct font_config_t 
+	{
+		LOGFONT asm_view_font;
+		LOGFONT mem_view_font;
+		LOGFONT stk_view_font;
+	}font_cfg;
 };
 
 extern app_config_t app_cfg;

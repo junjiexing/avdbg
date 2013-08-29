@@ -27,6 +27,9 @@ public:
 	LOGFONT m_AsmViewFont;
 	BOOL m_bMemViewFontChanged;
 	LOGFONT m_MemViewFont;
+	BOOL m_bStkViewFontChanged;
+	LOGFONT m_StkViewFont;
 
 	afx_msg void OnBnClickedButtonChooseDasmFont();
+	afx_msg void OnBnClickedButtonChooseStkviewFont();
 };

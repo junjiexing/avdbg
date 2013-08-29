@@ -407,7 +407,7 @@ int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	SetPaintFont(app_cfg.asm_view_font);
+	SetPaintFont(app_cfg.font_cfg.asm_view_font);
 
 	return 0;
 }

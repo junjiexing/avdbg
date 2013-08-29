@@ -42,5 +42,6 @@ bool save_app_config()
 void load_default_config()
 {
 	LOGFONT default_font = {-13,0,0,0,400,'\0','\0','\0','\0','\x32','\x2','\x1','1',"ºÚÌå"};
-	app_cfg.asm_view_font = app_cfg.mem_view_font = default_font;
+	app_cfg.font_cfg.stk_view_font = app_cfg.font_cfg.asm_view_font = 
+		app_cfg.font_cfg.mem_view_font = default_font;
 }

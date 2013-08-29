@@ -32,6 +32,7 @@ BEGIN_MESSAGE_MAP(CFontPropPage, CDialogEx)
 //	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_CHOOSEMEMVIEW_FONT, &CFontPropPage::OnBnClickedButtonChoosememviewFont)
 	ON_BN_CLICKED(IDC_BUTTON_CHOOSE_DASM_FONT, &CFontPropPage::OnBnClickedButtonChooseDasmFont)
+	ON_BN_CLICKED(IDC_BUTTON_CHOOSE_STKVIEW_FONT, &CFontPropPage::OnBnClickedButtonChooseStkviewFont)
 END_MESSAGE_MAP()
 
 
@@ -65,4 +66,19 @@ void CFontPropPage::OnBnClickedButtonChooseDasmFont()
 
 	m_AsmViewFont = dlg.m_SelFont;
 	m_bAsmViewFontChanged = TRUE;
+}
+
+
+void CFontPropPage::OnBnClickedButtonChooseStkviewFont()
+{
+	CCustomFontDlg dlg;
+
+	dlg.m_SelFont = m_AsmViewFont;
+	if (dlg.DoModal()!=IDOK)
+	{
+		return;
+	}
+
+	m_StkViewFont = dlg.m_SelFont;
+	m_bStkViewFontChanged = TRUE;
 }

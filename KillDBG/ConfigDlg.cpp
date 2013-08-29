@@ -41,16 +41,23 @@ void CConfigDlg::OnBnClickedOk()
 {
 	if (m_FontPage.m_bAsmViewFontChanged)
 	{
-		app_cfg.asm_view_font = m_FontPage.m_AsmViewFont;
+		app_cfg.font_cfg.asm_view_font = m_FontPage.m_AsmViewFont;
 		main_frame->m_wndAsmView.SetPaintFont(m_FontPage.m_AsmViewFont);
 		main_frame->m_wndAsmView.Invalidate(FALSE);
 	}
 
 	if (m_FontPage.m_bMemViewFontChanged)
 	{
-		app_cfg.mem_view_font = m_FontPage.m_MemViewFont;
+		app_cfg.font_cfg.mem_view_font = m_FontPage.m_MemViewFont;
 		main_frame->m_wndMemView.SetPaintFont(m_FontPage.m_MemViewFont);
 		main_frame->m_wndMemView.Invalidate(FALSE);
+	}
+
+	if (m_FontPage.m_bStkViewFontChanged)
+	{
+		app_cfg.font_cfg.stk_view_font = m_FontPage.m_StkViewFont;
+		main_frame->m_wndStackView.SetPaintFont(m_FontPage.m_StkViewFont);
+		main_frame->m_wndStackView.Invalidate(FALSE);
 	}
 
 	save_app_config();
@@ -83,8 +90,9 @@ BOOL CConfigDlg::OnInitDialog()
 	m_Tab.InsertItem(0,"×ÖÌå");
 	m_Tab.InsertItem(1,"ÑÕÉ«");
 
-	m_FontPage.m_AsmViewFont = app_cfg.asm_view_font;
-	m_FontPage.m_MemViewFont = app_cfg.mem_view_font;
+	m_FontPage.m_AsmViewFont = app_cfg.font_cfg.asm_view_font;
+	m_FontPage.m_MemViewFont = app_cfg.font_cfg.mem_view_font;
+	m_FontPage.m_StkViewFont = app_cfg.font_cfg.stk_view_font;
 	m_FontPage.Create(CFontPropPage::IDD,&m_Tab);
 	RECT rc;
 	m_Tab.GetClientRect(&rc);

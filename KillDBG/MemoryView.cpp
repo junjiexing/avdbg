@@ -312,7 +312,7 @@ int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_Header.InsertItem(2,&item);
 	m_Header.ShowWindow(SW_SHOW);
 
-	SetPaintFont(app_cfg.asm_view_font);
+	SetPaintFont(app_cfg.font_cfg.asm_view_font);
 
 	m_Menu.CreatePopupMenu();
 	m_Menu.AppendMenu(MF_ENABLED,IDR_FOLLOWADDR,"×ªµ½µØÖ·");
