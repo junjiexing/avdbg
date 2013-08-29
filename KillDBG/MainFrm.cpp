@@ -185,8 +185,8 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	CRect rectDummy(0,0,200,120);
  	//rectDummy.SetRectEmpty();
-	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,rectDummy, this, AFX_IDW_PANE_FIRST, 0);
-	m_wndOutputWnd.ShowWindow(FALSE);
+// 	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,rectDummy, this, AFX_IDW_PANE_FIRST, 0);
+// 	m_wndOutputWnd.ShowWindow(FALSE);
 
 	m_wndAsmView.Create(NULL,rectDummy,this,0);
 	m_wndAsmView.ShowWindow(FALSE);
@@ -205,6 +205,9 @@ BOOL CMainFrame::SetupDockPane(void)
 
 	m_wndStackView.Create(rectDummy,this,0);
 	m_wndStackView.ShowWindow(FALSE);
+
+	m_wndOutput.Create(rectDummy,this,0);
+	m_wndOutput.ShowWindow(FALSE);
 
 	// Create docking panes.
 	CXTPDockingPane* pPaneOutputWnd = m_paneManager.CreatePane(IDR_PANE_OUTPUTWND, rectDummy, xtpPaneDockBottom);
@@ -252,7 +255,7 @@ LRESULT CMainFrame::OnDockingPaneNotify(WPARAM wParam, LPARAM lParam)
 			switch (pPane->GetID())
 			{
 			case IDR_PANE_OUTPUTWND:
-				pPane->Attach(&m_wndOutputWnd);;
+				pPane->Attach(&m_wndOutput);;
 				break;
 			case IDR_PANE_DISASMWND:
 				pPane->Attach(&m_wndAsmView);
@@ -516,7 +519,7 @@ void CMainFrame::OnSetBreakPoint()
 	{
 		char buffer[50];
 		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);
-		m_wndOutputWnd.output_string(std::string(buffer),COutputWindow::OUT_ERROR);
+		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
 		m_wndAsmView.Invalidate(FALSE);
 	}
 }

@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include "KillDBG.h"
 #include "MainFrm.h"
-#include "OutputWindow.h"
 #include "AppConfig.h"
+#include <Scintilla.h>
 
 
 #ifdef _DEBUG
@@ -51,6 +51,8 @@ BOOL CKillDBGApp::InitInstance()
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
 
+	Scintilla_RegisterClasses(m_hInstance);
+
 	CWinApp::InitInstance();
 
 	// Standard initialization
@@ -64,7 +66,6 @@ BOOL CKillDBGApp::InitInstance()
 	// To create the main window, this code creates a new frame window
 	// object and then sets it as the application's main window object
 
-	TextView::reg_class();
 	//提升自身到 Debug Privilege
 	HANDLE hProcess=GetCurrentProcess();
 	HANDLE hToken;

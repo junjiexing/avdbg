@@ -30,7 +30,7 @@ bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std:
 		if (!CreateProcess(exe_path.c_str(), command_copy, 
 			NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, current_path.c_str(), &si, &pi))
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("创建调试进程失败！！"),COutputWindow::OUT_ERROR);
+			main_frame->m_wndOutput.output_string(std::string("创建调试进程失败！！"),COutputWnd::OUT_ERROR);
 			return;
 		}
 
@@ -54,7 +54,7 @@ bool debug_kernel::attach_process(DWORD pid)
 		DebugSetProcessKillOnExit(FALSE);
 		if (!DebugActiveProcess(pid_))
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("附加指定进程失败！！"),COutputWindow::OUT_ERROR);
+			main_frame->m_wndOutput.output_string(std::string("附加指定进程失败！！"),COutputWnd::OUT_ERROR);
 			return;
 		}		
 		debug_thread_proc();
@@ -137,7 +137,7 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	debug_utils::get_file_name_frome_handle(create_process_info.hFile,program_path);
 	boost::format fmter("加载程序：“%s”");
 	fmter % program_path;
-	main_frame->m_wndOutputWnd.output_string( fmter.str());
+	main_frame->m_wndOutput.output_string( fmter.str());
 
 	CloseHandle(create_process_info.hFile);
 
@@ -160,7 +160,7 @@ bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_pr
 {
 	boost::format fmter("被调试进程退出,退出代码为: %u");
 	fmter % exit_process.dwExitCode;
-	main_frame->m_wndOutputWnd.output_string(fmter.str());
+	main_frame->m_wndOutput.output_string(fmter.str());
 	debugee_exit_ = true;
 
 	continue_status_= DBG_CONTINUE;
@@ -171,7 +171,7 @@ bool debug_kernel::on_create_thread_event( const CREATE_THREAD_DEBUG_INFO& creat
 {
 	boost::format fmter("创建线程，起始地址为：0x%08X");
 	fmter % create_thread.lpStartAddress;
-	main_frame->m_wndOutputWnd.output_string(fmter.str());
+	main_frame->m_wndOutput.output_string(fmter.str());
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -181,7 +181,7 @@ bool debug_kernel::on_exit_thread_event( const EXIT_THREAD_DEBUG_INFO& exit_thre
 {
 	boost::format fmter("线程退出，退出代码为：%u");
 	fmter % exit_thread.dwExitCode;
-	main_frame->m_wndOutputWnd.output_string(fmter.str());
+	main_frame->m_wndOutput.output_string(fmter.str());
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -194,7 +194,7 @@ bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 
 	boost::format fmter("加载模块:\"%s\"");
 	fmter % dll_path;
-	main_frame->m_wndOutputWnd.output_string(fmter.str());
+	main_frame->m_wndOutput.output_string(fmter.str());
 
 	CloseHandle(load_dll.hFile);
 
@@ -206,7 +206,7 @@ bool debug_kernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll 
 {
 	boost::format fmter("卸载模块:\"0x%08X\"");
 	fmter % unload_dll.lpBaseOfDll;
-	main_frame->m_wndOutputWnd.output_string(fmter.str());
+	main_frame->m_wndOutput.output_string(fmter.str());
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -223,7 +223,7 @@ bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO&
 
 	if (!read_memory((DWORD)debug_string.lpDebugStringData,read_buffer,str_len))
 	{
-		main_frame->m_wndOutputWnd.output_string(std::string("获取调试字符串失败"),COutputWindow::OUT_WARNING);
+		main_frame->m_wndOutput.output_string(std::string("获取调试字符串失败"),COutputWnd::OUT_WARNING);
 		return false;
 	}
 
@@ -241,7 +241,7 @@ bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO&
 	{
 		sprintf(output_str,"调试字符串：“%s”\n",read_buffer);
 	}
-	main_frame->m_wndOutputWnd.output_string(std::string(output_str));
+	main_frame->m_wndOutput.output_string(std::string(output_str));
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -260,12 +260,12 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 	{
 	case EXCEPTION_ACCESS_VIOLATION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ACCESS_VIOLATION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ACCESS_VIOLATION"));
 		}
 		break;
 	case EXCEPTION_DATATYPE_MISALIGNMENT:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_DATATYPE_MISALIGNMENT"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_DATATYPE_MISALIGNMENT"));
 		}
 		break;
 	case EXCEPTION_BREAKPOINT:
@@ -273,7 +273,7 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 			void* addr = debug_exception.ExceptionRecord.ExceptionAddress;
 			boost::format fmter("断点异常，地址：0x%08X,异常代码：0x%08X\n");
 			fmter % addr % debug_exception.ExceptionRecord.ExceptionCode;
-			main_frame->m_wndOutputWnd.output_string(fmter.str());
+			main_frame->m_wndOutput.output_string(fmter.str());
 
 			breakpoint_t* bp = find_breakpoint_by_address((DWORD)addr);
 			if (bp)	// 调试器设置的断点
@@ -340,104 +340,104 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 		break;
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"));
 		}
 		break;
 	case EXCEPTION_FLT_DENORMAL_OPERAND:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_DENORMAL_OPERAND"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_DENORMAL_OPERAND"));
 		}
 		break;
 	case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_DIVIDE_BY_ZERO"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_DIVIDE_BY_ZERO"));
 		}
 		break;
 	case EXCEPTION_FLT_INEXACT_RESULT:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_INEXACT_RESULT"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_INEXACT_RESULT"));
 		}
 		break;
 	case EXCEPTION_FLT_INVALID_OPERATION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_INVALID_OPERATION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_INVALID_OPERATION"));
 		}
 		break;
 	case EXCEPTION_FLT_OVERFLOW:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_OVERFLOW"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_OVERFLOW"));
 		}
 		break;
 	case EXCEPTION_FLT_STACK_CHECK:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_STACK_CHECK"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_STACK_CHECK"));
 		}
 		break;
 	case EXCEPTION_FLT_UNDERFLOW:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_FLT_UNDERFLOW"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_UNDERFLOW"));
 		}
 		break;
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INT_DIVIDE_BY_ZERO"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INT_DIVIDE_BY_ZERO"));
 		}
 		break;
 	case EXCEPTION_INT_OVERFLOW:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INT_OVERFLOW"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INT_OVERFLOW"));
 		}
 		break;
 	case EXCEPTION_PRIV_INSTRUCTION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_PRIV_INSTRUCTION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_PRIV_INSTRUCTION"));
 		}
 		break;
 	case EXCEPTION_IN_PAGE_ERROR:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_IN_PAGE_ERROR"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_IN_PAGE_ERROR"));
 		}
 		break;
 	case EXCEPTION_ILLEGAL_INSTRUCTION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_ILLEGAL_INSTRUCTION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ILLEGAL_INSTRUCTION"));
 		}
 		break;
 	case EXCEPTION_NONCONTINUABLE_EXCEPTION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_NONCONTINUABLE_EXCEPTION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_NONCONTINUABLE_EXCEPTION"));
 		}
 		break;
 	case EXCEPTION_STACK_OVERFLOW:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_STACK_OVERFLOW"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_STACK_OVERFLOW"));
 		}
 		break;
 	case EXCEPTION_INVALID_DISPOSITION:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INVALID_DISPOSITION"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INVALID_DISPOSITION"));
 		}
 		break;
 	case EXCEPTION_GUARD_PAGE:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_GUARD_PAGE"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_GUARD_PAGE"));
 		}
 		break;
 	case EXCEPTION_INVALID_HANDLE:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("EXCEPTION_INVALID_HANDLE"));
+			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INVALID_HANDLE"));
 		}
 		break;
 // 	case EXCEPTION_POSSIBLE_DEADLOCK:
 // 		break;
 	case CONTROL_C_EXIT:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("CONTROL_C_EXIT"));
+			main_frame->m_wndOutput.output_string(std::string("CONTROL_C_EXIT"));
 		}
 		break;
 	default:
 		{
-			main_frame->m_wndOutputWnd.output_string(std::string("未知异常"));
+			main_frame->m_wndOutput.output_string(std::string("未知异常"));
 		}
 		break;
 	}

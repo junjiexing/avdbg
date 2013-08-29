@@ -57,13 +57,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\XTP\Source;$(SolutionDir)3rdparty\libasmx86;$(SolutionDir)\TextView;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\XTP\Source;$(SolutionDir)3rdparty\libasmx86;$(SolutionDir)3rdparty\Scintilla;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\XTP\$(Configuration)\;$(SolutionDir)lib\TextView\$(Configuration)\;$(SolutionDir)lib\libasmx86\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ToolkitPro.lib;TextView.lib;libasmx86.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\XTP\$(Configuration)\;$(SolutionDir)lib\libasmx86\$(Configuration)\;$(SolutionDir)lib\Scintilla\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ToolkitPro.lib;libasmx86.lib;Scintilla.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\XTP\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -77,15 +77,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\XTP\Source;$(SolutionDir)3rdparty\libasmx86;$(SolutionDir)\TextView;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\XTP\Source;$(SolutionDir)3rdparty\libasmx86;$(SolutionDir)3rdparty\Scintilla;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib\XTP\$(Configuration)\;$(SolutionDir)lib\TextView\$(Configuration)\;$(SolutionDir)lib\libasmx86\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ToolkitPro.lib;TextView.lib;libasmx86.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\XTP\$(Configuration)\;$(SolutionDir)lib\libasmx86\$(Configuration)\;$(SolutionDir)lib\Scintilla\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ToolkitPro.lib;libasmx86.lib;Scintilla.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <MinimumRequiredVersion>5.01</MinimumRequiredVersion>
     </Link>
     <ResourceCompile>
@@ -110,8 +110,9 @@
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MemoryView.cpp" />
     <ClCompile Include="ModuleList.cpp" />
-    <ClCompile Include="OutputWindow.cpp" />
+    <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="RegisterWnd.cpp" />
+    <ClCompile Include="ScintillaWnd.cpp" />
     <ClCompile Include="StackView.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="x86Analysis.cpp">
@@ -137,9 +138,10 @@
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MemoryView.h" />
     <ClInclude Include="ModuleList.h" />
-    <ClInclude Include="OutputWindow.h" />
+    <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="RegisterWnd.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ScintillaWnd.h" />
     <ClInclude Include="StackView.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="x86Analysis.h" />

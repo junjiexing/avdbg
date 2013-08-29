@@ -5,13 +5,13 @@
 #pragma once
 
 #include "ChildView.h"
-#include "OutputWindow.h"
 #include "AsmView.h"
 #include "ModuleList.h"
 #include "BreakpointList.h"
 #include "RegisterWnd.h"
 #include "MemoryView.h"
 #include "StackView.h"
+#include "OutputWnd.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -30,13 +30,13 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 
-	CXTPOfficeBorder<COutputWindow> m_wndOutputWnd;
 	CXTPOfficeBorder<CAsmView> m_wndAsmView;
 	CXTPOfficeBorder<CModuleList> m_wndModuleList;
 	CXTPOfficeBorder<CBreakpointList> m_wndBpList;
 	CXTPOfficeBorder<CRegisterWnd> m_wndRegister;
 	CXTPOfficeBorder<CMemoryView> m_wndMemView;
 	CXTPOfficeBorder<CStackView> m_wndStackView;
+	CXTPOfficeBorder<COutputWnd> m_wndOutput;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
