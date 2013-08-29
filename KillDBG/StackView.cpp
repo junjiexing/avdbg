@@ -6,6 +6,13 @@
 #include "StackView.h"
 #include "AsmView.h"
 #include "AppConfig.h"
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#include <algorithm>
 
 
 // CStackView
@@ -63,6 +70,9 @@ void CStackView::OnPaint()
 	RECT rc;
 	GetClientRect(&rc);
 
+	DWORD dwSelStart = std::min(m_dwSelStart,m_dwSelEnd);
+	DWORD dwSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
+
 	for (int i=0;i*m_nLineHight<=rc.bottom;++i)
 	{
 		RECT tmp = rc;
@@ -74,7 +84,7 @@ void CStackView::OnPaint()
 		DWORD dwLineAddr = m_dwStartAddr+i*4;
 		SIZE_T nRead = 0;
 
-		if (dwLineAddr>=m_dwSelStart && dwLineAddr <=m_dwSelEnd)
+		if (dwLineAddr>=dwSelStart && dwLineAddr <=dwSelEnd)
 		{
 			dc.SetBkColor(0x00FF0000);
 		}

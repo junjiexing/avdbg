@@ -83,8 +83,8 @@ void CMemoryView::OnPaint()
 
 	});
 
-	DWORD nSelStart = std::min(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
-	DWORD nSelEnd = std::max(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
+	DWORD dwSelStart = std::min(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
+	DWORD dwSelEnd = std::max(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
 
 	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 	{
@@ -113,7 +113,7 @@ void CMemoryView::OnPaint()
 			rc.right = m_AddrWidth + width + m_nFontWidth*3;
 			rc.top = y;
 			rc.bottom = rc.top + m_nLineHight;
-			if (pos>=nSelStart && pos<=nSelEnd)
+			if (pos>=dwSelStart && pos<=dwSelEnd)
 			{
 				dcMem.SetBkColor(0x00FF0000);
 			}
@@ -146,28 +146,28 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
-		if (i*16>=nSelStart && i*16+15<=nSelEnd)
+		if (i*16>=dwSelStart && i*16+15<=dwSelEnd)
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
-		else if (i*16>nSelStart && i*16<nSelEnd && i*16+15>nSelEnd)
+		else if (i*16>dwSelStart && i*16<dwSelEnd && i*16+15>dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelEnd-i*16);
+			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelEnd-i*16);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<nSelStart && i*16+15>nSelStart && i*16+15<nSelEnd)
+		else if (i*16<dwSelStart && i*16+15>dwSelStart && i*16+15<dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
-			tmp.right = tmp.left+m_nFontWidth*(num-nSelStart);
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-i*16);
+			tmp.right = tmp.left+m_nFontWidth*(num-dwSelStart);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<=nSelStart && i*16+15>=nSelEnd)
+		else if (i*16<=dwSelStart && i*16+15>=dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(nSelStart-i*16);
-			tmp.right = tmp.left+m_nFontWidth*(nSelEnd-nSelStart+1);
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-i*16);
+			tmp.right = tmp.left+m_nFontWidth*(dwSelEnd-dwSelStart+1);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 
