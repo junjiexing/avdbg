@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 BOOL CStackView::Create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
-	return __super::Create(NULL,NULL,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_VSCROLL,rect,pParentWnd,nID);
+	return __super::Create(NULL,NULL,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,rect,pParentWnd,nID);
 }
 
 
