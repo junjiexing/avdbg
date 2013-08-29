@@ -48,7 +48,7 @@ public:
 	void SetAddrToView(DWORD address)
 	{
 		m_dwStartAddr = address;
-		Invalidate();
+		UpdateScrollInfo();
 	}
 
 	BOOL SetPaintFont(const LOGFONT& font)
@@ -75,8 +75,11 @@ public:
 		m_nFontWidth = text_metrit.tmAveCharWidth;
 		ReleaseDC(pDC);
 
+		Invalidate(FALSE);
 		return TRUE;
 	}
+
+	void UpdateScrollInfo();
 
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

@@ -20,7 +20,8 @@
 IMPLEMENT_DYNAMIC(CStackView, CWnd)
 
 CStackView::CStackView()
-	:m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0)
+	:m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0),
+	m_bLBtnDwn(false),m_dwSelStart(NULL),m_dwSelEnd(NULL)
 {
 
 }
@@ -144,7 +145,17 @@ void CStackView::OnMouseMove(UINT nFlags, CPoint point)
 
 BOOL CStackView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	m_dwStartAddr += zDelta>0?-4:4;
+	RECT rc;
+	GetClientRect(&rc);
+
+	if (zDelta>0 && m_dwStartAddr>=4)
+	{
+		m_dwStartAddr -= 4;
+	}
+	else if (zDelta<0 && m_dwStartAddr<0x7FFEFFFF-4)
+	{
+		m_dwStartAddr += 4;
+	}
 
 	if (m_bLBtnDwn)
 	{

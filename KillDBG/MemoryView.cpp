@@ -83,8 +83,8 @@ void CMemoryView::OnPaint()
 
 	});
 
-	DWORD dwSelStart = std::min(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
-	DWORD dwSelEnd = std::max(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
+	DWORD dwSelStart = std::min(m_dwSelStart,m_dwSelEnd);
+	DWORD dwSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
 
 	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 	{
@@ -113,7 +113,7 @@ void CMemoryView::OnPaint()
 			rc.right = m_AddrWidth + width + m_nFontWidth*3;
 			rc.top = y;
 			rc.bottom = rc.top + m_nLineHight;
-			if (pos>=dwSelStart && pos<=dwSelEnd)
+			if (pos+m_dwStartAddr>=dwSelStart && pos+m_dwStartAddr<=dwSelEnd)
 			{
 				dcMem.SetBkColor(0x00FF0000);
 			}
@@ -146,27 +146,30 @@ void CMemoryView::OnPaint()
 		}
 
 		dcMem.SetBkColor(0x00FF0000);
-		if (i*16>=dwSelStart && i*16+15<=dwSelEnd)
+
+		DWORD dwLineStart = m_dwStartAddr+i*16;
+		DWORD dwLineEnd = dwLineStart+15;
+		if (dwLineStart>=dwSelStart && dwLineEnd<=dwSelEnd)
 		{
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
 		}
-		else if (i*16>dwSelStart && i*16<dwSelEnd && i*16+15>dwSelEnd)
+		else if (dwLineStart>dwSelStart && dwLineStart<dwSelEnd && dwLineEnd>dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelEnd-i*16);
+			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelEnd-dwLineStart);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<dwSelStart && i*16+15>dwSelStart && i*16+15<dwSelEnd)
+		else if (dwLineStart<dwSelStart && dwLineEnd>dwSelStart && dwLineEnd<dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-i*16);
-			tmp.right = tmp.left+m_nFontWidth*(num-dwSelStart);
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
+			tmp.right = tmp.left+m_nFontWidth*(num-(dwSelStart-dwLineStart));
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
-		else if (i*16<=dwSelStart && i*16+15>=dwSelEnd)
+		else if (dwLineStart<=dwSelStart && dwLineEnd>=dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-i*16);
+			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
 			tmp.right = tmp.left+m_nFontWidth*(dwSelEnd-dwSelStart+1);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
@@ -340,6 +343,68 @@ void CMemoryView::OnFollowAddr()
 
 void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
+	RECT rc;
+	GetClientRect(&rc);
+
+	switch(nSBCode)
+	{
+	case SB_TOP:
+		m_dwStartAddr = NULL;
+		break;
+
+	case SB_BOTTOM:
+		m_dwStartAddr = 0x7FFEFFF;
+		break;
+
+	case SB_LINEUP:
+		{
+			if (m_dwStartAddr >= 16)
+			{
+				m_dwStartAddr -= 16;
+			} 
+		}
+		break;
+
+	case SB_LINEDOWN:
+		{
+			if (m_dwStartAddr <= 0x7FFEFFFF-16)
+			{
+				m_dwStartAddr += 16;
+			}
+		}
+		break;
+
+	case SB_PAGEDOWN:
+		{
+			int nLines = rc.bottom / m_nLineHight;
+			if (m_dwStartAddr <= 0x7FFEFFFF - nLines * 16)
+			{
+				m_dwStartAddr += nLines * 16;
+			}
+		}
+		break;
+
+	case SB_PAGEUP:
+		{
+			int nLines = rc.bottom / m_nLineHight;
+			if (m_dwStartAddr >= nLines * 16)
+			{
+				m_dwStartAddr -= nLines * 16;
+			}
+		}
+		break;
+
+	case SB_THUMBPOSITION:
+	case SB_THUMBTRACK:
+		{
+			SCROLLINFO scroll_info = { sizeof(SCROLLINFO), SIF_TRACKPOS };
+			GetScrollInfo(SB_VERT, &scroll_info);
+			m_dwStartAddr = scroll_info.nTrackPos;
+		}
+		break;
+	}
+
+	UpdateScrollInfo();
 
 	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
@@ -347,8 +412,37 @@ void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 BOOL CMemoryView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	m_dwStartAddr += zDelta>0?-16:16;
-	Invalidate(FALSE);
+	RECT rc;
+	GetClientRect(&rc);
+
+	if (zDelta>0 && m_dwStartAddr>=16)
+	{
+		m_dwStartAddr -= 16;
+	}
+	else if (zDelta<0 && m_dwStartAddr<0x7FFEFFFF-16)
+	{
+		m_dwStartAddr += 16;
+	}
+
+	UpdateScrollInfo();
 
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CMemoryView::UpdateScrollInfo()
+{
+	RECT rc = {0};
+	GetClientRect(&rc);
+
+	SCROLLINFO scroll_info = {sizeof(SCROLLINFO)};
+	scroll_info.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
+
+	scroll_info.nMin = 0;
+	scroll_info.nMax = 0x7FFEFFFF;
+	scroll_info.nPos = m_dwStartAddr;
+	scroll_info.nPage = rc.bottom / m_nLineHight;
+
+	SetScrollInfo(SB_VERT,&scroll_info,TRUE);
+
+	Invalidate(FALSE);
 }
