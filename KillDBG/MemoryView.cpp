@@ -217,6 +217,8 @@ void CMemoryView::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
 
 void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	SetFocus();
+
 	RECT rc = {0};
 	GetClientRect(&rc);
 	rc.top = 20;
