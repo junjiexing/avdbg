@@ -71,7 +71,7 @@ void CStackView::OnPaint()
 			
 
 		DWORD data;
-		DWORD dwLineAddr = m_dwStartAddr+i*16;
+		DWORD dwLineAddr = m_dwStartAddr+i*4;
 		SIZE_T nRead = 0;
 
 		if (dwLineAddr>=m_dwSelStart && dwLineAddr <=m_dwSelEnd)
@@ -103,7 +103,7 @@ void CStackView::OnLButtonDown(UINT nFlags, CPoint point)
 	SetFocus();
 
 	m_bLBtnDwn = true;
-	m_dwSelStart = m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 16;
+	m_dwSelStart = m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 4;
 	Invalidate(FALSE);
 
 	CWnd::OnLButtonDown(nFlags, point);
@@ -113,7 +113,7 @@ void CStackView::OnLButtonDown(UINT nFlags, CPoint point)
 void CStackView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	m_bLBtnDwn = false;
-	m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 16;
+	m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 4;
 	Invalidate(FALSE);
 
 	CWnd::OnLButtonUp(nFlags, point);
@@ -124,7 +124,7 @@ void CStackView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_bLBtnDwn)
 	{
-		m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 16;
+		m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 4;
 		Invalidate(FALSE);
 	}
 
@@ -134,7 +134,7 @@ void CStackView::OnMouseMove(UINT nFlags, CPoint point)
 
 BOOL CStackView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	m_dwStartAddr += zDelta>0?-16:16;
+	m_dwStartAddr += zDelta>0?-4:4;
 	Invalidate(FALSE);
 
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
