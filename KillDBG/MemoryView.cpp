@@ -83,8 +83,8 @@ void CMemoryView::OnPaint()
 
 	});
 
-	DWORD nSelStart = std::min(m_dwSelStart,m_dwSelEnd);
-	DWORD nSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
+	DWORD nSelStart = std::min(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
+	DWORD nSelEnd = std::max(m_dwSelStart,m_dwSelEnd) - m_dwStartAddr;
 
 	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 	{
@@ -227,7 +227,7 @@ void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-		m_dwSelEnd = m_dwSelStart = line*16+nChar;
+		m_dwSelEnd = m_dwSelStart = m_dwStartAddr + line*16+nChar;
 
 		Invalidate();
 	}
@@ -250,7 +250,7 @@ void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-		m_dwSelEnd = line*16+nChar;
+		m_dwSelEnd = m_dwStartAddr + line*16+nChar;
 
 		Invalidate();
 	}
@@ -271,7 +271,7 @@ void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
 		int line = (point.y-20) / m_nLineHight;
 		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
 
-		m_dwSelEnd = line*16+nChar;
+		m_dwSelEnd = m_dwStartAddr + line*16+nChar;
 
 		Invalidate();
 	}
