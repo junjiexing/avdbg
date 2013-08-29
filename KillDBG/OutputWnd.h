@@ -50,5 +50,6 @@ public:
 	{
 		SendMessage(SCI_ADDTEXT,line.size(),reinterpret_cast<LPARAM>(line.c_str()));
 	}
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
