@@ -83,8 +83,8 @@ void CMemoryView::OnPaint()
 
 	});
 
-	int nSelStart = std::min(m_dwSelStart,m_dwSelEnd);
-	int nSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
+	DWORD nSelStart = std::min(m_dwSelStart,m_dwSelEnd);
+	DWORD nSelEnd = std::max(m_dwSelStart,m_dwSelEnd);
 
 	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 	{
