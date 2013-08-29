@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AutoComplete.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CallTip.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CaseConvert.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CaseFolder.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Catalogue.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CellBuffer.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CharClassify.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ContractionState.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Decoration.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Document.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalLexer.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Indicator.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyMap.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LineMarker.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PerLine.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PositionCache.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RESearch.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RunStyles.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ScintillaBase.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Selection.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Style.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UniConversion.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewStyle.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="XPM.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Accessor.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CharacterCategory.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CharacterSet.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexerBase.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexerModule.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexerNoExceptions.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexerSimple.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PropSetSimple.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleContext.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WordList.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckD2D.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PlatWin.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ScintillaWin.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexAsm.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LexCPP.cxx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AutoComplete.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CallTip.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CaseConvert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CaseFolder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Catalogue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CellBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CharClassify.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ContractionState.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Decoration.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Document.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalLexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FontQuality.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Indicator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyMap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LineMarker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Partitioning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PerLine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PositionCache.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RESearch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RunStyles.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ScintillaBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Selection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Style.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UnicodeFromUTF8.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UniConversion.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewStyle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XPM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ILexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SciLexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Scintilla.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ScintillaWidget.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Accessor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterCategory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexAccessor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexerBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexerModule.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexerNoExceptions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexerSimple.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PropSetSimple.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SparseState.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StyleContext.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SubStyles.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WordList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatWin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
