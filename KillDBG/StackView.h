@@ -22,6 +22,10 @@ protected:
 	int m_nLineHight;
 	int m_nFontWidth;
 
+	DWORD m_dwSelStart;
+	DWORD m_dwSelEnd;
+	bool m_bLBtnDwn;
+
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -60,6 +64,10 @@ public:
 
 		return TRUE;
 	}
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 
