@@ -133,12 +133,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\lib\libasmx86\$(Configuration)\</OutDir>
-    <IntDir>..\..\junk\libasmx86\$(Configuration)\</IntDir>
+    <OutDir>..\..\lib\Scintilla\$(Configuration)\</OutDir>
+    <IntDir>..\..\junk\Scintilla\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\lib\libasmx86\$(Configuration)\</OutDir>
-    <IntDir>..\..\junk\libasmx86\$(Configuration)\</IntDir>
+    <OutDir>..\..\lib\Scintilla\$(Configuration)\</OutDir>
+    <IntDir>..\..\junk\Scintilla\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
