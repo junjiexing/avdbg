@@ -44,6 +44,8 @@ BEGIN_MESSAGE_MAP(CMemoryView, CWnd)
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
 	ON_COMMAND(IDR_FOLLOWADDR, &CMemoryView::OnFollowAddr)
+	ON_WM_VSCROLL()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -333,4 +335,20 @@ void CMemoryView::OnFollowAddr()
 	}
 	
 	SetAddrToView(dlg.m_dwAddr);
+}
+
+
+void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+
+	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+BOOL CMemoryView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	m_dwStartAddr += zDelta>0?-16:16;
+	Invalidate(FALSE);
+
+	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }

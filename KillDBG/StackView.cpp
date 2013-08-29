@@ -136,8 +136,11 @@ BOOL CStackView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	m_dwStartAddr += zDelta>0?-4:4;
 
-	ScreenToClient(&pt);
-	m_dwSelEnd = m_dwStartAddr + pt.y / m_nLineHight * 4;
+	if (m_bLBtnDwn)
+	{
+		ScreenToClient(&pt);
+		m_dwSelEnd = m_dwStartAddr + pt.y / m_nLineHight * 4;
+	}
 	Invalidate(FALSE);
 
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
