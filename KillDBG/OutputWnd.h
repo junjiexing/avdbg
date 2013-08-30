@@ -14,8 +14,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
 
 	enum OutputType
 	{
@@ -48,7 +46,9 @@ public:
 
 	void AddSring(const std::string& line)
 	{
-		SendMessage(SCI_ADDTEXT,line.size(),reinterpret_cast<LPARAM>(line.c_str()));
+		SendMessage(SCI_SETREADONLY,FALSE);
+		SendMessage(SCI_APPENDTEXT,line.size(),reinterpret_cast<LPARAM>(line.c_str()));
+		SendMessage(SCI_SETREADONLY,TRUE);
 	}
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
