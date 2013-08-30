@@ -61,7 +61,6 @@ END
 //
 
 IDR_TOOLBARWND          BITMAP                  "res\\toolbar1.bmp"
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDB_BITMAP_ICONS        BITMAP                  "res\\PaneIcons.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,22 +70,13 @@ IDB_BITMAP_ICONS        BITMAP                  "res\\PaneIcons.bmp"
 
 IDR_TOOLBARWND TOOLBAR 16, 15
 BEGIN
-    BUTTON      ID_BUTTONDISWND
+    BUTTON      ID_VIEW_DISWND
     BUTTON      ID_VIEW_REGISTER
     BUTTON      ID_VIEW_OUTPUT
     BUTTON      ID_VIEW_MEMORY
     BUTTON      ID_VIEW_STACK
-    BUTTON      ID_VIEW_PESTRUCT
-    BUTTON      ID_VIEW_MEMORYMAP
-END
-
-IDR_MAINFRAME TOOLBAR 16, 15
-BEGIN
-    BUTTON      ID_EDIT_CUT
-    BUTTON      ID_EDIT_COPY
-    BUTTON      ID_EDIT_PASTE
-    SEPARATOR
-    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_VIEW_MODULELIST
+    BUTTON      ID_VIEW_BREAKPOINT
 END
 
 
@@ -113,17 +103,9 @@ BEGIN
         MENUITEM "停止调试",                        ID_FILE_STOP
         MENUITEM "退出(&X)",                      ID_APP_EXIT
     END
-    POPUP "编辑(&E)"
-    BEGIN
-        MENUITEM "撤销(&U)\tCtrl+Z",              ID_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "剪切(&T)\tCtrl+X",              ID_EDIT_CUT
-        MENUITEM "复制(&C)\tCtrl+C",              ID_EDIT_COPY
-        MENUITEM "粘贴(&P)\tCtrl+V",              ID_EDIT_PASTE
-    END
     POPUP "视图(&V)"
     BEGIN
-        MENUITEM "反汇编窗口",                       ID_BUTTONDISWND
+        MENUITEM "反汇编窗口",                       ID_VIEW_DISWND
         MENUITEM "寄存器窗口",                       ID_VIEW_REGISTER
         MENUITEM "输出窗口",                        ID_VIEW_OUTPUT
         MENUITEM "内存窗口",                        ID_VIEW_MEMORY
@@ -154,14 +136,6 @@ END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
 END
@@ -462,6 +436,25 @@ END
 STRINGTABLE
 BEGIN
     IDR_PANE_MEMORYMAP      "内存映射"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_DISWND          "反汇编窗口"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_REGISTER        "寄存器窗口"
+    ID_VIEW_OUTPUT          "输出窗口"
+    ID_VIEW_MEMORY          "内存查看窗口"
+    ID_VIEW_STACK           "堆栈窗口"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_MODULELIST      "模块窗口"
+    ID_VIEW_BREAKPOINT      "断点窗口"
 END
 
 #endif    // 中文(简体，中国) resources

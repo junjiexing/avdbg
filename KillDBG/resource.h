@@ -19,9 +19,9 @@
 #define IDR_PANE_MEMVIEW                113
 #define IDR_FOLLOWADDR                  114
 #define IDR_PANE_STACK                  115
-#define ID_STEPIN_UNHANDLE_EXCEPT         116
-#define ID_STEPOVER_UNHANDLE_EXCEPT       117
-#define ID_RUN_UNHANDLE_EXCEPT            118
+#define ID_STEPIN_UNHANDLE_EXCEPT       116
+#define ID_STEPOVER_UNHANDLE_EXCEPT     117
+#define ID_RUN_UNHANDLE_EXCEPT          118
 #define IDR_MAINFRAME                   128
 #define IDR_KillDBGTYPE                 129
 #define IDB_BITMAP_ICONS                130
@@ -53,7 +53,6 @@
 #define IDC_STATIC_MEMVIEW_FONT         1013
 #define IDC_BUTTON_CHOOSE_STKVIEW_FONT  1016
 #define IDR_PANE_MEMORYMAP              4006
-#define ID_BUTTONDISWND                 32772
 #define ID_VIEW_32773                   32773
 #define ID_VIEW_32774                   32774
 #define ID_VIEW_REGISTER                32775
@@ -68,9 +67,9 @@
 #define ID_FILE_32787                   32787
 #define ID_FILE_ATTACH                  32788
 #define ID_PESTRUCT                     32789
-#define ID_VIEW_PESTRUCT                32789
+#define ID_VIEW_MODULELIST              32789
 #define ID_BUTTON32790                  32790
-#define ID_VIEW_MEMORYMAP               32790
+#define ID_VIEW_BREAKPOINT              32790
 #define ID_TEST_TEST1                   32791
 #define ID_TEST_TEST2                   32792
 #define ID_32794                        32794
@@ -78,13 +77,14 @@
 #define ID_32799                        32799
 #define ID_MENU_CONFIG                  32800
 #define ID_CONFIG_UICFG                 32801
+#define ID_VIEW_DISWND                  32802
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32802
+#define _APS_NEXT_COMMAND_VALUE         32803
 #define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           119
 #endif

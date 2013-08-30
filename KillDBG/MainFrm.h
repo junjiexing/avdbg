@@ -60,13 +60,12 @@ protected:
 	afx_msg LRESULT OnDockingPaneNotify(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnButtondiswnd();
 	afx_msg void OnViewRegister();
 	afx_msg void OnViewMemory();
 	afx_msg void OnViewStack();
 	afx_msg void OnViewOutput();
-	afx_msg void OnViewPEStruct();
-	afx_msg void OnViewMemoryMap();
+	afx_msg void OnViewBreakPoint();
+	afx_msg void OnViewModule();
 
 	
 	afx_msg void OnStepIn();
@@ -94,4 +93,5 @@ public:
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnConfigUicfg();
+	afx_msg void OnViewDiswnd();
 };

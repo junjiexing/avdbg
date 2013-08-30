@@ -27,7 +27,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CLOSE()
 
 	ON_COMMAND(XTP_ID_CUSTOMIZE, OnCustomize)
-	ON_COMMAND(ID_BUTTONDISWND, &CMainFrame::OnButtondiswnd)
 
 	ON_MESSAGE(XTPWM_DOCKINGPANE_NOTIFY, OnDockingPaneNotify)
 
@@ -38,8 +37,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_VIEW_MEMORY, &CMainFrame::OnViewMemory)
 	ON_COMMAND(ID_VIEW_STACK, &CMainFrame::OnViewStack)
 	ON_COMMAND(ID_VIEW_OUTPUT, &CMainFrame::OnViewOutput)
-	ON_COMMAND(ID_VIEW_PESTRUCT, &CMainFrame::OnViewPEStruct)
-	ON_COMMAND(ID_VIEW_MEMORYMAP, &CMainFrame::OnViewMemoryMap)
+	ON_COMMAND(ID_VIEW_BREAKPOINT, &CMainFrame::OnViewBreakPoint)
+	ON_COMMAND(ID_VIEW_MODULELIST, &CMainFrame::OnViewModule)
 
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateFileOpen)
 	ON_UPDATE_COMMAND_UI(ID_FILE_ATTACH, &CMainFrame::OnUpdateFileAttach)
@@ -56,6 +55,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 	ON_COMMAND(ID_CONFIG_UICFG, &CMainFrame::OnConfigUicfg)
+	ON_COMMAND(ID_VIEW_DISWND, &CMainFrame::OnViewDiswnd)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -129,13 +129,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// Create ToolBar
-	CXTPToolBar* pToolBarNoraml = m_pCommandBars->Add(_T("Standard"), xtpBarTop);
-	if (!pToolBarNoraml || !pToolBarNoraml->LoadToolBar(IDR_MAINFRAME))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;
-	}
-
 	CXTPToolBar* pToolBarWnd = m_pCommandBars->Add(_T("Window"), xtpBarTop);
 	if (!pToolBarWnd || !pToolBarWnd->LoadToolBar(IDR_TOOLBARWND))
 	{
@@ -376,24 +369,19 @@ void CMainFrame::OnCustomize()
 	}
 }
 
-void CMainFrame::OnButtondiswnd()
-{
-// 	m_paneManager.ShowPane(IDR_PANE_DISASM);
-}
-
 void CMainFrame::OnViewRegister()
 {
-// 	m_paneManager.ShowPane(IDR_PANE_REGISTER);
+ 	m_paneManager.ShowPane(IDR_PANE_REGISTER);
 }
 
 void CMainFrame::OnViewMemory()
 {
-// 	m_paneManager.ShowPane(IDR_PANE_MEMORY);
+ 	m_paneManager.ShowPane(IDR_PANE_MEMVIEW);
 }
 
 void CMainFrame::OnViewStack()
 {
-// 	m_paneManager.ShowPane(IDR_PANE_STACK);
+ 	m_paneManager.ShowPane(IDR_PANE_STACK);
 }
 
 void CMainFrame::OnViewOutput()
@@ -401,15 +389,6 @@ void CMainFrame::OnViewOutput()
  	m_paneManager.ShowPane(IDR_PANE_OUTPUTWND);
 }
 
-void CMainFrame::OnViewPEStruct()
-{
-// 	m_paneManager.ShowPane(IDR_PANE_PESTRUCT);
-}
-
-void CMainFrame::OnViewMemoryMap()
-{
-	m_paneManager.ShowPane(IDR_PANE_MEMORYMAP);
-}
 
 void CMainFrame::OnFileOpen()
 {
@@ -566,4 +545,20 @@ void CMainFrame::OnDebugRunHandleException()
 	}
 	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
 	debug_kernel_ptr->continue_debug();
+}
+
+
+void CMainFrame::OnViewDiswnd()
+{
+	m_paneManager.ShowPane(IDR_PANE_DISASMWND);
+}
+
+void CMainFrame::OnViewBreakPoint()
+{
+	m_paneManager.ShowPane(IDR_PANE_BPLIST);
+}
+
+void CMainFrame::OnViewModule()
+{
+	m_paneManager.ShowPane(IDR_PANE_MODULELIST);
 }
