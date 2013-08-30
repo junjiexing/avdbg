@@ -13,7 +13,7 @@ public:
 	virtual ~CAssemblyDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOG_ASM };
+	enum { IDD = IDD_ASSEMBLY };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

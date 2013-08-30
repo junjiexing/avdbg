@@ -13,7 +13,7 @@ public:
 	virtual ~CAttachProcessDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOGATTACH };
+	enum { IDD = IDD_ATTACH };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

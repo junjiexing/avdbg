@@ -12,7 +12,7 @@ public:
 	virtual ~CFileOpenDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOGOPEN };
+	enum { IDD = IDD_OPEN };
 
 	CString	m_strPath;
 	CString	m_strParam;

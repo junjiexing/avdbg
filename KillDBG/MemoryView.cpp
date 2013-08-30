@@ -43,7 +43,7 @@ BEGIN_MESSAGE_MAP(CMemoryView, CWnd)
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
-	ON_COMMAND(IDR_FOLLOWADDR, &CMemoryView::OnFollowAddr)
+	ON_COMMAND(ID_FOLLOWADDR, &CMemoryView::OnFollowAddr)
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -317,7 +317,7 @@ int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetPaintFont(app_cfg.font_cfg.asm_view_font);
 
 	m_Menu.CreatePopupMenu();
-	m_Menu.AppendMenu(MF_ENABLED,IDR_FOLLOWADDR,"转到地址");
+	m_Menu.AppendMenu(MF_ENABLED,ID_FOLLOWADDR,"转到地址");
 
 	return 0;
 }

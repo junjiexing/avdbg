@@ -13,7 +13,7 @@ public:
 	virtual ~CCustomFontDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOG_FONT };
+	enum { IDD = IDD_FONT };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

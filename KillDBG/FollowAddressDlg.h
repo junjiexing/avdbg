@@ -12,7 +12,7 @@ public:
 	virtual ~CFollowAddressDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOG_FLOADDR };
+	enum { IDD = IDD_FOLLOWADDRESS };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

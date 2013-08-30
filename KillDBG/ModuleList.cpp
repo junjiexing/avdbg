@@ -24,7 +24,7 @@ CModuleList::~CModuleList()
 
 BEGIN_MESSAGE_MAP(CModuleList, CListCtrl)
 	ON_WM_RBUTTONDOWN()
-	ON_COMMAND(IDR_REFRESH, &CModuleList::OnRefresh)
+	ON_COMMAND(ID_REFRESH, &CModuleList::OnRefresh)
 END_MESSAGE_MAP()
 
 BOOL CModuleList::Create( const RECT& rect,CWnd* pParentWnd,UINT nID )
@@ -53,7 +53,7 @@ void CModuleList::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	CMenu menu;
 	menu.CreatePopupMenu();
-	menu.AppendMenu(MF_ENABLED,IDR_REFRESH,"Ë¢ÐÂ");
+	menu.AppendMenu(MF_ENABLED,ID_REFRESH,"Ë¢ÐÂ");
 	POINT pt = {point.x,point.y};
 	ClientToScreen(&pt);
 	menu.TrackPopupMenu(NULL,pt.x,pt.y,this);
