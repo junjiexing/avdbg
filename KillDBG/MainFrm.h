@@ -72,6 +72,9 @@ public:
 	afx_msg void OnStepIn();
 	afx_msg void OnStepOver();
 	afx_msg void OnDebugRun();
+	afx_msg void OnStepInHandleException();
+	afx_msg void OnStepOverHandleException();
+	afx_msg void OnDebugRunHandleException();
 	afx_msg void OnFollowAddr();
 	afx_msg void OnSetBreakPoint();
 

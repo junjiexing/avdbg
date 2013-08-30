@@ -19,6 +19,9 @@
 #define IDR_PANE_MEMVIEW                113
 #define IDR_FOLLOWADDR                  114
 #define IDR_PANE_STACK                  115
+#define ID_STEPIN_UNHANDLE_EXCEPT         116
+#define ID_STEPOVER_UNHANDLE_EXCEPT       117
+#define ID_RUN_UNHANDLE_EXCEPT            118
 #define IDR_MAINFRAME                   128
 #define IDR_KillDBGTYPE                 129
 #define IDB_BITMAP_ICONS                130
@@ -48,7 +51,6 @@
 #define IDC_BUTTON_CHOOSEMEMVIEW_FONT   1011
 #define IDC_STATIC_DASM_FONT            1012
 #define IDC_STATIC_MEMVIEW_FONT         1013
-#define IDC_BUTTON_STKFONT              1016
 #define IDC_BUTTON_CHOOSE_STKVIEW_FONT  1016
 #define IDR_PANE_MEMORYMAP              4006
 #define ID_BUTTONDISWND                 32772
@@ -84,6 +86,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1017
-#define _APS_NEXT_SYMED_VALUE           116
+#define _APS_NEXT_SYMED_VALUE           119
 #endif
 #endif

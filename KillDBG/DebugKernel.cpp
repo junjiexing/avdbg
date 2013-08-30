@@ -622,7 +622,8 @@ bool debug_kernel::step_in()
 		return false;
 	}
 	CloseHandle(thd_handle);
-	continue_debug(DBG_CONTINUE);
+	
+	continue_debug();
 	return true;
 }
 
@@ -853,7 +854,8 @@ bool debug_kernel::step_over()
 		{
 			return false;
 		}
-		return continue_debug(DBG_CONTINUE);
+		
+		return continue_debug();
 	}
 	return step_in();
 }

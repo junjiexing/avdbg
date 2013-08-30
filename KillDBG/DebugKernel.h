@@ -40,7 +40,7 @@ public:
 	bool step_over();
 
 	// 继续调试，运行被调试进程
-	bool continue_debug(DWORD continue_status)
+	bool continue_debug(void)
 	{
 		breakpoint_t* bp = find_breakpoint_by_address(context_.Eip);
 		if (bp)
@@ -50,6 +50,15 @@ public:
 
 
 		return SetEvent(continue_event_);
+	}
+
+	void SetContinueStatus(DWORD continue_status)
+	{
+		continue_status_ = continue_status;
+	}
+	DWORD GetContinueStatus(void)
+	{
+		return continue_status_;
 	}
 
 	bool add_breakpoint(DWORD address,bool is_once = false);

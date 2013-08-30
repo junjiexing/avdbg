@@ -48,6 +48,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_STEP_IN, &CMainFrame::OnStepIn)
 	ON_COMMAND(ID_STEP_OVER, &CMainFrame::OnStepOver)
 	ON_COMMAND(ID_RUN, &CMainFrame::OnDebugRun)
+	ON_COMMAND(ID_STEPIN_UNHANDLE_EXCEPT, &CMainFrame::OnStepInHandleException)
+	ON_COMMAND(ID_STEPOVER_UNHANDLE_EXCEPT, &CMainFrame::OnStepOverHandleException)
+	ON_COMMAND(ID_RUN_UNHANDLE_EXCEPT, &CMainFrame::OnDebugRunHandleException)
 	ON_COMMAND(ID_FOLLOW_ADDR, &CMainFrame::OnFollowAddr)
 	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
 
@@ -159,12 +162,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	ACCEL acc[] = 
 	{
-		{ FCONTROL | FVIRTKEY, 'G', ID_FOLLOW_ADDR }, 
+		{ FVIRTKEY | FCONTROL, 'G', ID_FOLLOW_ADDR }, 
 		{ FVIRTKEY, VK_F7,ID_STEP_IN},
 		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
 		{ FVIRTKEY,VK_F9,ID_RUN},
 		{ FVIRTKEY,VK_F2,ID_SET_BREAKPOINT},
-		{ FVIRTKEY,VK_F8,ID_STEP_OVER},
+		{ FVIRTKEY | FSHIFT,VK_F7,ID_STEPIN_UNHANDLE_EXCEPT},
+		{ FVIRTKEY | FSHIFT,VK_F8,ID_STEPOVER_UNHANDLE_EXCEPT},
+		{ FVIRTKEY | FSHIFT,VK_F9,ID_RUN_UNHANDLE_EXCEPT},
 	};
 	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc)/sizeof(ACCEL));
 	return 0;
@@ -469,6 +474,7 @@ void CMainFrame::OnStepIn()
 	{
 		return;
 	}
+	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
 	debug_kernel_ptr->step_in();
 }
 
@@ -478,6 +484,7 @@ void CMainFrame::OnStepOver()
 	{
 		return;
 	}
+	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
 	debug_kernel_ptr->step_over();
 }
 
@@ -497,7 +504,8 @@ void CMainFrame::OnDebugRun()
 	{
 		return;
 	}
-	debug_kernel_ptr->continue_debug(DBG_CONTINUE);
+	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->continue_debug();
 }
 
 void CMainFrame::OnSetBreakPoint()
@@ -524,9 +532,38 @@ void CMainFrame::OnSetBreakPoint()
 	}
 }
 
-
 void CMainFrame::OnConfigUicfg()
 {
 	CConfigDlg dlg;
 	dlg.DoModal();
+}
+
+void CMainFrame::OnStepInHandleException()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->step_in();
+}
+
+void CMainFrame::OnStepOverHandleException()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->step_over();
+}
+
+void CMainFrame::OnDebugRunHandleException()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->continue_debug();
 }
