@@ -152,7 +152,7 @@ CAPTION "About KillDBG"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "KillDBG Version 1.0",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "KillDBG Version 0.2",IDC_STATIC,40,10,119,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2012",IDC_STATIC,40,25,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
 END
@@ -250,8 +250,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 0,0,0,2
+ PRODUCTVERSION 0,0,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -264,21 +264,21 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "0409"
+        BLOCK "00000409"
         BEGIN
             VALUE "CompanyName", "TODO: <Company name>"
             VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", "1.0.0.1"
+            VALUE "FileVersion", "0.0.0.2"
             VALUE "InternalName", "KillDBG.exe"
             VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
             VALUE "OriginalFilename", "KillDBG.exe"
             VALUE "ProductName", "TODO: <Product name>"
-            VALUE "ProductVersion", "1.0.0.1"
+            VALUE "ProductVersion", "0.0.0.2"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1252
+        VALUE "Translation", 0x0, 1033
     END
 END
 
@@ -293,56 +293,26 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 228
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 48
     END
 
     IDD_OPEN, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 249
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 78
+        , 71, 249
     END
 
     IDD_ATTACH, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 335
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 223
-    END
-
-    IDD_DIALOG_FLOADDR, DIALOG
-    BEGIN
-    END
-
-    IDD_DIALOG_ASM, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 174
-        VERTGUIDE, 57
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 68
+        , 71, 335
     END
 
     IDD_DIALOG_CONFIG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 302
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 170
+        , 71, 302
     END
 
     IDD_FONT, DIALOG
     BEGIN
-        LEFTMARGIN, 3
-        RIGHTMARGIN, 174
-        TOPMARGIN, 3
-        BOTTOMMARGIN, 118
-        BOTTOMMARGIN, 123
+        , 71, 174
     END
 
     IDD_FORMVIEW_FONT, DIALOG
@@ -440,6 +410,9 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_VIEW_STACK           "堆栈窗口"
+    ID_VIEW_MODULELIST      "模块窗口"
+    ID_VIEW_BREAKPOINT      "断点窗口"
     ID_VIEW_DISWND          "反汇编窗口"
 END
 
@@ -448,13 +421,6 @@ BEGIN
     ID_VIEW_REGISTER        "寄存器窗口"
     ID_VIEW_OUTPUT          "输出窗口"
     ID_VIEW_MEMORY          "内存查看窗口"
-    ID_VIEW_STACK           "堆栈窗口"
-END
-
-STRINGTABLE
-BEGIN
-    ID_VIEW_MODULELIST      "模块窗口"
-    ID_VIEW_BREAKPOINT      "断点窗口"
 END
 
 #endif    // 中文(简体，中国) resources
