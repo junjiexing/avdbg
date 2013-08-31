@@ -154,48 +154,50 @@ void CAsmView::OnPaint()
 		x86dis_str str = {0};
 		m_Decoder.str_insn(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
 		//const char* pcsIns = m_Decoder.str(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD);
-		char pcsIns[1024] = {0};
-		//sprintf(pcsIns,"%s %s,%s,%s,%s,%s,%s",str.prefix,str.opcode,str.operand[0],str.operand[1],str.operand[2],str.operand[3],str.operand[4]);
+		char szBuffer[1024] = {0};
+		sprintf(szBuffer, "%08X ",curAddr.addr32.offset);
+		dcMem.SetTextColor(0x00EDFB34);
+		dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
+
+		m_vecAddress.push_back(curAddr.addr32.offset);
+
 		if (str.prefix[0])
 		{
-			strcat(pcsIns,str.prefix);
+			strcat(szBuffer,str.prefix);
 		}
 		if (str.opcode[0])
 		{
-			strcat(pcsIns," ");
-			strcat(pcsIns,str.opcode);
+			strcat(szBuffer," ");
+			strcat(szBuffer,str.opcode);
 		}
 		if (str.operand[0][0])
 		{
-			strcat(pcsIns," ");
-			strcat(pcsIns,str.operand[0]);
+			strcat(szBuffer," ");
+			strcat(szBuffer,str.operand[0]);
 		}
 		if (str.operand[1][0])
 		{
-			strcat(pcsIns,",");
-			strcat(pcsIns,str.operand[1]);
+			strcat(szBuffer,",");
+			strcat(szBuffer,str.operand[1]);
 		}
 		if (str.operand[2][0])
 		{
-			strcat(pcsIns,",");
-			strcat(pcsIns,str.operand[2]);
+			strcat(szBuffer,",");
+			strcat(szBuffer,str.operand[2]);
 		}
 		if (str.operand[3][0])
 		{
-			strcat(pcsIns,",");
-			strcat(pcsIns,str.operand[3]);
+			strcat(szBuffer,",");
+			strcat(szBuffer,str.operand[3]);
 		}
 		if (str.operand[4][0])
 		{
-			strcat(pcsIns,",");
-			strcat(pcsIns,str.operand[40]);
+			strcat(szBuffer,",");
+			strcat(szBuffer,str.operand[40]);
 		}
 
 
-		char szInsn[100];
-		sprintf(szInsn, "%08X  %s",curAddr.addr32.offset, pcsIns);
-		m_vecAddress.push_back(curAddr.addr32.offset);
-		dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szInsn,strlen(szInsn),NULL);
+		//dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szInsn,strlen(szInsn),NULL);
 
 		i += insn->size;
 		curAddr.addr32.offset += insn->size;

@@ -546,7 +546,6 @@ void CMainFrame::OnDebugRunHandleException()
 	debug_kernel_ptr->continue_debug();
 }
 
-
 void CMainFrame::OnViewDiswnd()
 {
 	m_paneManager.ShowPane(IDR_PANE_DISASMWND);
