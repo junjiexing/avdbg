@@ -14,5 +14,9 @@ namespace debug_utils
 
 	bool get_error_msg(DWORD error_code,std::string& message);
 	bool get_file_name_frome_handle(HANDLE hfile, std::string& file_name);
+
+	bool is_bound(char ch);
+
+	bool get_word_from_pos(const std::string& src,int pos,int& start,int& end);
 }
 

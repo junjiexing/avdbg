@@ -37,6 +37,7 @@ private:
 	void UpdateScrollInfo();
 
 	std::vector<DWORD> m_vecAddress;
+	std::vector<std::string> m_vecAsm;
 	CFont m_Font;
 	int m_nLineHight;
 	int m_nFontWidth;
@@ -48,6 +49,7 @@ private:
 	DWORD m_dwSelAddrStart;
 	DWORD m_dwSelAddrEnd;
 	BOOL m_bLButtonDown;
+	std::string m_strSelWord;
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

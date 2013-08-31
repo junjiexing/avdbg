@@ -85,6 +85,7 @@ void CAsmView::OnPaint()
 	}
 
 	m_vecAddress.clear();
+	m_vecAsm.clear();
 
 	byte buffer[rcClient.bottom/m_nLineHight*15+1];
 	SIZE_T num_read;
@@ -244,8 +245,7 @@ void CAsmView::OnPaint()
 			x += strlen(szBuffer+x);
 		}
 
-
-		//dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szInsn,strlen(szInsn),NULL);
+		m_vecAsm.push_back(std::string(szBuffer));
 
 		i += insn->size;
 		curAddr.addr32.offset += insn->size;
@@ -457,14 +457,25 @@ void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
 
-	m_bLButtonDown = TRUE;
-
-	int index = point.y/m_nLineHight;
-	if (index<m_vecAddress.size())
+	if (point.x>m_nMargenWidth)
 	{
-		m_dwSelAddrEnd = m_dwSelAddrStart = m_vecAddress[index];
+		m_bLButtonDown = TRUE;
+
+		int index = point.y/m_nLineHight;
+		if (index<m_vecAddress.size() && index<m_vecAsm.size())
+		{
+			m_dwSelAddrEnd = m_dwSelAddrStart = m_vecAddress[index];
+			const std::string& line_str = m_vecAsm[index];
+			int pos = (point.x-m_nMargenWidth)/m_nFontWidth;
+			int start = 0,end = 0;
+			if (debug_utils::get_word_from_pos(line_str,pos,start,end))
+			{
+				m_strSelWord = line_str.substr(start,end-start);
+			}
+		}
+		Invalidate(FALSE);
 	}
-	Invalidate(FALSE);
+
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
@@ -480,7 +491,6 @@ void CAsmView::OnLButtonUp(UINT nFlags, CPoint point)
 	Invalidate(FALSE);
 	CWnd::OnLButtonUp(nFlags, point);
 }
-
 
 void CAsmView::OnMouseMove(UINT nFlags, CPoint point)
 {

@@ -111,3 +111,53 @@ bool debug_utils::get_file_name_frome_handle( HANDLE hfile, std::string& file_na
 
 	return ret;
 }
+
+bool debug_utils::get_word_from_pos( const std::string& src,int pos,int& start,int& end )
+{
+	if (pos>src.size() || pos<0)
+	{
+		return false;
+	}
+
+	bool found_start = false;
+	bool found_end = false;
+	for (int i=0;i<src.size();++i)
+	{
+		if (is_bound(src[i]))
+		{
+			if (i<pos)
+			{
+				start = i+1;
+				found_start = true;
+			}
+			else if (i>=pos)
+			{
+				end = i;
+				found_end = true;
+				break;
+			}
+		}
+	}
+
+	if (!found_start)
+	{
+		start = 0;
+	}
+
+	if (!found_end)
+	{
+		end = src.size();
+	}
+
+	return true;
+}
+
+bool debug_utils::is_bound( char ch )
+{
+	return ch == '%' || ch == '^' || ch == '&' || ch == '*' ||
+		ch == '(' || ch == ')' || ch == '-' || ch == '+' ||
+		ch == '=' || ch == '|' || ch == '{' || ch == '}' ||
+		ch == '[' || ch == ']' || ch == ':' || ch == ';' ||
+		ch == '<' || ch == '>' || ch == ',' || ch == '/' ||
+		ch == '?' || ch == '!' || ch == '.' || ch == '~' || ch == ' ';
+}
