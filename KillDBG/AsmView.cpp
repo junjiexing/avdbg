@@ -193,7 +193,7 @@ void CAsmView::OnPaint()
 		if (str.operand[4][0])
 		{
 			strcat(szBuffer,",");
-			strcat(szBuffer,str.operand[40]);
+			strcat(szBuffer,str.operand[4]);
 		}
 
 
