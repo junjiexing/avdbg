@@ -492,8 +492,8 @@ void CMainFrame::OnSetBreakPoint()
 	{
 		return;
 	}
-
-	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(m_wndAsmView.m_dwSelAddrStart);
+	DWORD dwSelAddr = m_wndAsmView.GetSelAddrStart();
+	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(dwSelAddr);
 	if (bp)
 	{
 		debug_kernel_ptr->delete_breakpoint(bp->address);
@@ -501,10 +501,10 @@ void CMainFrame::OnSetBreakPoint()
 		return;
 	}
 
-	if (!debug_kernel_ptr->add_breakpoint(m_wndAsmView.m_dwSelAddrStart))
+	if (!debug_kernel_ptr->add_breakpoint(dwSelAddr))
 	{
 		char buffer[50];
-		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);
+		sprintf(buffer,"在地址 %08X 处设置断点失败！",dwSelAddr);
 		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
 	}
 	m_wndAsmView.Invalidate(FALSE);

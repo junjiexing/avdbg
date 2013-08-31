@@ -24,13 +24,10 @@ public:
 		m_AddrToShow = addr;
 		UpdateScrollInfo();
 	}
-
-	DWORD m_AddrToShow;
-	DWORD m_Eip;
-	x86dis m_Decoder;
-	DWORD m_dwSelAddrStart;
-	DWORD m_dwSelAddrEnd;
-	BOOL m_bLButtonDown;
+	DWORD GetSelAddrStart()
+	{
+		return m_dwSelAddrStart;
+	}
 
 private:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -44,6 +41,14 @@ private:
 	int m_nLineHight;
 	int m_nFontWidth;
 	int m_nMargenWidth;
+
+	DWORD m_AddrToShow;
+	DWORD m_Eip;
+	x86dis m_Decoder;
+	DWORD m_dwSelAddrStart;
+	DWORD m_dwSelAddrEnd;
+	BOOL m_bLButtonDown;
+
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
