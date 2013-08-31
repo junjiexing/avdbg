@@ -255,27 +255,34 @@ bool debug_kernel::on_rip_event( const RIP_INFO& rip_info )
 
 bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_exception )
 {
+	DWORD addr = (DWORD)debug_exception.ExceptionRecord.ExceptionAddress;
+	main_frame->m_wndAsmView.SetEIP(addr);
+
+	char out_str[100];
+	const char* fmt = "异常：%s,地址：0x%08X,第 %d 次处理机会。";
+
+	int chance = debug_exception.dwFirstChance?1:2;
 
 	switch (debug_exception.ExceptionRecord.ExceptionCode)
 	{
 	case EXCEPTION_ACCESS_VIOLATION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ACCESS_VIOLATION"));
+			sprintf(out_str,fmt,"EXCEPTION_ACCESS_VIOLATION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_DATATYPE_MISALIGNMENT:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_DATATYPE_MISALIGNMENT"));
+			sprintf(out_str,fmt,"EXCEPTION_DATATYPE_MISALIGNMENT",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_BREAKPOINT:
 		{
-			void* addr = debug_exception.ExceptionRecord.ExceptionAddress;
-			boost::format fmter("断点异常，地址：0x%08X,异常代码：0x%08X\n");
-			fmter % addr % debug_exception.ExceptionRecord.ExceptionCode;
-			main_frame->m_wndOutput.output_string(fmter.str());
+			sprintf(out_str,fmt,"EXCEPTION_BREAKPOINT",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 
-			breakpoint_t* bp = find_breakpoint_by_address((DWORD)addr);
+			breakpoint_t* bp = find_breakpoint_by_address(addr);
 			if (bp)	// 调试器设置的断点
 			{
 				if (bp->is_once)
@@ -291,40 +298,17 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 				HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
 				context_.Eip -= 1;
 				SetThreadContext(thd_handle,&context_);
-				CloseHandle(thd_handle);
-				main_frame->m_wndAsmView.SetEIP((DWORD)addr);
-				
+				CloseHandle(thd_handle);			
 			}
 			else
 			{
 				// 系统断点或程序自己写的断点
-				main_frame->m_wndAsmView.SetEIP((DWORD)addr+1);
+				main_frame->m_wndAsmView.SetEIP(addr+1);
 			}
 
 			main_frame->m_wndAsmView.Invalidate(FALSE);
 			
 			continue_status_= DBG_CONTINUE;
-			// 		memory_region_info_t info;
-			// 		bool ret = this->get_memory_info_by_addr(addr,info);
-			// 		if (!ret)
-			// 		{
-			// 			output_string(std::string("异常地址无法访问。"),OUT_ERROR);
-			// 			return;
-			// 		}
-			// 
-			// // 		std::thread([this,info,addr]()
-			// // 		{
-			// 			std::vector<byte> buffer(info.size);
-			// 			SIZE_T	nRead = 0;
-			// 			read_debugee_memory(info.start_addr,buffer.data(),info.size);
-			// 			//ASSERT(nRead == info.dwSize);
-			// 
-			// 			std::shared_ptr<x86Analysis> analy(new x86Analysis(buffer.data(),info.size,(unsigned long)(info.start_addr),shared_from_this())) ;
-			// 			analy->add_entry((uint32)addr);
-			// 			std::vector<std::string> asmcode;
-			// 			analy->process(asmcode);
-			// 			main_frm_ptr_->m_wndAsmView.SetAnalysiser(analy);
-			// 		}).detach();
 		}
 
 		break;
@@ -340,99 +324,118 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 		break;
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"));
+			sprintf(out_str,fmt,"EXCEPTION_ARRAY_BOUNDS_EXCEEDED",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_DENORMAL_OPERAND:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_DENORMAL_OPERAND"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_DENORMAL_OPERAND",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_DIVIDE_BY_ZERO"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_DIVIDE_BY_ZERO",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_INEXACT_RESULT:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_INEXACT_RESULT"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_INEXACT_RESULT",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_INVALID_OPERATION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_INVALID_OPERATION"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_INVALID_OPERATION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_OVERFLOW:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_OVERFLOW"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_OVERFLOW",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_STACK_CHECK:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_STACK_CHECK"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_STACK_CHECK",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_UNDERFLOW:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_FLT_UNDERFLOW"));
+			sprintf(out_str,fmt,"EXCEPTION_FLT_UNDERFLOW",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INT_DIVIDE_BY_ZERO"));
+			sprintf(out_str,fmt,"EXCEPTION_INT_DIVIDE_BY_ZERO",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INT_OVERFLOW:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INT_OVERFLOW"));
+			sprintf(out_str,fmt,"EXCEPTION_INT_OVERFLOW",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_PRIV_INSTRUCTION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_PRIV_INSTRUCTION"));
+			sprintf(out_str,fmt,"EXCEPTION_PRIV_INSTRUCTION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_IN_PAGE_ERROR:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_IN_PAGE_ERROR"));
+			sprintf(out_str,fmt,"EXCEPTION_IN_PAGE_ERROR",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_ILLEGAL_INSTRUCTION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_ILLEGAL_INSTRUCTION"));
+			sprintf(out_str,fmt,"EXCEPTION_ILLEGAL_INSTRUCTION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_NONCONTINUABLE_EXCEPTION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_NONCONTINUABLE_EXCEPTION"));
+			sprintf(out_str,fmt,"EXCEPTION_NONCONTINUABLE_EXCEPTION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_STACK_OVERFLOW:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_STACK_OVERFLOW"));
+			sprintf(out_str,fmt,"EXCEPTION_STACK_OVERFLOW",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INVALID_DISPOSITION:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INVALID_DISPOSITION"));
+			sprintf(out_str,fmt,"EXCEPTION_INVALID_DISPOSITION",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_GUARD_PAGE:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_GUARD_PAGE"));
+			sprintf(out_str,fmt,"EXCEPTION_GUARD_PAGE",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INVALID_HANDLE:
 		{
-			main_frame->m_wndOutput.output_string(std::string("EXCEPTION_INVALID_HANDLE"));
+			sprintf(out_str,fmt,"EXCEPTION_INVALID_HANDLE",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 // 	case EXCEPTION_POSSIBLE_DEADLOCK:
 // 		break;
 	case CONTROL_C_EXIT:
 		{
-			main_frame->m_wndOutput.output_string(std::string("CONTROL_C_EXIT"));
+			sprintf(out_str,fmt,"CONTROL_C_EXIT",addr,chance);
+			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	default:
@@ -441,6 +444,7 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 		}
 		break;
 	}
+
 	return false;
 }
 
