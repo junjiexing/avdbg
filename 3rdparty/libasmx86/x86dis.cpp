@@ -1309,7 +1309,7 @@ void x86dis::prefixes()
 	}
 }
 
-static const char *regs(x86dis_insn *insn, int mode, int nr)
+static const char *regs(const x86dis_insn *insn, int mode, int nr)
 {
 	if (insn->rexprefix)
 	{
@@ -1321,7 +1321,7 @@ static const char *regs(x86dis_insn *insn, int mode, int nr)
 	}
 }
 
-void x86dis::str_op(char *opstr, int *opstrlen, x86dis_insn *insn, x86_insn_op *op, bool explicit_params)
+void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const x86_insn_op *op, bool explicit_params )
 {
 	//const char *cs_default = get_cs(e_cs_default);
 	//const char *cs_number = get_cs(e_cs_number);
@@ -2176,4 +2176,81 @@ void x86dis::set_addr_sym_func( char* (*pfn)(CPU_ADDR addr, int *symstrlen, void
 {
 	addr_sym_func = pfn;
 	addr_sym_func_context = pContext;
+}
+
+bool x86dis::str_insn( const x86dis_insn* insn,int opt, x86dis_str& result )
+{
+	char *p = result.prefix;
+	options = opt;
+	*p = 0;
+	if (insn->lockprefix == X86_PREFIX_LOCK) p += sprintf(p, "lock ");
+	if (insn->repprefix == X86_PREFIX_REPZ)
+	{
+		p += sprintf(p, "repz ");
+	}
+	else if (insn->repprefix == X86_PREFIX_REPNZ)
+	{
+		p += sprintf(p, "repnz ");
+	}
+	if (p != result.prefix && p[-1] == ' ')
+	{
+		p--;
+		*p = 0;
+	}
+	const char *iname = insn->name;
+	bool explicit_params = (options & X86DIS_STYLE_EXPLICIT_MEMSIZE) || iname[0] == '~';
+
+	char ops[5][512];	/* FIXME: possible buffer overflow ! */
+	char *op[5];
+	int oplen[5];
+
+	//if (options & DIS_STYLE_HIGHLIGHT) enable_highlighting();
+	for (int i=0; i < 5; i++)
+	{
+		op[i] = (char*)&result.operand[i];
+		str_op(op[i], &result.operand_len[i], insn, &insn->op[i], explicit_params);
+	}
+	char *s=insnstr;
+
+	if (iname[0] == '~') iname++;
+
+	switch (iname[0])
+	{
+	case '|':
+		pickname(result.opcode, iname, 0);
+		break;
+	case '?':
+	case '&':
+		switch (insn->eopsize)
+		{
+		case X86_OPSIZE16: 
+			pickname(result.opcode, iname, 0);
+			break;
+		case X86_OPSIZE32:
+			pickname(result.opcode, iname, 1);
+			break;
+		case X86_OPSIZE64:
+			pickname(result.opcode, iname, 2);
+			break;
+		default: {assert(0);}
+		}
+		break;
+	case '*':
+		switch (insn->eaddrsize)
+		{
+		case X86_ADDRSIZE16: 
+			pickname(result.opcode, iname, 0);
+			break;
+		case X86_ADDRSIZE32:
+			pickname(result.opcode, iname, 1);
+			break;
+		case X86_ADDRSIZE64:
+			pickname(result.opcode, iname, 2);
+			break;
+		default: {assert(0);}
+		}
+		break;
+	default:
+		strcpy(result.opcode, iname);
+	}
 }

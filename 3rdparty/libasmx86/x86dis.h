@@ -23,6 +23,7 @@
 #define __X86DIS_H__
 
 #include "x86opc.h"
+#include <string>
 
 /* generic disassembler styles */
 //#define DIS_STYLE_HIGHLIGHT		0x80000000		/* create highlighting information in strf() */
@@ -132,6 +133,14 @@ struct x86dis_insn
 	x86_insn_op op[5];
 };
 
+struct x86dis_str 
+{
+	char prefix[64];
+	char opcode[32];
+	int operand_len[5];
+	char operand[5][512];
+};
+
 /*
 *	CLASS x86dis
 */
@@ -182,7 +191,7 @@ protected:
 	bool isaddr(char c);
 	virtual void prefixes();
 	void str_format(char **str, const char **format, char *p, char *n, char *op[3], int oplen[3], char stopchar, int print);
-	virtual void str_op(char *opstr, int *opstrlen, x86dis_insn *insn, x86_insn_op *op, bool explicit_params);
+	virtual void str_op(char *opstr, int *opstrlen, const x86dis_insn *insn, const x86_insn_op *op, bool explicit_params);
 	uint mkmod(uint modrm);
 	uint mkreg(uint modrm);
 	uint mkindex(uint modrm);
@@ -213,6 +222,7 @@ public:
 	virtual	byte getSize(dis_insn *disasm_insn);
 	virtual const char* str(dis_insn *disasm_insn, int options);
 	virtual const char* strf(dis_insn *disasm_insn, int options, const char *format);
+	virtual bool str_insn( const x86dis_insn* insn,int opt, x86dis_str& result);
 	virtual bool validInsn(dis_insn *disasm_insn);
 
 	//Disassembler

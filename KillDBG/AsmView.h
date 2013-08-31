@@ -30,6 +30,7 @@ public:
 	x86dis m_Decoder;
 	DWORD m_dwSelAddrStart;
 	DWORD m_dwSelAddrEnd;
+	BOOL m_bLButtonDown;
 
 private:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -72,6 +73,8 @@ public:
 		return TRUE;
 	}
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };
 
 

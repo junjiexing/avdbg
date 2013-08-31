@@ -16,7 +16,8 @@ IMPLEMENT_DYNAMIC(CAsmView, CWnd)
 
 CAsmView::CAsmView()
 	:m_AddrToShow(NULL),m_Eip(NULL),m_Decoder(X86_OPSIZE32,X86_ADDRSIZE32),
-	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20)
+	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
+	m_bLButtonDown(FALSE)
 {
 
 }
@@ -33,6 +34,8 @@ BEGIN_MESSAGE_MAP(CAsmView, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CHAR()
 	ON_WM_CREATE()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
@@ -113,7 +116,46 @@ void CAsmView::OnPaint()
 		{
 			break;
 		}
-		const char* pcsIns = m_Decoder.str(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD);
+
+		x86dis_str str = {0};
+		m_Decoder.str_insn(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
+		//const char* pcsIns = m_Decoder.str(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD);
+		char pcsIns[1024] = {0};
+		//sprintf(pcsIns,"%s %s,%s,%s,%s,%s,%s",str.prefix,str.opcode,str.operand[0],str.operand[1],str.operand[2],str.operand[3],str.operand[4]);
+		if (str.prefix[0])
+		{
+			strcat(pcsIns,str.prefix);
+		}
+		if (str.opcode[0])
+		{
+			strcat(pcsIns," ");
+			strcat(pcsIns,str.opcode);
+		}
+		if (str.operand[0][0])
+		{
+			strcat(pcsIns," ");
+			strcat(pcsIns,str.operand[0]);
+		}
+		if (str.operand[1][0])
+		{
+			strcat(pcsIns,",");
+			strcat(pcsIns,str.operand[1]);
+		}
+		if (str.operand[2][0])
+		{
+			strcat(pcsIns,",");
+			strcat(pcsIns,str.operand[2]);
+		}
+		if (str.operand[3][0])
+		{
+			strcat(pcsIns,",");
+			strcat(pcsIns,str.operand[3]);
+		}
+		if (str.operand[4][0])
+		{
+			strcat(pcsIns,",");
+			strcat(pcsIns,str.operand[40]);
+		}
 
 		char szInsn[100];
 		sprintf(szInsn, "%08X  %s",curAddr.addr32.offset, pcsIns);
@@ -162,8 +204,21 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	{
 		if (!debug_kernel_ptr)
 		{
-			break;
+			break;;
 		}
+
+		if (m_bLButtonDown)
+		{
+			ScreenToClient(&pt);
+			int index = pt.y/m_nLineHight;
+			if (index<m_vecAddress.size())
+			{
+				m_dwSelAddrEnd = m_vecAddress[index];
+			}
+			Invalidate(FALSE);
+		}
+
+
 
 		if (zDelta<0)
 		{
@@ -171,7 +226,8 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 			SIZE_T	num_read = 0;
 			if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15*5,&num_read))
 			{
-				break;
+				m_AddrToShow += 1;
+				break;;
 			}
 
 			CPU_ADDR	curAddr = {0};
@@ -193,7 +249,7 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		}
 		m_AddrToShow = dwTmpAddr;
 	} while (0);
-
+	
 	Invalidate(FALSE);
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }
@@ -346,6 +402,9 @@ void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
+
+	m_bLButtonDown = TRUE;
+
 	int index = point.y/m_nLineHight;
 	if (index<m_vecAddress.size())
 	{
@@ -353,6 +412,35 @@ void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	Invalidate(FALSE);
 	CWnd::OnLButtonDown(nFlags, point);
+}
+
+void CAsmView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	m_bLButtonDown = FALSE;
+
+	int index = point.y/m_nLineHight;
+	if (index<m_vecAddress.size())
+	{
+		m_dwSelAddrEnd = m_vecAddress[index];
+	}
+	Invalidate(FALSE);
+	CWnd::OnLButtonUp(nFlags, point);
+}
+
+
+void CAsmView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_bLButtonDown)
+	{
+		int index = point.y/m_nLineHight;
+		if (index<m_vecAddress.size())
+		{
+			m_dwSelAddrEnd = m_vecAddress[index];
+		}
+		Invalidate(FALSE);
+	}
+
+	CWnd::OnMouseMove(nFlags, point);
 }
 
 void CAsmView::UpdateScrollInfo()
@@ -401,7 +489,6 @@ void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	Invalidate(FALSE);
 }
 
-
 int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
@@ -411,3 +498,4 @@ int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
+
