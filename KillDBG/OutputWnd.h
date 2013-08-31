@@ -49,6 +49,7 @@ public:
 		SendMessage(SCI_SETREADONLY,FALSE);
 		SendMessage(SCI_APPENDTEXT,line.size(),reinterpret_cast<LPARAM>(line.c_str()));
 		SendMessage(SCI_SETREADONLY,TRUE);
+		SendMessage(SCI_SCROLLTOEND);
 	}
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
