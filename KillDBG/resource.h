@@ -10,7 +10,6 @@
 #define ID_RUN_UNHANDLE_EXCEPT          106
 #define ID_FOLLOW_ADDR                  107
 #define ID_SET_BREAKPOINT               108
-
 #define ID_FILE_ATTACH                  201
 #define ID_FILE_STOP                    202
 #define ID_VIEW_REGISTER                301
@@ -21,18 +20,17 @@
 #define ID_VIEW_BREAKPOINT              306
 #define ID_VIEW_DISWND                  307
 #define ID_CONFIG_UICFG                 401
-#define ID_REFRESH						501
-#define ID_FOLLOWADDR					502
-
+#define ID_REFRESH                      501
+#define ID_FOLLOWADDR                   502
 #define IDD_ABOUTBOX                    600
-#define IDD_FONT						601
-#define IDD_OPEN						602
-#define IDD_ASSEMBLY					603
-#define IDD_ATTACH						604
+#define IDD_FONT                        601
+#define IDD_OPEN                        602
+#define IDD_ASSEMBLY                    603
+#define IDD_ATTACH                      604
 #define IDD_DIALOG_CONFIG               605
 #define IDD_FORMVIEW_FONT               606
-#define IDD_FOLLOWADDRESS				607
-
+#define IDD_FOLLOWADDRESS               607
+#define IDR_XPSTYLE                     1
 #define IDR_PANE_OUTPUTWND              701
 #define IDR_PANE_MODULELIST             702
 #define IDR_PANE_DISASMWND              703
@@ -41,12 +39,9 @@
 #define IDR_PANE_MEMVIEW                706
 #define IDR_PANE_STACK                  707
 #define IDR_PANE_MEMORYMAP              708
-
 #define IDR_MAINFRAME                   801
 #define IDR_TOOLBARWND                  802
-
 #define IDB_BITMAP_ICONS                901
-
 #define IDC_EDITFILEPATH                1000
 #define IDC_BUTTONBROWSE                1001
 #define IDC_EDITPARAM                   1002
@@ -68,7 +63,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        142
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32803
 #define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           119
