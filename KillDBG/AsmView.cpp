@@ -155,45 +155,67 @@ void CAsmView::OnPaint()
 		m_Decoder.str_insn(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
 		//const char* pcsIns = m_Decoder.str(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD);
 		char szBuffer[1024] = {0};
+		int x = 0;
 		sprintf(szBuffer, "%08X ",curAddr.addr32.offset);
 		dcMem.SetTextColor(0x00EDFB34);
 		dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
+		x += 9;
 
 		m_vecAddress.push_back(curAddr.addr32.offset);
 
 		if (str.prefix[0])
 		{
 			strcat(szBuffer,str.prefix);
+			dcMem.SetTextColor(0x00E037D7);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 		if (str.opcode[0])
 		{
 			strcat(szBuffer," ");
 			strcat(szBuffer,str.opcode);
+			dcMem.SetTextColor(0x00990033);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 		if (str.operand[0][0])
 		{
 			strcat(szBuffer," ");
 			strcat(szBuffer,str.operand[0]);
+			dcMem.SetTextColor(0x0000FF00);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 		if (str.operand[1][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[1]);
-		}
+			dcMem.SetTextColor(0x0000FF00);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);		}
 		if (str.operand[2][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[2]);
+			dcMem.SetTextColor(0x0000FF00);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 		if (str.operand[3][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[3]);
+			dcMem.SetTextColor(0x0000FF00);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 		if (str.operand[4][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[4]);
+			dcMem.SetTextColor(0x0000FF00);
+			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			x += strlen(szBuffer+x);
 		}
 
 
