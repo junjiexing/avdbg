@@ -43,6 +43,7 @@ private:
 	CFont m_Font;
 	int m_nLineHight;
 	int m_nFontWidth;
+	int m_nMargenWidth;
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);

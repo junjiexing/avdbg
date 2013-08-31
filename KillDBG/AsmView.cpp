@@ -17,7 +17,7 @@ IMPLEMENT_DYNAMIC(CAsmView, CWnd)
 CAsmView::CAsmView()
 	:m_AddrToShow(NULL),m_Eip(NULL),m_Decoder(X86_OPSIZE32,X86_ADDRSIZE32),
 	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
-	m_bLButtonDown(FALSE)
+	m_bLButtonDown(FALSE),m_nMargenWidth(20)
 {
 
 }
@@ -158,7 +158,7 @@ void CAsmView::OnPaint()
 		int x = 0;
 		sprintf(szBuffer, "%08X ",curAddr.addr32.offset);
 		dcMem.SetTextColor(0x00EDFB34);
-		dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
+		dcMem.ExtTextOut(m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
 		x += 9;
 
 		m_vecAddress.push_back(curAddr.addr32.offset);
@@ -172,18 +172,44 @@ void CAsmView::OnPaint()
 		}
 		if (str.opcode[0])
 		{
-			strcat(szBuffer," ");
+			strcat(szBuffer,"  ");
 			strcat(szBuffer,str.opcode);
-			dcMem.SetTextColor(0x00990033);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			
+			COLORREF color = 0x00990033;
+			if (str.opcode[0]=='j')
+			{
+				if (str.opcode[1]=='m')
+				{
+					color = 0x00FF0000;
+				}
+				else
+				{
+					color = 0x00CC0000;
+				}
+			}
+			else if ((str.opcode[0]=='l') && (str.opcode[1]=='o')  && (str.opcode[2]=='o'))
+			{
+				color = 0x00CC0000;
+			}
+			else if ((str.opcode[0]=='c') && (str.opcode[1]=='a'))
+			{
+				color = 0x00990066;
+			}
+			else if ((str.opcode[0]=='r') && (str.opcode[1]=='e'))
+			{
+				color = 0x00999900;
+			}
+
+			dcMem.SetTextColor(color);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[0][0])
 		{
-			strcat(szBuffer," ");
+			strcat(szBuffer,"  ");
 			strcat(szBuffer,str.operand[0]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[1][0])
@@ -191,14 +217,14 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[1]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);		}
 		if (str.operand[2][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[2]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[3][0])
@@ -206,7 +232,7 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[3]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[4][0])
@@ -214,7 +240,7 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[4]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			x += strlen(szBuffer+x);
 		}
 
