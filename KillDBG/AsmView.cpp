@@ -67,7 +67,6 @@ void CAsmView::OnPaint()
 	CBitmap* pOldBmp = dcMem.SelectObject(&bmpMem);
 	CFont* pOldFont = dcMem.SelectObject(&m_Font);
 
-	dcMem.FillRect(&rcClient,&CBrush(0xB2F7FF));
 
 	debug_utils::scope_exit on_exit([this,&dc,&rcClient,&dcMem,&pOldBmp,&bmpMem,pOldFont]()
 	{
@@ -81,6 +80,7 @@ void CAsmView::OnPaint()
 
 	if (debug_kernel_ptr == NULL)
 	{
+		dcMem.FillRect(&rcClient,&CBrush(0x00FFFFFF));
 		return;
 	}
 
@@ -93,29 +93,63 @@ void CAsmView::OnPaint()
 		int y = 0;
 		for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
 		{
-			char szInsn1[20];
-			sprintf(szInsn1,"%08X  ???",m_AddrToShow+i);
+			char szUnknownInsn[20];
+			sprintf(szUnknownInsn,"%08X  ???",m_AddrToShow+i);
 			m_vecAddress.push_back(m_AddrToShow+i);
 			rcLine.top = y;
 			rcLine.bottom = y+m_nLineHight;
-			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn1,strlen(szInsn1),NULL);
+			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szUnknownInsn,strlen(szUnknownInsn),NULL);
 			y+=m_nLineHight;
 		}
 
 		return;
 	}
 	
-
+	dcMem.SetBkMode(TRANSPARENT);
 	CPU_ADDR	curAddr = {0};
 	curAddr.addr32.offset = (uint32)m_AddrToShow;
-	int y = 0;
-	for (unsigned int i=0;i<num_read;)
+	for (unsigned int i=0,j=0;i<num_read;++j)
 	{
 		x86dis_insn* insn = (x86dis_insn*)m_Decoder.decode(buffer+i,num_read-i,curAddr);
 		if ((uint32)m_AddrToShow>curAddr.addr32.offset && (uint32)m_AddrToShow < curAddr.addr32.offset + insn->size)
 		{
 			break;
 		}
+
+		//dcMem.ExtTextOut()
+		// 绘制当前行的背景色
+		RECT rcLine;	// 当前行的矩形范围
+		rcLine.top = j*m_nLineHight;
+		rcLine.bottom = rcLine.top+m_nLineHight;
+		rcLine.left = 0;
+		rcLine.right = rcClient.right;
+
+		debug_kernel::breakpoint_t* bp;
+		if (curAddr.addr32.offset == (uint32)m_Eip)	// EIP在这一行
+		{
+			dcMem.SetBkColor(0x00B26600);
+		}
+		else if (bp = debug_kernel_ptr->find_breakpoint_by_address(curAddr.addr32.offset)) // 这一行有断点
+		{
+			if (bp->user_enable) // 是否启用了
+			{
+				dcMem.SetBkColor(0x000000FF);
+			}
+			else
+			{
+				dcMem.SetBkColor(0x00990066);
+			}
+		}
+		else if (curAddr.addr32.offset >= m_dwSelAddrStart && curAddr.addr32.offset <= m_dwSelAddrEnd) // 这一行被选中了
+		{
+			dcMem.SetBkColor(0x0000FFFF);
+		}
+		else  // 普通行
+		{
+			dcMem.SetBkColor(0x00FFFFFF);
+		}
+
+		dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rcLine,NULL,NULL,NULL);	// 用指定的背景色给当前航上色
 
 		x86dis_str str = {0};
 		m_Decoder.str_insn(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
@@ -157,42 +191,12 @@ void CAsmView::OnPaint()
 			strcat(pcsIns,str.operand[40]);
 		}
 
+
 		char szInsn[100];
 		sprintf(szInsn, "%08X  %s",curAddr.addr32.offset, pcsIns);
 		m_vecAddress.push_back(curAddr.addr32.offset);
-		if (y<rcClient.bottom && curAddr.addr32.offset >= (uint32)m_AddrToShow-5)
-		{
-			debug_kernel::breakpoint_t* bp;
-			if (curAddr.addr32.offset == (uint32)m_Eip)
-			{
-				dcMem.SetBkColor(0x0000FF);
-			}
-			else if (curAddr.addr32.offset >= m_dwSelAddrStart && curAddr.addr32.offset <= m_dwSelAddrEnd)
-			{
-				dcMem.SetBkColor(0x00FFFF);
-			}
-			else if (bp = debug_kernel_ptr->find_breakpoint_by_address(curAddr.addr32.offset))
-			{
-				if (bp->user_enable)
-				{
-					dcMem.SetBkColor(0xFFFFFF);
-				}
-				else
-				{
-					dcMem.SetBkColor(0xFFFF00);
-				}
-			}
-			else
-			{
-				dcMem.SetBkColor(0x00FF33);
-			}
+		dcMem.ExtTextOut(0,j*m_nLineHight,NULL,NULL,szInsn,strlen(szInsn),NULL);
 
-			rcLine.top = y;
-			rcLine.bottom = y+m_nLineHight;
-			dcMem.ExtTextOut(0,y,ETO_OPAQUE,&rcLine,szInsn,strlen(szInsn),NULL);
-			y+=m_nLineHight;
-
-		}
 		i += insn->size;
 		curAddr.addr32.offset += insn->size;
 	}

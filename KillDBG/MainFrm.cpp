@@ -389,7 +389,6 @@ void CMainFrame::OnViewOutput()
  	m_paneManager.ShowPane(IDR_PANE_OUTPUTWND);
 }
 
-
 void CMainFrame::OnFileOpen()
 {
 	CFileOpenDlg	dlg(this);
@@ -507,8 +506,8 @@ void CMainFrame::OnSetBreakPoint()
 		char buffer[50];
 		sprintf(buffer,"在地址 %08X 处设置断点失败！",m_wndAsmView.m_dwSelAddrStart);
 		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
-		m_wndAsmView.Invalidate(FALSE);
 	}
+	m_wndAsmView.Invalidate(FALSE);
 }
 
 void CMainFrame::OnConfigUicfg()
