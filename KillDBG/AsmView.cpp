@@ -143,7 +143,7 @@ void CAsmView::OnPaint()
 		}
 		else if (curAddr.addr32.offset >= m_dwSelAddrStart && curAddr.addr32.offset <= m_dwSelAddrEnd) // 这一行被选中了
 		{
-			dcMem.SetBkColor(0x0000FFFF);
+			dcMem.SetBkColor(0x00B7B5B2);
 		}
 		else  // 普通行
 		{
@@ -183,24 +183,24 @@ void CAsmView::OnPaint()
 			{
 				if (str.opcode[1]=='m')
 				{
-					color = 0x00FF0000;
+					color = 0x000000FF;
 				}
 				else
 				{
-					color = 0x00CC0000;
+					color = 0x000000CC;
 				}
 			}
 			else if ((str.opcode[0]=='l') && (str.opcode[1]=='o')  && (str.opcode[2]=='o'))
 			{
-				color = 0x00CC0000;
+				color = 0x000000CC;
 			}
 			else if ((str.opcode[0]=='c') && (str.opcode[1]=='a'))
 			{
-				color = 0x00990066;
+				color = 0x00FF0066;
 			}
 			else if ((str.opcode[0]=='r') && (str.opcode[1]=='e'))
 			{
-				color = 0x00999900;
+				color = 0x00FF00FF;
 			}
 
 			dcMem.SetTextColor(color);
@@ -596,7 +596,7 @@ BOOL CAsmView::ExtTextOutWithSelection( CDC& dc, int x, int y, LPCTSTR lpszStrin
 				rc.right = rc.left+strlen(m_strSelWord.c_str())*m_nFontWidth;
 				rc.top = y;
 				rc.bottom = y+m_nLineHight;
-				dc.SetBkColor(0x00FF0000);
+				dc.SetBkColor(0x00666666);
 				return dc.ExtTextOut(x,y,ETO_OPAQUE,&rc,lpszString,nCount,NULL);
 			}
 		}
