@@ -120,7 +120,7 @@ void CAsmView::OnPaint()
 		//dcMem.ExtTextOut()
 		// 绘制当前行的背景色
 		RECT rcLine;	// 当前行的矩形范围
-		rcLine.top = j*m_nLineHight;
+		rcLine.top = j*m_nLineHight-(m_nLineHight/5);  // 减去行高的五分之一是为了让字在行的中间
 		rcLine.bottom = rcLine.top+m_nLineHight;
 		rcLine.left = 0;
 		rcLine.right = rcClient.right;
@@ -159,7 +159,8 @@ void CAsmView::OnPaint()
 		int x = 0;
 		sprintf(szBuffer, "%08X ",curAddr.addr32.offset);
 		dcMem.SetTextColor(0x00EDFB34);
-		dcMem.ExtTextOut(m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
+		//dcMem.ExtTextOut(m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer,9,NULL);
+		ExtTextOutWithSelection(dcMem,m_nMargenWidth,j*m_nLineHight,szBuffer,9);
 		x += 9;
 
 		m_vecAddress.push_back(curAddr.addr32.offset);
@@ -168,7 +169,8 @@ void CAsmView::OnPaint()
 		{
 			strcat(szBuffer,str.prefix);
 			dcMem.SetTextColor(0x00E037D7);
-			dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.opcode[0])
@@ -202,7 +204,8 @@ void CAsmView::OnPaint()
 			}
 
 			dcMem.SetTextColor(color);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[0][0])
@@ -210,7 +213,8 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,"  ");
 			strcat(szBuffer,str.operand[0]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[1][0])
@@ -218,14 +222,17 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[1]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
-			x += strlen(szBuffer+x);		}
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
+			x += strlen(szBuffer+x);
+		}
 		if (str.operand[2][0])
 		{
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[2]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[3][0])
@@ -233,7 +240,8 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[3]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.operand[4][0])
@@ -241,7 +249,8 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,",");
 			strcat(szBuffer,str.operand[4]);
 			dcMem.SetTextColor(0x0000FF00);
-			dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 
@@ -562,4 +571,39 @@ int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
+
+BOOL CAsmView::ExtTextOutWithSelection( CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount )
+{
+	RECT rc;
+
+	do 
+	{
+		if (m_strSelWord.size()>0)
+		{
+			const char* pSub = strstr(lpszString,m_strSelWord.c_str());
+			if (pSub)
+			{
+				if (pSub != lpszString && !debug_utils::is_bound(pSub[-1]))
+				{
+					break;
+				}
+				if (pSub+m_strSelWord.size() != lpszString+nCount && !debug_utils::is_bound(pSub[m_strSelWord.size()]))
+				{
+					break;
+				}
+
+				rc.left = x+(pSub-lpszString)*m_nFontWidth;
+				rc.right = rc.left+strlen(m_strSelWord.c_str())*m_nFontWidth;
+				rc.top = y;
+				rc.bottom = y+m_nLineHight;
+				dc.SetBkColor(0x00FF0000);
+				return dc.ExtTextOut(x,y,ETO_OPAQUE,&rc,lpszString,nCount,NULL);
+			}
+		}
+	} while (0);
+	
+	return dc.ExtTextOut(x,y,NULL,NULL,lpszString,nCount,NULL);
+}
+
+
 

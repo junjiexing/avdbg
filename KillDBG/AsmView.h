@@ -51,6 +51,8 @@ private:
 	BOOL m_bLButtonDown;
 	std::string m_strSelWord;
 
+	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount);
+
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
