@@ -146,15 +146,15 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+IDD_ABOUTBOX DIALOGEX 0, 0, 247, 116
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About KillDBG"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "KillDBG Version 0.2",IDC_STATIC,40,10,119,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2012",IDC_STATIC,40,25,119,8
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,5,21,20
+    LTEXT           "KillDBG Version 0.2",IDC_STATIC,47,11,119,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+    LTEXT           "感谢 Joen、瞽瞽和charme在技术上的帮助;\n感谢Dr.菜、jackrain和avplayer群的朋友关于程序结构上的指导。\n感谢BraveFm和女孩不哭的测试。\n讨论群：\n\t127285697(DdvpDbg插件讨论群)\n\t3597082(avplayer C++开源社区)\n\t149462056(我自己建的水群)\n\n开源项目地址：https://github.com/avdbg/avdbg.git",IDC_STATIC,16,31,226,81
 END
 
 IDD_OPEN DIALOGEX 0, 0, 256, 85
@@ -283,13 +283,29 @@ BEGIN
 END
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+IDR_XPSTYLE             RT_MANIFEST             "XPStyle.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// 24
+// DESIGNINFO
 //
 
-IDR_XPSTYLE                 24                      "XPStyle.manifest"
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        RIGHTMARGIN, 242
+        BOTTOMMARGIN, 112
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
