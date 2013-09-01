@@ -283,44 +283,6 @@ BEGIN
 END
 
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_ABOUTBOX, DIALOG
-    BEGIN
-    END
-
-    IDD_OPEN, DIALOG
-    BEGIN
-        , 71, 249
-    END
-
-    IDD_ATTACH, DIALOG
-    BEGIN
-        , 71, 335
-    END
-
-    IDD_DIALOG_CONFIG, DIALOG
-    BEGIN
-        , 71, 302
-    END
-
-    IDD_FONT, DIALOG
-    BEGIN
-        , 71, 174
-    END
-
-    IDD_FORMVIEW_FONT, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
