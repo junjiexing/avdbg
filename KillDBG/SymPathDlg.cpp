@@ -23,7 +23,7 @@ CSymPathDlg::~CSymPathDlg()
 void CSymPathDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_EDIT_SYMBOL_PATH, m_editSymPath);
+	DDX_Control(pDX, IDC_CHECK_RELOAD_SYMBOL, m_Reload);
 }
 
 
@@ -39,6 +39,7 @@ END_MESSAGE_MAP()
 void CSymPathDlg::OnBnClickedOk()
 {
 	GetDlgItemText(IDC_EDIT_SYMBOL_PATH,m_strSymPaths);
+	m_bReload = m_Reload.GetCheck();
 	CDialogEx::OnOK();
 }
 

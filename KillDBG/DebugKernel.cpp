@@ -13,6 +13,10 @@ debug_kernel::debug_kernel(void)
 
 debug_kernel::~debug_kernel(void)
 {
+	for each (load_dll_info_t info in load_dll_info_)
+	{
+		CloseHandle(info.file_handle);
+	}
 }
 
 bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std::string& current_path)
@@ -156,7 +160,8 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 // 	IMAGEHLP_MODULE64 info = {sizeof(info)};
 // 	SymGetModuleInfo64(handle_,base,&info);
 
-	CloseHandle(create_process_info.hFile);
+	load_dll_info_t info = {create_process_info.hFile,base};
+	load_dll_info_.push_back(info);
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -204,7 +209,8 @@ bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 	main_frame->m_wndOutput.output_string(fmter.str());
 
 	SymLoadModuleEx(handle_,load_dll.hFile,NULL,NULL,(DWORD)load_dll.lpBaseOfDll,0,NULL,NULL);
-	CloseHandle(load_dll.hFile);
+	load_dll_info_t info = {load_dll.hFile,(DWORD)load_dll.lpBaseOfDll};
+	load_dll_info_.push_back(info);
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -891,4 +897,14 @@ bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol )
 void debug_kernel::set_sym_search_path(const char* paths, bool reload)
 {
 	sym_search_path_ = paths;
+
+	if (reload)
+	{
+		SymCleanup(handle_);
+		
+		for each (load_dll_info_t info in load_dll_info_)
+		{
+			SymLoadModuleEx(handle_,info.file_handle,NULL,NULL,(DWORD)info.base_of_dll,0,NULL,NULL);
+		}
+	}
 }

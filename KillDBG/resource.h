@@ -11,7 +11,7 @@
 #define ID_RUN_UNHANDLE_EXCEPT          106
 #define ID_FOLLOW_ADDR                  107
 #define ID_SET_BREAKPOINT               108
-#define IDD_DIALOG1                     144
+#define IDD_SYMBOL_SEARCH_PATHS         144
 #define ID_FILE_ATTACH                  201
 #define ID_FILE_STOP                    202
 #define ID_VIEW_REGISTER                301
@@ -61,6 +61,8 @@
 #define IDC_BUTTON_CHOOSE_STKVIEW_FONT  1016
 #define IDC_EDIT_SYMBOL_PATH            1017
 #define IDC_BUTTON_ADD_PATH             1018
+#define IDC_CHECK1                      1019
+#define IDC_CHECK_RELOAD_SYMBOL         1019
 #define ID_32803                        32803
 #define ID_FILE_SETSYMPATH              32804
 
@@ -70,7 +72,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32805
-#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           119
 #endif
 #endif

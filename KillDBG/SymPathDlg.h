@@ -13,11 +13,11 @@ public:
 	virtual ~CSymPathDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOG1 };
+	enum { IDD = IDD_SYMBOL_SEARCH_PATHS };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
-	CEdit m_editSymPath;
+	CButton m_Reload;
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -25,4 +25,5 @@ public:
 	afx_msg void OnBnClickedButtonAddPath();
 
 	CString m_strSymPaths;
+	BOOL m_bReload;
 };

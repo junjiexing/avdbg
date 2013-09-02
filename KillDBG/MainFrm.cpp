@@ -573,5 +573,11 @@ void CMainFrame::OnFileSetsympath()
 		return;
 	}
 
+	if (dlg.m_bReload && debug_kernel_ptr)
+	{
+		debug_kernel_ptr->set_sym_search_path(dlg.m_strSymPaths.GetBuffer(),true);
+		return;
+	}
+
 	m_strSymPaths = dlg.m_strSymPaths;
 }

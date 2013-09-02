@@ -129,6 +129,14 @@ private:
 
 	std::string sym_search_path_;
 
+	struct load_dll_info_t 
+	{
+		HANDLE file_handle;
+		DWORD base_of_dll;
+	};
+
+	std::vector<load_dll_info_t> load_dll_info_;
+
 // 	std::string exe_path_;
 // 	std::string command_str_;
 // 	std::string current_path_;
