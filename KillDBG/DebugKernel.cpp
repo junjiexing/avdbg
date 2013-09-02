@@ -156,11 +156,9 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 
 	SymInitialize(handle_,sym_search_path_.c_str(),FALSE);
 
-	SymLoadModuleEx(handle_,create_process_info.hFile,NULL,NULL,base,0,NULL,NULL);
-// 	IMAGEHLP_MODULE64 info = {sizeof(info)};
-// 	SymGetModuleInfo64(handle_,base,&info);
+	load_dll_info_t info = {create_process_info.hFile,base,program_path};
+	load_symbol(info);
 
-	load_dll_info_t info = {create_process_info.hFile,base};
 	load_dll_info_.push_back(info);
 
 	continue_status_= DBG_CONTINUE;
@@ -208,8 +206,9 @@ bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 	fmter % dll_path;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
-	SymLoadModuleEx(handle_,load_dll.hFile,NULL,NULL,(DWORD)load_dll.lpBaseOfDll,0,NULL,NULL);
-	load_dll_info_t info = {load_dll.hFile,(DWORD)load_dll.lpBaseOfDll};
+	load_dll_info_t info = {load_dll.hFile,(DWORD)load_dll.lpBaseOfDll,dll_path};
+	load_symbol(info);
+
 	load_dll_info_.push_back(info);
 
 	continue_status_= DBG_CONTINUE;
@@ -901,10 +900,53 @@ void debug_kernel::set_sym_search_path(const char* paths, bool reload)
 	if (reload)
 	{
 		SymCleanup(handle_);
+		SymInitialize(handle_,sym_search_path_.c_str(),FALSE);
 		
 		for each (load_dll_info_t info in load_dll_info_)
 		{
-			SymLoadModuleEx(handle_,info.file_handle,NULL,NULL,(DWORD)info.base_of_dll,0,NULL,NULL);
+			load_symbol(info);
 		}
 	}
+}
+
+bool debug_kernel::load_symbol( const load_dll_info_t& info )
+{
+	SymLoadModuleEx(handle_,info.file_handle,NULL,NULL,info.base_of_dll,0,NULL,NULL);
+
+	IMAGEHLP_MODULE64 module64 = {sizeof(module64)};
+	SymGetModuleInfo64(handle_,info.base_of_dll,&module64);
+	if (module64.SymType == SymNone)
+	{
+		main_frame->m_wndOutput.output_string(str(boost::format("为模块 %s 加载调试信息失败") % info.dll_path));
+		return false;
+	}
+
+	std::string sym_type;
+	switch (module64.SymType)
+	{
+	case SymCoff:
+		sym_type = "COFF 类型";
+		break;
+	case SymCv:
+		sym_type = "CodeView 类型";
+		break;
+	case SymPdb:
+		sym_type = "PDB 类型";
+		break;
+	case SymSym:
+		sym_type = ".sym文件 类型";
+		break;
+	case SymDia:
+		sym_type = "DIA 类型";
+		break;
+	case SymExport:
+		sym_type = "由Dll导出表生成";
+		break;
+	default:
+		sym_type = "其他类型";
+		break;
+	}
+	main_frame->m_wndOutput.output_string(str(boost::format("为模块 %s 加载调试信息成功,调试信息类型为 %s。") % info.dll_path % sym_type));
+
+	return true;
 }

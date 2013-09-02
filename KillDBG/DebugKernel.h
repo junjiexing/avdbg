@@ -133,6 +133,7 @@ private:
 	{
 		HANDLE file_handle;
 		DWORD base_of_dll;
+		std::string dll_path;
 	};
 
 	std::vector<load_dll_info_t> load_dll_info_;
@@ -152,6 +153,8 @@ private:
 	bool on_output_debug_string_event(const OUTPUT_DEBUG_STRING_INFO& debug_string);
 	bool on_rip_event(const RIP_INFO& rip_info);
 	bool on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
+
+	bool load_symbol(const load_dll_info_t& info);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
