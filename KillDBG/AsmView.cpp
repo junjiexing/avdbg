@@ -182,10 +182,11 @@ void CAsmView::OnPaint()
 
 		if (str.prefix[0])
 		{
+			strcat(szBuffer,"  ");
 			strcat(szBuffer,str.prefix);
 			dcMem.SetTextColor(0x00E037D7);
 			//dcMem.ExtTextOut(x*m_nFontWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
-			ExtTextOutWithSelection(dcMem,x*m_nFontWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
+			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));
 			x += strlen(szBuffer+x);
 		}
 		if (str.opcode[0])
