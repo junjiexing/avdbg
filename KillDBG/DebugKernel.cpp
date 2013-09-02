@@ -139,8 +139,6 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	fmter % program_path;
 	main_frame->m_wndOutput.output_string( fmter.str());
 
-	CloseHandle(create_process_info.hFile);
-
 	handle_ = create_process_info.hProcess;
 
 	IMAGE_DOS_HEADER dos_header;
@@ -151,6 +149,14 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	add_breakpoint( base + nt_header.OptionalHeader.AddressOfEntryPoint,true);
 	main_frame->m_wndMemView.SetAddrToView(base + nt_header.OptionalHeader.AddressOfEntryPoint);
 	CloseHandle(create_process_info.hThread);
+
+	SymInitialize(handle_,NULL,FALSE);
+
+	SymLoadModuleEx(handle_,create_process_info.hFile,NULL,NULL,base,0,NULL,NULL);
+// 	IMAGEHLP_MODULE64 info = {sizeof(info)};
+// 	SymGetModuleInfo64(handle_,base,&info);
+
+	CloseHandle(create_process_info.hFile);
 
 	continue_status_= DBG_CONTINUE;
 	return true;
@@ -163,6 +169,7 @@ bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_pr
 	main_frame->m_wndOutput.output_string(fmter.str());
 	debugee_exit_ = true;
 
+	SymCleanup(handle_);
 	continue_status_= DBG_CONTINUE;
 	return true;
 }
@@ -196,6 +203,7 @@ bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 	fmter % dll_path;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
+	SymLoadModuleEx(handle_,load_dll.hFile,NULL,NULL,(DWORD)load_dll.lpBaseOfDll,0,NULL,NULL);
 	CloseHandle(load_dll.hFile);
 
 	continue_status_= DBG_CONTINUE;
@@ -208,6 +216,7 @@ bool debug_kernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll 
 	fmter % unload_dll.lpBaseOfDll;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
+	SymUnloadModule64(handle_,(DWORD)unload_dll.lpBaseOfDll);
 	continue_status_= DBG_CONTINUE;
 	return true;
 }
@@ -862,4 +871,19 @@ bool debug_kernel::step_over()
 		return continue_debug();
 	}
 	return step_in();
+}
+
+bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol )
+{
+	char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+	PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
+
+	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	pSymbol->MaxNameLen = MAX_SYM_NAME;
+	bool ret = SymFromAddr(handle_,addr,NULL,pSymbol) == TRUE;
+	if (ret)
+	{
+		symbol = pSymbol->Name;
+	}
+	return ret;
 }

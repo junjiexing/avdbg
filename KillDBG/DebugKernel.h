@@ -104,6 +104,8 @@ public:
 	}
 
 
+	bool symbol_from_addr(DWORD addr,std::string& symbol);
+
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件
 	DEBUG_EVENT debug_event_;

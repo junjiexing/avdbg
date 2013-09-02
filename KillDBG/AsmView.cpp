@@ -19,7 +19,22 @@ CAsmView::CAsmView()
 	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
 	m_bLButtonDown(FALSE),m_nMargenWidth(20)
 {
+	m_Decoder.set_addr_sym_func([](CPU_ADDR addr, int *symstrlen, void *context)->const char*
+	{
+		if (!debug_kernel_ptr)
+		{
+			return NULL;
+		}
 
+		static std::string symbol;
+		if (!debug_kernel_ptr->symbol_from_addr(addr.addr32.offset,symbol))
+		{
+			return NULL;
+		}
+		
+		*symstrlen = symbol.size();
+		return symbol.c_str();
+	},NULL);
 }
 
 CAsmView::~CAsmView()

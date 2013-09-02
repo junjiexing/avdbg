@@ -202,7 +202,7 @@ protected:
 	//Disassembler
 	int options;
 	//bool highlight;
-	char* (*addr_sym_func)(CPU_ADDR addr, int *symstrlen, void *context);
+	const char* (*addr_sym_func)(CPU_ADDR addr, int *symstrlen, void *context);
 	void* addr_sym_func_context;
 
 	//const char *get_cs(AsmSyntaxHighlightEnum style);
@@ -228,7 +228,7 @@ public:
 	//Disassembler
 	virtual	dis_insn *createInvalidInsn();
 	virtual	bool selectNext(dis_insn *disasm_insn);
-	void set_addr_sym_func(char* (*pfn)(CPU_ADDR addr, int *symstrlen, void *context),void* pContext);
+	void set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, void *context),void* pContext);
 };
 
 class x86_64dis: public x86dis
