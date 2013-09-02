@@ -150,7 +150,7 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	main_frame->m_wndMemView.SetAddrToView(base + nt_header.OptionalHeader.AddressOfEntryPoint);
 	CloseHandle(create_process_info.hThread);
 
-	SymInitialize(handle_,NULL,FALSE);
+	SymInitialize(handle_,sym_search_path_.c_str(),FALSE);
 
 	SymLoadModuleEx(handle_,create_process_info.hFile,NULL,NULL,base,0,NULL,NULL);
 // 	IMAGEHLP_MODULE64 info = {sizeof(info)};
@@ -886,4 +886,9 @@ bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol )
 		symbol = pSymbol->Name;
 	}
 	return ret;
+}
+
+void debug_kernel::set_sym_search_path(const char* paths, bool reload)
+{
+	sym_search_path_ = paths;
 }

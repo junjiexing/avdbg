@@ -121,6 +121,7 @@
     <ClCompile Include="ScintillaWnd.cpp" />
     <ClCompile Include="StackView.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="SymPathDlg.cpp" />
     <ClCompile Include="x86Analysis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -150,6 +151,7 @@
     <ClInclude Include="ScintillaWnd.h" />
     <ClInclude Include="StackView.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SymPathDlg.h" />
     <ClInclude Include="x86Analysis.h" />
   </ItemGroup>
   <ItemGroup>

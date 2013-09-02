@@ -99,6 +99,7 @@ BEGIN
     POPUP "文件(&F)"
     BEGIN
         MENUITEM "打开...",                       ID_FILE_OPEN
+        MENUITEM "设置符号目录",                      ID_FILE_SETSYMPATH
         MENUITEM "附加进程...",                     ID_FILE_ATTACH
         MENUITEM "停止调试",                        ID_FILE_STOP
         MENUITEM "退出(&X)",                      ID_APP_EXIT
@@ -243,6 +244,17 @@ BEGIN
     PUSHBUTTON      "选择",IDC_BUTTON_CHOOSE_STKVIEW_FONT,135,43,50,14
 END
 
+IDD_DIALOG1 DIALOGEX 0, 0, 309, 177
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "设置符号搜索路径"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,198,156,50,14
+    PUSHBUTTON      "取消",IDCANCEL,252,156,50,14
+    EDITTEXT        IDC_EDIT_SYMBOL_PATH,7,7,295,139,ES_MULTILINE | ES_AUTOVSCROLL
+    PUSHBUTTON      "添加目录",IDC_BUTTON_ADD_PATH,135,156,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -302,6 +314,14 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 242
         BOTTOMMARGIN, 112
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 170
     END
 END
 #endif    // APSTUDIO_INVOKED

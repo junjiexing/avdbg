@@ -127,6 +127,7 @@ private:
 	// 被调试进程的进程ID
 	DWORD pid_;
 
+	std::string sym_search_path_;
 
 // 	std::string exe_path_;
 // 	std::string command_str_;
@@ -201,5 +202,6 @@ public:
 
 		return false;
 	}
+	void set_sym_search_path(const char* paths, bool reload);
 };
 

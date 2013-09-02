@@ -9,6 +9,7 @@
 #include "AttachProcessDlg.h"
 #include "FollowAddressDlg.h"
 #include "ConfigDlg.h"
+#include "SymPathDlg.h"
 
 
 #ifdef _DEBUG
@@ -56,6 +57,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 	ON_COMMAND(ID_CONFIG_UICFG, &CMainFrame::OnConfigUicfg)
 	ON_COMMAND(ID_VIEW_DISWND, &CMainFrame::OnViewDiswnd)
+	ON_COMMAND(ID_FILE_SETSYMPATH, &CMainFrame::OnFileSetsympath)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -398,6 +400,7 @@ void CMainFrame::OnFileOpen()
 	}
 
 	debug_kernel_ptr.reset(new debug_kernel());
+	debug_kernel_ptr->set_sym_search_path(m_strSymPaths.GetBuffer(),false);
 	debug_kernel_ptr->load_exe(dlg.get_path(),dlg.get_param(),dlg.get_run_dir());
 }
 
@@ -411,6 +414,7 @@ void CMainFrame::OnFileAttach()
 	}
 
 	debug_kernel_ptr.reset(new debug_kernel());
+	debug_kernel_ptr->set_sym_search_path(m_strSymPaths.GetBuffer(),false);
 	debug_kernel_ptr->attach_process(dlg.m_dwPID);
 }
 
@@ -559,4 +563,15 @@ void CMainFrame::OnViewBreakPoint()
 void CMainFrame::OnViewModule()
 {
 	m_paneManager.ShowPane(IDR_PANE_MODULELIST);
+}
+
+void CMainFrame::OnFileSetsympath()
+{
+	CSymPathDlg dlg;
+	if (dlg.DoModal()!=IDOK)
+	{
+		return;
+	}
+
+	m_strSymPaths = dlg.m_strSymPaths;
 }

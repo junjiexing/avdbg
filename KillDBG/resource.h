@@ -2,6 +2,7 @@
 // Microsoft Visual C++ 生成的包含文件。
 // 供 KillDBG.rc 使用
 //
+#define IDR_XPSTYLE                     1
 #define ID_STEP_IN                      101
 #define ID_STEP_OVER                    102
 #define ID_RUN                          103
@@ -10,6 +11,7 @@
 #define ID_RUN_UNHANDLE_EXCEPT          106
 #define ID_FOLLOW_ADDR                  107
 #define ID_SET_BREAKPOINT               108
+#define IDD_DIALOG1                     144
 #define ID_FILE_ATTACH                  201
 #define ID_FILE_STOP                    202
 #define ID_VIEW_REGISTER                301
@@ -30,7 +32,6 @@
 #define IDD_DIALOG_CONFIG               605
 #define IDD_FORMVIEW_FONT               606
 #define IDD_FOLLOWADDRESS               607
-#define IDR_XPSTYLE                     1
 #define IDR_PANE_OUTPUTWND              701
 #define IDR_PANE_MODULELIST             702
 #define IDR_PANE_DISASMWND              703
@@ -58,14 +59,18 @@
 #define IDC_STATIC_DASM_FONT            1012
 #define IDC_STATIC_MEMVIEW_FONT         1013
 #define IDC_BUTTON_CHOOSE_STKVIEW_FONT  1016
+#define IDC_EDIT_SYMBOL_PATH            1017
+#define IDC_BUTTON_ADD_PATH             1018
+#define ID_32803                        32803
+#define ID_FILE_SETSYMPATH              32804
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        144
-#define _APS_NEXT_COMMAND_VALUE         32803
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_COMMAND_VALUE         32805
+#define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           119
 #endif
 #endif

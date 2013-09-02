@@ -12,6 +12,7 @@
 #include "MemoryView.h"
 #include "StackView.h"
 #include "OutputWnd.h"
+#include "SymPathDlg.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -50,6 +51,8 @@ protected:  // control bar embedded members
 	CXTPCommandBars* m_pCommandBars;
 
 	HACCEL m_hAcc;
+
+	CString m_strSymPaths;
 
 // Generated message map functions
 protected:
@@ -94,4 +97,5 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnConfigUicfg();
 	afx_msg void OnViewDiswnd();
+	afx_msg void OnFileSetsympath();
 };
