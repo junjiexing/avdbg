@@ -591,31 +591,31 @@ BOOL CAsmView::ExtTextOutWithSelection( CDC& dc, int x, int y, LPCTSTR lpszStrin
 {
 	RECT rc;
 
-	do 
+	if (m_strSelWord.size()>0)
 	{
-		if (m_strSelWord.size()>0)
-		{
-			const char* pSub = strstr(lpszString,m_strSelWord.c_str());
-			if (pSub)
-			{
-				if (pSub != lpszString && !debug_utils::is_bound(pSub[-1]))
-				{
-					break;
-				}
-				if (pSub+m_strSelWord.size() != lpszString+nCount && !debug_utils::is_bound(pSub[m_strSelWord.size()]))
-				{
-					break;
-				}
+		const char* pSub = lpszString;
 
-				rc.left = x+(pSub-lpszString)*m_nFontWidth;
-				rc.right = rc.left+strlen(m_strSelWord.c_str())*m_nFontWidth;
-				rc.top = y;
-				rc.bottom = y+m_nLineHight;
-				dc.SetBkColor(0x00666666);
-				return dc.ExtTextOut(x,y,ETO_OPAQUE,&rc,lpszString,nCount,NULL);
+		pSub = strstr(lpszString,m_strSelWord.c_str());
+		while (pSub)
+		{
+			if (pSub != lpszString && !debug_utils::is_bound(pSub[-1]))
+			{
+				break;
 			}
-		}
-	} while (0);
+			if (pSub+m_strSelWord.size() != lpszString+nCount && !debug_utils::is_bound(pSub[m_strSelWord.size()]))
+			{
+				break;
+			}
+
+			rc.left = x+(pSub-lpszString)*m_nFontWidth;
+			rc.right = rc.left+strlen(m_strSelWord.c_str())*m_nFontWidth;
+			rc.top = y;
+			rc.bottom = y+m_nLineHight;
+			dc.SetBkColor(0x00666666);
+			dc.ExtTextOut(x,y,ETO_OPAQUE,&rc,NULL,0,NULL);
+			pSub = strstr(pSub+m_strSelWord.size(),m_strSelWord.c_str());
+		} 
+	}
 	
 	return dc.ExtTextOut(x,y,NULL,NULL,lpszString,nCount,NULL);
 }
