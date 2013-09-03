@@ -19,7 +19,7 @@ CAsmView::CAsmView()
 	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
 	m_bLButtonDown(FALSE),m_nMargenWidth(20)
 {
-	m_Decoder.set_addr_sym_func([](CPU_ADDR addr, int *symstrlen, void *context)->const char*
+	m_Decoder.set_addr_sym_func([](CPU_ADDR addr, int *symstrlen, X86_Optype type)->const char*
 	{
 		if (!debug_kernel_ptr)
 		{
@@ -27,13 +27,30 @@ CAsmView::CAsmView()
 		}
 
 		static std::string symbol;
-		if (!debug_kernel_ptr->symbol_from_addr(addr.addr32.offset,symbol))
+		if (debug_kernel_ptr->symbol_from_addr(addr.addr32.offset,symbol))
 		{
-			return NULL;
+			*symstrlen = symbol.size();
+			return symbol.c_str();
+		}
+
+		if (type == X86_OPTYPE_MEM)
+		{
+			SIZE_T num_read = 0;
+			DWORD	target_addr = 0;
+			if (!debug_kernel_ptr->read_memory(addr.addr32.offset,&target_addr,4,&num_read) || num_read != 4)
+			{
+				return NULL;
+			}
+
+			if (!debug_kernel_ptr->symbol_from_addr(target_addr,symbol))
+			{
+				return NULL;
+			}
+			*symstrlen = symbol.size();
+			return symbol.c_str();
 		}
 		
-		*symstrlen = symbol.size();
-		return symbol.c_str();
+		return NULL;
 	},NULL);
 }
 
@@ -132,6 +149,8 @@ void CAsmView::OnPaint()
 			break;
 		}
 
+		auto type = m_Decoder.is_branch(insn);
+
 		//dcMem.ExtTextOut()
 		// 绘制当前行的背景色
 		RECT rcLine;	// 当前行的矩形范围
@@ -195,28 +214,24 @@ void CAsmView::OnPaint()
 			strcat(szBuffer,str.opcode);
 			
 			COLORREF color = 0x00990033;
-			if (str.opcode[0]=='j')
+
+			switch (type)
 			{
-				if (str.opcode[1]=='m')
-				{
-					color = 0x000000FF;
-				}
-				else
-				{
-					color = 0x000000CC;
-				}
-			}
-			else if ((str.opcode[0]=='l') && (str.opcode[1]=='o')  && (str.opcode[2]=='o'))
-			{
+			case x86dis::BR_JMP:
+				color = 0x000000FF;
+				break;
+			case x86dis::BR_JCC:
 				color = 0x000000CC;
-			}
-			else if ((str.opcode[0]=='c') && (str.opcode[1]=='a'))
-			{
+				break;
+			case x86dis::BR_LOOP:
+				color = 0x000000CC;
+				break;
+			case x86dis::BR_CALL:
 				color = 0x00FF0066;
-			}
-			else if ((str.opcode[0]=='r') && (str.opcode[1]=='e'))
-			{
+				break;
+			case x86dis::BR_RET:
 				color = 0x00FF00FF;
+				break;
 			}
 
 			dcMem.SetTextColor(color);
@@ -227,7 +242,72 @@ void CAsmView::OnPaint()
 		if (str.operand[0][0])
 		{
 			strcat(szBuffer,"  ");
-			strcat(szBuffer,str.operand[0]);
+
+			bool bIsCallApi = false;
+			do 
+			{
+				if (type == x86dis::BR_CALL)
+				{
+					std::string tmp;
+					x86_insn_op op = insn->op[0];
+					if (op.type == X86_OPTYPE_IMM
+						&& !debug_kernel_ptr->symbol_from_addr(op.imm,tmp))
+					{
+						byte opcode_buffer[16] = {0};
+						SIZE_T num_read = 0;
+						if (!debug_kernel_ptr->read_memory(op.imm,opcode_buffer,15,&num_read))
+						{
+							break;
+						}
+
+						CPU_ADDR addr = {0};
+						addr.addr32.offset = op.imm;
+						x86dis_insn* target_insn = (x86dis_insn*)m_Decoder.decode(opcode_buffer,num_read,addr);
+						if (m_Decoder.is_branch(target_insn) != x86Analysis::BR_JMP)
+						{
+							break;
+						}
+
+						const char* target_str = m_Decoder.strf(target_insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
+						strcat(szBuffer,"<");
+						strcat(szBuffer,target_str);
+						strcat(szBuffer,">");
+						bIsCallApi = true;
+						break;
+					}
+
+// 					if (op.type == X86_OPTYPE_MEM
+// 						&& op.mem.hasdisp 
+// 						&& op.mem.base == X86_REG_NO 
+// 						&& op.mem.index == X86_REG_NO
+// 						&& !debug_kernel_ptr->symbol_from_addr(op.mem.disp,tmp))
+// 					{
+// 						SIZE_T num_read = 0;
+// 						DWORD	target_addr = 0;
+// 						if (!debug_kernel_ptr->read_memory(op.imm,&target_addr,4,&num_read) || num_read != 4)
+// 						{
+// 							break;
+// 						}
+// 
+// 						if (!debug_kernel_ptr->symbol_from_addr(target_addr,tmp))
+// 						{
+// 							break;
+// 						}
+// 
+// 						strcat(szBuffer,"<");
+// 						strcat(szBuffer,tmp.c_str());
+// 						strcat(szBuffer,">");
+// 						bIsCallApi = true;
+// 						break;
+// 					}
+				}
+			} while (0);
+			
+			if (!bIsCallApi)
+			{
+				strcat(szBuffer,str.operand[0]);
+ 			}
+
 			dcMem.SetTextColor(0x0000FF00);
 			//dcMem.ExtTextOut(x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,NULL,NULL,szBuffer+x,strlen(szBuffer+x),NULL);
 			ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,szBuffer+x,strlen(szBuffer+x));

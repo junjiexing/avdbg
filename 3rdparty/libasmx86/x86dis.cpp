@@ -1335,7 +1335,7 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 			CPU_ADDR a;
 			filloffset(a, op->imm);
 			int slen;
-			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, addr_sym_func_context) : NULL;
+			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_IMM) : NULL;
 			if (s)
 			{
 				memcpy(opstr, s, slen);
@@ -1545,7 +1545,7 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 				CPU_ADDR a;
 				filloffset(a, op->mem.disp);
 				int slen;
-				const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, addr_sym_func_context) : 0;
+				const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_MEM) : 0;
 				if (s)
 				{
 					if (!first)
@@ -1602,7 +1602,8 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 			//strcpy(d, cs_symbol); d += strlen(cs_symbol);
 			*(d++)=']';
 			//strcpy(d, cs_default); d += strlen(cs_default);
-			//if (*opstrlen)
+			if (*opstrlen)
+				++(*opstrlen);
 			//	*opstrlen += strlen(cs_symbol) + 1 + strlen(cs_default);
 			*d=0;
 			break;
@@ -1613,7 +1614,7 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 			a.addr32.seg = op->farptr.seg;
 			a.addr32.offset = op->farptr.offset;
 			int slen;
-			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, addr_sym_func_context) : 0;
+			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_FARPTR) : 0;
 			if (s)
 			{
 				memcpy(opstr, s, slen);
@@ -2172,10 +2173,9 @@ bool x86dis::selectNext(dis_insn *disasm_insn)
 // 	highlight = false;
 // }
 
-void x86dis::set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, void *context),void* pContext )
+void x86dis::set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, X86_Optype type),void* pContext )
 {
 	addr_sym_func = pfn;
-	addr_sym_func_context = pContext;
 }
 
 bool x86dis::str_insn( const x86dis_insn* insn,int opt, x86dis_str& result )
