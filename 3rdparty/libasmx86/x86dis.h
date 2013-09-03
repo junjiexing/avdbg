@@ -229,6 +229,18 @@ public:
 	virtual	dis_insn *createInvalidInsn();
 	virtual	bool selectNext(dis_insn *disasm_insn);
 	void set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, void *context),void* pContext);
+
+	enum BRANCHTYPE				//用于判断是否是转移指令
+	{
+		BR_NONE,				// 没有分支
+		BR_JMP,
+		BR_RET,
+		BR_CALL,
+		BR_JCC,
+		BR_LOOP
+	};
+
+	BRANCHTYPE is_branch(x86dis_insn* opcode);
 };
 
 class x86_64dis: public x86dis

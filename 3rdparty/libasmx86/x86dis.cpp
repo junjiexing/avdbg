@@ -2254,3 +2254,38 @@ bool x86dis::str_insn( const x86dis_insn* insn,int opt, x86dis_str& result )
 		strcpy(result.opcode, iname);
 	}
 }
+
+x86dis::BRANCHTYPE x86dis::is_branch( x86dis_insn* opcode )
+{
+	const char *opcode_str = opcode->name;
+	if (opcode_str[0] == '~')
+	{
+		opcode_str++;
+	}
+	if (opcode_str[0] == '|')
+	{
+		opcode_str++;
+	}
+
+	if (opcode_str[0]=='j')
+	{
+		if (opcode_str[1]=='m')
+			return BR_JMP;
+		else
+			return BR_JCC;
+	}
+	else if ((opcode_str[0]=='l') && (opcode_str[1]=='o')  && (opcode_str[2]=='o'))
+	{
+		// loop opcode will be threated like a jXX
+		return BR_LOOP;
+	}
+	else if ((opcode_str[0]=='c') && (opcode_str[1]=='a'))
+	{
+		return BR_CALL;
+	}
+	else if ((opcode_str[0]=='r') && (opcode_str[1]=='e'))
+	{
+		return BR_RET;
+	}
+	else return BR_NONE;
+}
