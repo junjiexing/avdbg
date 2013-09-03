@@ -2253,6 +2253,8 @@ bool x86dis::str_insn( const x86dis_insn* insn,int opt, x86dis_str& result )
 	default:
 		strcpy(result.opcode, iname);
 	}
+
+	return true;
 }
 
 x86dis::BRANCHTYPE x86dis::is_branch( x86dis_insn* opcode )

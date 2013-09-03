@@ -112,7 +112,8 @@ void CAsmView::OnPaint()
 
 	if (debug_kernel_ptr == NULL)
 	{
-		dcMem.FillRect(&rcClient,&CBrush(0x00FFFFFF));
+		CBrush brush(0x00FFFFFF);
+		dcMem.FillRect(&rcClient,&brush);
 		return;
 	}
 

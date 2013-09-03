@@ -72,7 +72,8 @@ void CMemoryView::OnPaint()
 	CBitmap* pOldBmp = dcMem.SelectObject(&bmpMem);
 	CFont* pOldFont = dcMem.SelectObject(&m_Font);
 	dcMem.SetBkMode(TRANSPARENT);
-	dcMem.FillRect(&rcClient,&CBrush(0xB2F7FF));
+	CBrush brush(0xB2F7FF);
+	dcMem.FillRect(&rcClient,&brush);
 
 	debug_utils::scope_exit on_exit([this,&dc,&rcClient,&dcMem,&pOldBmp,&bmpMem,pOldFont]()
 	{
