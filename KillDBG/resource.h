@@ -40,6 +40,7 @@
 #define IDR_PANE_MEMVIEW                706
 #define IDR_PANE_STACK                  707
 #define IDR_PANE_MEMORYMAP              708
+#define IDR_PANE_CALLSTACK              708
 #define IDR_MAINFRAME                   801
 #define IDR_TOOLBARWND                  802
 #define IDB_BITMAP_ICONS                901
@@ -61,7 +62,6 @@
 #define IDC_BUTTON_CHOOSE_STKVIEW_FONT  1016
 #define IDC_EDIT_SYMBOL_PATH            1017
 #define IDC_BUTTON_ADD_PATH             1018
-#define IDC_CHECK1                      1019
 #define IDC_CHECK_RELOAD_SYMBOL         1019
 #define ID_32803                        32803
 #define ID_FILE_SETSYMPATH              32804
@@ -73,6 +73,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32805
 #define _APS_NEXT_CONTROL_VALUE         1020
-#define _APS_NEXT_SYMED_VALUE           119
+#define _APS_NEXT_SYMED_VALUE           120
 #endif
 #endif

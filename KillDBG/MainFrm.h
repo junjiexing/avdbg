@@ -13,6 +13,7 @@
 #include "StackView.h"
 #include "OutputWnd.h"
 #include "SymPathDlg.h"
+#include "CallStackWnd.h"
 
 #define		WM_USER_DEBUGSTOP	WM_USER+1
 
@@ -38,6 +39,7 @@ public:
 	CXTPOfficeBorder<CMemoryWnd> m_wndMemView;
 	CXTPOfficeBorder<CStackWnd> m_wndStackView;
 	CXTPOfficeBorder<COutputWnd> m_wndOutput;
+	CXTPOfficeBorder<CCallStackWnd> m_wndCallStack;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;

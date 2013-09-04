@@ -104,6 +104,7 @@
     <ClCompile Include="AssemblyDlg.cpp" />
     <ClCompile Include="AttachProcessDlg.cpp" />
     <ClCompile Include="BreakpointList.cpp" />
+    <ClCompile Include="CallStackWnd.cpp" />
     <ClCompile Include="ChildView.cpp" />
     <ClCompile Include="ConfigDlg.cpp" />
     <ClCompile Include="CustomFontDlg.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="AssemblyDlg.h" />
     <ClInclude Include="AttachProcessDlg.h" />
     <ClInclude Include="BreakpointList.h" />
+    <ClInclude Include="CallStackWnd.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="ConfigDlg.h" />
     <ClInclude Include="CustomFontDlg.h" />

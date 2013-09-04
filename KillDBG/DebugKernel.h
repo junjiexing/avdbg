@@ -103,8 +103,15 @@ public:
 		return bp_vec_;
 	}
 
+	const CONTEXT& get_current_context()
+	{
+		return context_;
+	}
+
 
 	bool symbol_from_addr(DWORD addr,std::string& symbol);
+
+	bool stack_walk(STACKFRAME64& stack_frame, CONTEXT& context);
 
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件

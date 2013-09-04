@@ -81,6 +81,8 @@ void debug_kernel::debug_thread_proc()
 		GetThreadContext(thd_handle,&context_);
 		CloseHandle(thd_handle);
 
+		main_frame->m_wndCallStack.Invalidate(FALSE);
+
 		main_frame->m_wndRegister.PostMessage(WM_USER_SETCONTEXT,(WPARAM)&context_);
 		main_frame->m_wndStackView.SetAddrToView(context_.Esp);
 
@@ -949,4 +951,18 @@ bool debug_kernel::load_symbol( const load_dll_info_t& info )
 	main_frame->m_wndOutput.output_string(str(boost::format("为模块 %s 加载调试信息成功,调试信息类型为 %s。") % info.dll_path % sym_type));
 
 	return true;
+}
+
+bool debug_kernel::stack_walk( STACKFRAME64& stack_frame, CONTEXT& context )
+{
+	HANDLE thread = OpenThread(THREAD_ALL_ACCESS,FALSE,debug_event_.dwThreadId);
+	if (!thread)
+	{
+		return false;
+	}
+	bool ret = StackWalk64(IMAGE_FILE_MACHINE_I386,handle_,thread,&stack_frame,&context,NULL,SymFunctionTableAccess64,SymGetModuleBase64,NULL) == TRUE;
+
+	CloseHandle(thread);
+
+	return ret;
 }
