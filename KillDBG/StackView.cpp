@@ -17,21 +17,21 @@
 
 // CStackView
 
-IMPLEMENT_DYNAMIC(CStackView, CWnd)
+IMPLEMENT_DYNAMIC(CStackWnd, CWnd)
 
-CStackView::CStackView()
+CStackWnd::CStackWnd()
 	:m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0),
 	m_bLBtnDwn(false),m_dwSelStart(NULL),m_dwSelEnd(NULL)
 {
 
 }
 
-CStackView::~CStackView()
+CStackWnd::~CStackWnd()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CStackView, CWnd)
+BEGIN_MESSAGE_MAP(CStackWnd, CWnd)
 	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
@@ -40,7 +40,7 @@ BEGIN_MESSAGE_MAP(CStackView, CWnd)
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
-BOOL CStackView::Create( const RECT& rect, CWnd* pParentWnd, UINT nID )
+BOOL CStackWnd::Create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
 	return __super::Create(NULL,NULL,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,rect,pParentWnd,nID);
 }
@@ -50,7 +50,7 @@ BOOL CStackView::Create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 // CStackView 消息处理程序
 
 
-int CStackView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CStackWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -61,7 +61,7 @@ int CStackView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-void CStackView::OnPaint()
+void CStackWnd::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
@@ -109,7 +109,7 @@ void CStackView::OnPaint()
 }
 
 
-void CStackView::OnLButtonDown(UINT nFlags, CPoint point)
+void CStackWnd::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
 
@@ -121,7 +121,7 @@ void CStackView::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 
-void CStackView::OnLButtonUp(UINT nFlags, CPoint point)
+void CStackWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	m_bLBtnDwn = false;
 	m_dwSelEnd = m_dwStartAddr + point.y / m_nLineHight * 4;
@@ -131,7 +131,7 @@ void CStackView::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CStackView::OnMouseMove(UINT nFlags, CPoint point)
+void CStackWnd::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_bLBtnDwn)
 	{
@@ -143,7 +143,7 @@ void CStackView::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 
-BOOL CStackView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+BOOL CStackWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	RECT rc;
 	GetClientRect(&rc);

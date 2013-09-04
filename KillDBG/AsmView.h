@@ -4,13 +4,13 @@
 extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 // CAsmView
 
-class CAsmView : public CWnd
+class CAsmWnd : public CWnd
 {
-	DECLARE_DYNAMIC(CAsmView)
+	DECLARE_DYNAMIC(CAsmWnd)
 
 public:
-	CAsmView();
-	virtual ~CAsmView();
+	CAsmWnd();
+	virtual ~CAsmWnd();
 
 	BOOL Create(LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID);
 

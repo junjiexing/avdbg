@@ -12,9 +12,9 @@
 
 // CAsmView
 
-IMPLEMENT_DYNAMIC(CAsmView, CWnd)
+IMPLEMENT_DYNAMIC(CAsmWnd, CWnd)
 
-CAsmView::CAsmView()
+CAsmWnd::CAsmWnd()
 	:m_AddrToShow(NULL),m_Eip(NULL),m_Decoder(X86_OPSIZE32,X86_ADDRSIZE32),
 	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
 	m_bLButtonDown(FALSE),m_nMargenWidth(20)
@@ -54,12 +54,12 @@ CAsmView::CAsmView()
 	},NULL);
 }
 
-CAsmView::~CAsmView()
+CAsmWnd::~CAsmWnd()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CAsmView, CWnd)
+BEGIN_MESSAGE_MAP(CAsmWnd, CWnd)
 	ON_WM_PAINT()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_VSCROLL()
@@ -70,7 +70,7 @@ BEGIN_MESSAGE_MAP(CAsmView, CWnd)
 	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
-BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
+BOOL CAsmWnd::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
 // 	m_wndOutputWnd.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
 // 		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
@@ -82,7 +82,7 @@ BOOL CAsmView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWn
 
 // CAsmView 消息处理程序
 
-void CAsmView::OnPaint()
+void CAsmWnd::OnPaint()
 {
 	//__super::OnPaint();
 	CPaintDC dc(this); // device context for painting
@@ -358,7 +358,7 @@ void CAsmView::OnPaint()
 	}
 }
 
-BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+BOOL CAsmWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	do 
 	{
@@ -414,7 +414,7 @@ BOOL CAsmView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-void CAsmView::SetEIP( DWORD eip )
+void CAsmWnd::SetEIP( DWORD eip )
 {
 
 	debug_utils::scope_exit on_return([this](){UpdateScrollInfo();});
@@ -462,7 +462,7 @@ void CAsmView::SetEIP( DWORD eip )
 	}
 }
 
-void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CAsmWnd::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	switch(nSBCode)
 	{
@@ -520,7 +520,7 @@ void CAsmView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
+void CAsmWnd::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 {
 	if (dwTargetAddr == 0)
 	{
@@ -559,7 +559,7 @@ void CAsmView::PreviousCode( DWORD dwTargetAddr,DWORD* pdwPreInsn )
 	}
 }
 
-void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
+void CAsmWnd::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
 
@@ -585,7 +585,7 @@ void CAsmView::OnLButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
-void CAsmView::OnLButtonUp(UINT nFlags, CPoint point)
+void CAsmWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	m_bLButtonDown = FALSE;
 
@@ -598,7 +598,7 @@ void CAsmView::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-void CAsmView::OnMouseMove(UINT nFlags, CPoint point)
+void CAsmWnd::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_bLButtonDown)
 	{
@@ -613,7 +613,7 @@ void CAsmView::OnMouseMove(UINT nFlags, CPoint point)
 	CWnd::OnMouseMove(nFlags, point);
 }
 
-void CAsmView::UpdateScrollInfo()
+void CAsmWnd::UpdateScrollInfo()
 {
 	RECT rc = {0};
 	GetClientRect(&rc);
@@ -631,7 +631,7 @@ void CAsmView::UpdateScrollInfo()
 	Invalidate(FALSE);
 }
 
-void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CAsmWnd::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	debug_utils::scope_exit on_exit([this,nChar,nRepCnt,nFlags](){CWnd::OnChar(nChar, nRepCnt, nFlags);});
 	if (nChar != ' ' || m_AddrToShow == 0)
@@ -659,7 +659,7 @@ void CAsmView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	Invalidate(FALSE);
 }
 
-int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CAsmWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -669,7 +669,7 @@ int CAsmView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-BOOL CAsmView::ExtTextOutWithSelection( CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount )
+BOOL CAsmWnd::ExtTextOutWithSelection( CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount )
 {
 	RECT rc;
 

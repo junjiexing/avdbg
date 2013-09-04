@@ -3,13 +3,13 @@
 
 // CMemoryView
 
-class CMemoryView : public CWnd
+class CMemoryWnd : public CWnd
 {
-	DECLARE_DYNAMIC(CMemoryView)
+	DECLARE_DYNAMIC(CMemoryWnd)
 
 public:
-	CMemoryView();
-	virtual ~CMemoryView();
+	CMemoryWnd();
+	virtual ~CMemoryWnd();
 
 protected:
 	DECLARE_MESSAGE_MAP()

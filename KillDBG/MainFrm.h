@@ -31,12 +31,12 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 
-	CXTPOfficeBorder<CAsmView> m_wndAsmView;
+	CXTPOfficeBorder<CAsmWnd> m_wndAsmView;
 	CXTPOfficeBorder<CModuleList> m_wndModuleList;
 	CXTPOfficeBorder<CBreakpointList> m_wndBpList;
 	CXTPOfficeBorder<CRegisterWnd> m_wndRegister;
-	CXTPOfficeBorder<CMemoryView> m_wndMemView;
-	CXTPOfficeBorder<CStackView> m_wndStackView;
+	CXTPOfficeBorder<CMemoryWnd> m_wndMemView;
+	CXTPOfficeBorder<CStackWnd> m_wndStackView;
 	CXTPOfficeBorder<COutputWnd> m_wndOutput;
 
 #ifdef _DEBUG

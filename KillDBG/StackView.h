@@ -3,13 +3,13 @@
 
 // CStackView
 
-class CStackView : public CWnd
+class CStackWnd : public CWnd
 {
-	DECLARE_DYNAMIC(CStackView)
+	DECLARE_DYNAMIC(CStackWnd)
 
 public:
-	CStackView();
-	virtual ~CStackView();
+	CStackWnd();
+	virtual ~CStackWnd();
 
 	BOOL Create(const RECT& rect, CWnd* pParentWnd, UINT nID);
 

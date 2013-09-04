@@ -18,9 +18,9 @@
 extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 // CMemoryView
 
-IMPLEMENT_DYNAMIC(CMemoryView, CWnd)
+IMPLEMENT_DYNAMIC(CMemoryWnd, CWnd)
 
-CMemoryView::CMemoryView()
+CMemoryWnd::CMemoryWnd()
 	:m_AddrWidth(0),m_HexWidth(0),m_AsciiWidth(0),
 	m_dwSelEnd(0),m_dwSelStart(0),m_bLBtnDwn(false),
 	m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0)
@@ -28,22 +28,22 @@ CMemoryView::CMemoryView()
 
 }
 
-CMemoryView::~CMemoryView()
+CMemoryWnd::~CMemoryWnd()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CMemoryView, CWnd)
+BEGIN_MESSAGE_MAP(CMemoryWnd, CWnd)
 	ON_WM_PAINT()
-	ON_NOTIFY(HDN_ENDTRACKA, 123, &CMemoryView::OnHdnEndtrack)
-	ON_NOTIFY(HDN_ENDTRACKW, 123, &CMemoryView::OnHdnEndtrack)
+	ON_NOTIFY(HDN_ENDTRACKA, 123, &CMemoryWnd::OnHdnEndtrack)
+	ON_NOTIFY(HDN_ENDTRACKW, 123, &CMemoryWnd::OnHdnEndtrack)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
-	ON_COMMAND(ID_FOLLOWADDR, &CMemoryView::OnFollowAddr)
+	ON_COMMAND(ID_FOLLOWADDR, &CMemoryWnd::OnFollowAddr)
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -52,7 +52,7 @@ END_MESSAGE_MAP()
 
 // CMemoryView 消息处理程序
 
-void CMemoryView::OnPaint()
+void CMemoryWnd::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 	
@@ -189,12 +189,12 @@ void CMemoryView::OnPaint()
 	}
 }
 
-BOOL CMemoryView::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
+BOOL CMemoryWnd::Create( LPCTSTR lpszWindowName, const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
 	return __super::Create(NULL,lpszWindowName,AFX_WS_DEFAULT_VIEW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_VSCROLL,rect,pParentWnd,nID);
 }
 
-void CMemoryView::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
+void CMemoryWnd::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
 {
 	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
 	*pResult = 0;
@@ -216,7 +216,7 @@ void CMemoryView::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
 	Invalidate(FALSE);
 }
 
-void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
+void CMemoryWnd::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	SetFocus();
 
@@ -241,7 +241,7 @@ void CMemoryView::OnLButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
-void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
+void CMemoryWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	RECT rc = {0};
 	GetClientRect(&rc);
@@ -264,7 +264,7 @@ void CMemoryView::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
+void CMemoryWnd::OnMouseMove(UINT nFlags, CPoint point)
 {
 	RECT rc = {0};
 	GetClientRect(&rc);
@@ -285,7 +285,7 @@ void CMemoryView::OnMouseMove(UINT nFlags, CPoint point)
 	CWnd::OnMouseMove(nFlags, point);
 }
 
-void CMemoryView::OnSize(UINT nType, int cx, int cy)
+void CMemoryWnd::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
@@ -294,7 +294,7 @@ void CMemoryView::OnSize(UINT nType, int cx, int cy)
 	m_Header.MoveWindow(0,0,rc.right,20);
 }
 
-int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CMemoryWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -323,7 +323,7 @@ int CMemoryView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CMemoryView::OnRButtonDown(UINT nFlags, CPoint point)
+void CMemoryWnd::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	POINT pt = {point.x,point.y};
 	ClientToScreen(&pt);
@@ -332,7 +332,7 @@ void CMemoryView::OnRButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnRButtonDown(nFlags, point);
 }
 
-void CMemoryView::OnFollowAddr()
+void CMemoryWnd::OnFollowAddr()
 {
 	CFollowAddressDlg dlg;
 	if (dlg.DoModal() != IDOK)
@@ -344,7 +344,7 @@ void CMemoryView::OnFollowAddr()
 }
 
 
-void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CMemoryWnd::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	RECT rc;
 	GetClientRect(&rc);
@@ -413,7 +413,7 @@ void CMemoryView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 
-BOOL CMemoryView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+BOOL CMemoryWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	RECT rc;
 	GetClientRect(&rc);
@@ -432,7 +432,7 @@ BOOL CMemoryView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-void CMemoryView::UpdateScrollInfo()
+void CMemoryWnd::UpdateScrollInfo()
 {
 	RECT rc = {0};
 	GetClientRect(&rc);
