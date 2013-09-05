@@ -77,6 +77,7 @@ BEGIN
     BUTTON      ID_VIEW_STACK
     BUTTON      ID_VIEW_MODULELIST
     BUTTON      ID_VIEW_BREAKPOINT
+    BUTTON      ID_VIEW_CALLSTACK
 END
 
 
@@ -111,6 +112,7 @@ BEGIN
         MENUITEM "输出窗口",                        ID_VIEW_OUTPUT
         MENUITEM "内存窗口",                        ID_VIEW_MEMORY
         MENUITEM "堆栈窗口",                        ID_VIEW_STACK
+        MENUITEM "调用堆栈",                        ID_VIEW_CALLSTACK
         POPUP "工具栏(&T)"
         BEGIN
             MENUITEM "工具栏(&T)",                     ID_VIEW_TOOLBAR

@@ -887,7 +887,7 @@ bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol )
 
 	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 	pSymbol->MaxNameLen = MAX_SYM_NAME;
-	bool ret = SymFromAddr(handle_,addr,NULL,pSymbol) == TRUE;
+	bool ret = SymFromAddr(handle_,addr,NULL,pSymbol) == TRUE && pSymbol->Address == addr;
 	if (ret)
 	{
 		symbol = pSymbol->Name;

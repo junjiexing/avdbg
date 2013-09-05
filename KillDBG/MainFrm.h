@@ -100,4 +100,5 @@ public:
 	afx_msg void OnConfigUicfg();
 	afx_msg void OnViewDiswnd();
 	afx_msg void OnFileSetsympath();
+	afx_msg void OnViewCallstack();
 };

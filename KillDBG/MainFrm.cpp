@@ -34,12 +34,16 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
 	ON_COMMAND(ID_FILE_ATTACH, &CMainFrame::OnFileAttach)
 	ON_COMMAND(ID_FILE_STOP, &CMainFrame::OnFileStop)
+	ON_COMMAND(ID_FILE_SETSYMPATH, &CMainFrame::OnFileSetsympath)
 	ON_COMMAND(ID_VIEW_REGISTER, &CMainFrame::OnViewRegister)
 	ON_COMMAND(ID_VIEW_MEMORY, &CMainFrame::OnViewMemory)
 	ON_COMMAND(ID_VIEW_STACK, &CMainFrame::OnViewStack)
 	ON_COMMAND(ID_VIEW_OUTPUT, &CMainFrame::OnViewOutput)
 	ON_COMMAND(ID_VIEW_BREAKPOINT, &CMainFrame::OnViewBreakPoint)
 	ON_COMMAND(ID_VIEW_MODULELIST, &CMainFrame::OnViewModule)
+	ON_COMMAND(ID_VIEW_CALLSTACK, &CMainFrame::OnViewCallstack)
+	ON_COMMAND(ID_VIEW_DISWND, &CMainFrame::OnViewDiswnd)
+	ON_COMMAND(ID_CONFIG_UICFG, &CMainFrame::OnConfigUicfg)
 
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateFileOpen)
 	ON_UPDATE_COMMAND_UI(ID_FILE_ATTACH, &CMainFrame::OnUpdateFileAttach)
@@ -55,9 +59,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
-	ON_COMMAND(ID_CONFIG_UICFG, &CMainFrame::OnConfigUicfg)
-	ON_COMMAND(ID_VIEW_DISWND, &CMainFrame::OnViewDiswnd)
-	ON_COMMAND(ID_FILE_SETSYMPATH, &CMainFrame::OnFileSetsympath)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -399,6 +400,11 @@ void CMainFrame::OnViewOutput()
  	m_paneManager.ShowPane(IDR_PANE_OUTPUTWND);
 }
 
+void CMainFrame::OnViewCallstack()
+{
+	m_paneManager.ShowPane(IDR_PANE_CALLSTACK);
+}
+
 void CMainFrame::OnFileOpen()
 {
 	CFileOpenDlg	dlg(this);
@@ -589,3 +595,5 @@ void CMainFrame::OnFileSetsympath()
 
 	m_strSymPaths = dlg.m_strSymPaths;
 }
+
+
