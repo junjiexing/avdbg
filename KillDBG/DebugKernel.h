@@ -109,8 +109,8 @@ public:
 	}
 
 
-	bool symbol_from_addr(DWORD addr,std::string& symbol);
-
+	bool symbol_from_addr(DWORD addr,std::string& symbol,bool allow_in_func = false);
+	bool symbol_from_addr( DWORD addr,PSYMBOL_INFO symbol_info);
 	bool stack_walk(STACKFRAME64& stack_frame, CONTEXT& context);
 
 private:

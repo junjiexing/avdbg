@@ -880,19 +880,40 @@ bool debug_kernel::step_over()
 	return step_in();
 }
 
-bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol )
+bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol,bool allow_in_func )
 {
 	char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
 	PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
 
 	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 	pSymbol->MaxNameLen = MAX_SYM_NAME;
-	bool ret = SymFromAddr(handle_,addr,NULL,pSymbol) == TRUE && pSymbol->Address == addr;
-	if (ret)
+	bool ret = SymFromAddr(handle_,addr,NULL,pSymbol) == TRUE;// && ;
+	if (!ret)
 	{
-		symbol = pSymbol->Name;
+		return false;
 	}
-	return ret;
+
+	symbol = pSymbol->Name;
+
+	if (pSymbol->Address == addr)
+	{
+		return true;
+	}
+
+	if (allow_in_func)
+	{
+		char offset[10];
+		sprintf(offset,"+%X",addr-(DWORD)pSymbol->Address);
+		symbol += offset;
+		return true;
+	}
+
+	return false;
+}
+
+bool debug_kernel::symbol_from_addr( DWORD addr,PSYMBOL_INFO symbol_info)
+{
+	return SymFromAddr(handle_,addr,NULL,symbol_info) == TRUE;
 }
 
 void debug_kernel::set_sym_search_path(const char* paths, bool reload)
@@ -909,6 +930,8 @@ void debug_kernel::set_sym_search_path(const char* paths, bool reload)
 			load_symbol(info);
 		}
 	}
+
+	SymSetSearchPath(handle_,paths);
 }
 
 bool debug_kernel::load_symbol( const load_dll_info_t& info )

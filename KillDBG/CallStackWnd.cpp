@@ -69,7 +69,7 @@ void CCallStackWnd::OnPaint()
 		char buffer[100];
 		std::string symbol;
 		sprintf(buffer,"%08X",(DWORD)frame.AddrPC.Offset);
-		if (debug_kernel_ptr->symbol_from_addr((DWORD)frame.AddrPC.Offset,symbol))
+		if (debug_kernel_ptr->symbol_from_addr((DWORD)frame.AddrPC.Offset,symbol,true))
 		{
 			strcat(buffer,"(");
 			strcat(buffer,symbol.c_str());
