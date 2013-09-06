@@ -3,6 +3,7 @@
 #include "DebugKernel.h"
 #include "MainFrm.h"
 #include "DebugUtils.h"
+#include <string.h>
 
 debug_kernel::debug_kernel(void)
 	:continue_status_(DBG_CONTINUE),debug_status_(STOP)
@@ -155,6 +156,22 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	add_breakpoint( base + nt_header.OptionalHeader.AddressOfEntryPoint,true);
 	main_frame->m_wndMemView.SetAddrToView(base + nt_header.OptionalHeader.AddressOfEntryPoint);
 	CloseHandle(create_process_info.hThread);
+
+// 	char buffer[512];
+// 	sprintf( buffer,"srv*%s*http://msdl.microsoft.com/download/symbols", "E:\\123");
+// 
+// 	if( !SetEnvironmentVariable( _T( "_NT_SYMBOL_PATH" ), buffer ) )
+// 	{
+// 		return FALSE;
+// 	}
+
+	DWORD Options = SymGetOptions(); 
+
+#ifdef DEBUG
+	Options |= SYMOPT_DEBUG; 
+#endif // _DEBUG
+
+	SymSetOptions( Options ); 
 
 	SymInitialize(handle_,sym_search_path_.c_str(),FALSE);
 
@@ -936,7 +953,8 @@ void debug_kernel::set_sym_search_path(const char* paths, bool reload)
 
 bool debug_kernel::load_symbol( const load_dll_info_t& info )
 {
-	SymLoadModuleEx(handle_,info.file_handle,NULL,NULL,info.base_of_dll,0,NULL,NULL);
+	SymLoadModuleEx(handle_,info.file_handle,info.dll_path.c_str(),NULL,info.base_of_dll,0,NULL,NULL);
+	//SymLoadModule64(handle_,NULL,info.dll_path.c_str(),NULL,NULL,NULL);
 
 	IMAGEHLP_MODULE64 module64 = {sizeof(module64)};
 	SymGetModuleInfo64(handle_,info.base_of_dll,&module64);

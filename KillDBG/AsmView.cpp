@@ -144,13 +144,13 @@ void CAsmWnd::OnPaint()
 	curAddr.addr32.offset = (uint32)m_AddrToShow;
 	for (unsigned int i=0,j=0;i<num_read;++j)
 	{
-		x86dis_insn* insn = (x86dis_insn*)m_Decoder.decode(buffer+i,num_read-i,curAddr);
-		if ((uint32)m_AddrToShow>curAddr.addr32.offset && (uint32)m_AddrToShow < curAddr.addr32.offset + insn->size)
+		x86dis_insn insn = *(x86dis_insn*)m_Decoder.decode(buffer+i,num_read-i,curAddr);
+		if ((uint32)m_AddrToShow>curAddr.addr32.offset && (uint32)m_AddrToShow < curAddr.addr32.offset + insn.size)
 		{
 			break;
 		}
 
-		auto type = m_Decoder.is_branch(insn);
+		auto type = m_Decoder.is_branch(&insn);
 
 		//dcMem.ExtTextOut()
 		// 绘制当前行的背景色
@@ -188,7 +188,8 @@ void CAsmWnd::OnPaint()
 		dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rcLine,NULL,NULL,NULL);	// 用指定的背景色给当前航上色
 
 		x86dis_str str = {0};
-		m_Decoder.str_insn(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
+		m_Decoder.str_insn(&insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,str);
+
 		//const char* pcsIns = m_Decoder.str(insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD);
 		char szBuffer[1024] = {0};
 		int x = 0;
@@ -250,7 +251,7 @@ void CAsmWnd::OnPaint()
 				if (type == x86dis::BR_CALL)
 				{
 					std::string tmp;
-					x86_insn_op op = insn->op[0];
+					x86_insn_op op = insn.op[0];
 					if (op.type == X86_OPTYPE_IMM
 						&& !debug_kernel_ptr->symbol_from_addr(op.imm,tmp))
 					{
@@ -263,13 +264,13 @@ void CAsmWnd::OnPaint()
 
 						CPU_ADDR addr = {0};
 						addr.addr32.offset = op.imm;
-						x86dis_insn* target_insn = (x86dis_insn*)m_Decoder.decode(opcode_buffer,num_read,addr);
-						if (m_Decoder.is_branch(target_insn) != x86Analysis::BR_JMP)
+						x86dis_insn target_insn = *(x86dis_insn*)m_Decoder.decode(opcode_buffer,num_read,addr);
+						if (m_Decoder.is_branch(&target_insn) != x86dis::BR_JMP)
 						{
 							break;
 						}
 
-						const char* target_str = m_Decoder.strf(target_insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
+						const char* target_str = m_Decoder.strf(&target_insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
 						strcat(szBuffer,"<");
 						strcat(szBuffer,target_str);
 						strcat(szBuffer,">");
@@ -353,8 +354,9 @@ void CAsmWnd::OnPaint()
 
 		m_vecAsm.push_back(std::string(szBuffer));
 
-		i += insn->size;
-		curAddr.addr32.offset += insn->size;
+		i += insn.size;
+		curAddr.addr32.offset += insn.size;
+
 	}
 }
 

@@ -63,9 +63,12 @@
 #define IDC_EDIT_SYMBOL_PATH            1017
 #define IDC_BUTTON_ADD_PATH             1018
 #define IDC_CHECK_RELOAD_SYMBOL         1019
+#define IDC_CHECK_AUTODOWNLOAD          1020
+#define IDC_EDIT1                       1021
+#define IDC_EDIT_AUTODOWN_SYMBOL_PATH   1021
+#define IDC_BUTTON_AUTODOWN_SYMBOL_PATH 1022
 #define ID_32803                        32803
 #define ID_FILE_SETSYMPATH              32804
-#define ID_BUTTON32806                  32806
 #define ID_VIEW_CALLSTACK               32806
 #define ID_32807                        32807
 
@@ -75,7 +78,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32808
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1023
 #define _APS_NEXT_SYMED_VALUE           120
 #endif
 #endif

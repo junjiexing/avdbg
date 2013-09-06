@@ -26,4 +26,10 @@ public:
 
 	CString m_strSymPaths;
 	BOOL m_bReload;
+	afx_msg void OnBnClickedButtonAutodownSymbolPath();
+	afx_msg void OnBnClickedCheckAutodownload();
+	CButton m_AutoDownChk;
+	CEdit m_AutoDownEdit;
+	CButton m_AutoDownButton;
+	virtual BOOL OnInitDialog();
 };
