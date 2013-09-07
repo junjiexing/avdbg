@@ -81,6 +81,8 @@ public:
 	afx_msg void OnDebugRunHandleException();
 	afx_msg void OnFollowAddr();
 	afx_msg void OnSetBreakPoint();
+	afx_msg void OnRunToCursor();
+	afx_msg void OnRunOut();
 
 	
 	//	afx_msg void OnDestroy();

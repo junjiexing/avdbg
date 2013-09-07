@@ -57,6 +57,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_RUN_UNHANDLE_EXCEPT, &CMainFrame::OnDebugRunHandleException)
 	ON_COMMAND(ID_FOLLOW_ADDR, &CMainFrame::OnFollowAddr)
 	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
+	ON_COMMAND(ID_RUN_TO_CURSOR, &CMainFrame::OnRunToCursor)
+	ON_COMMAND(ID_RUN_OUT, &CMainFrame::OnRunOut)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 END_MESSAGE_MAP()
@@ -166,6 +168,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{ FVIRTKEY | FSHIFT,VK_F7,ID_STEPIN_UNHANDLE_EXCEPT},
 		{ FVIRTKEY | FSHIFT,VK_F8,ID_STEPOVER_UNHANDLE_EXCEPT},
 		{ FVIRTKEY | FSHIFT,VK_F9,ID_RUN_UNHANDLE_EXCEPT},
+		{ FVIRTKEY,VK_F4,ID_RUN_TO_CURSOR},
+		{ FVIRTKEY | FCONTROL, VK_F9,ID_RUN_OUT},
 	};
 	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc)/sizeof(ACCEL));
 	return 0;
@@ -594,6 +598,63 @@ void CMainFrame::OnFileSetsympath()
 	}
 
 	m_strSymPaths = dlg.m_strSymPaths;
+}
+
+void CMainFrame::OnRunToCursor()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	DWORD dwSelAddr = m_wndAsmView.GetSelAddrStart();
+	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(dwSelAddr);
+	if (!bp && !debug_kernel_ptr->add_breakpoint(dwSelAddr,true))
+	{
+		char buffer[50];
+		sprintf(buffer,"在地址 %08X 处设置断点失败！",dwSelAddr);
+		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
+		return;
+	}
+
+	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->continue_debug();
+}
+
+void CMainFrame::OnRunOut()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	CONTEXT context = debug_kernel_ptr->get_current_context();
+	STACKFRAME64 frame = {0};
+	frame.AddrPC.Mode = AddrModeFlat;
+	frame.AddrPC.Offset = context.Eip;
+	frame.AddrStack.Mode = AddrModeFlat;
+	frame.AddrStack.Offset = context.Esp;
+	frame.AddrFrame.Mode = AddrModeFlat;
+	frame.AddrFrame.Offset = context.Ebp;
+
+	if (!debug_kernel_ptr->stack_walk(frame,context))
+	{
+		m_wndOutput.output_string(std::string("查找函数返回地址失败"),COutputWnd::OUT_ERROR);
+		return;
+	}
+
+	DWORD dwRetAddr = (DWORD)frame.AddrReturn.Offset;
+	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(dwRetAddr);
+	if (!bp && !debug_kernel_ptr->add_breakpoint(dwRetAddr,true))
+	{
+		char buffer[60];
+		sprintf(buffer,"在函数返回地址 %08X 处设置断点失败！",dwRetAddr);
+		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
+		return;
+	}
+
+	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->continue_debug();
 }
 
 

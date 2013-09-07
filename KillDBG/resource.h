@@ -11,6 +11,8 @@
 #define ID_RUN_UNHANDLE_EXCEPT          106
 #define ID_FOLLOW_ADDR                  107
 #define ID_SET_BREAKPOINT               108
+#define ID_RUN_TO_CURSOR                120
+#define ID_RUN_OUT                      121
 #define IDD_SYMBOL_SEARCH_PATHS         144
 #define ID_FILE_ATTACH                  201
 #define ID_FILE_STOP                    202
@@ -64,7 +66,6 @@
 #define IDC_BUTTON_ADD_PATH             1018
 #define IDC_CHECK_RELOAD_SYMBOL         1019
 #define IDC_CHECK_AUTODOWNLOAD          1020
-#define IDC_EDIT1                       1021
 #define IDC_EDIT_AUTODOWN_SYMBOL_PATH   1021
 #define IDC_BUTTON_AUTODOWN_SYMBOL_PATH 1022
 #define ID_32803                        32803
@@ -79,6 +80,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32808
 #define _APS_NEXT_CONTROL_VALUE         1023
-#define _APS_NEXT_SYMED_VALUE           120
+#define _APS_NEXT_SYMED_VALUE           122
 #endif
 #endif
