@@ -14,6 +14,7 @@
 #define ID_RUN_TO_CURSOR                120
 #define ID_RUN_OUT                      121
 #define IDD_SYMBOL_SEARCH_PATHS         144
+#define IDR_TOOLBARDEBUG                145
 #define ID_FILE_ATTACH                  201
 #define ID_FILE_STOP                    202
 #define ID_VIEW_REGISTER                301
@@ -72,13 +73,18 @@
 #define ID_FILE_SETSYMPATH              32804
 #define ID_VIEW_CALLSTACK               32806
 #define ID_32807                        32807
+#define ID_32814                        32814
+#define ID_32815                        32815
+#define ID_32816                        32816
+#define ID_32817                        32817
+#define ID_32818                        32818
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
-#define _APS_NEXT_COMMAND_VALUE         32808
+#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_COMMAND_VALUE         32819
 #define _APS_NEXT_CONTROL_VALUE         1023
 #define _APS_NEXT_SYMED_VALUE           122
 #endif

@@ -163,6 +163,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bmp00001.bmp" />
     <Image Include="res\KillDBG.ico" />
     <Image Include="res\PaneIcons.bmp" />
     <Image Include="res\Toolbar.bmp" />

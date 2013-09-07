@@ -124,6 +124,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	CXTPCommandBarsOptions* pOptions = m_pCommandBars->GetCommandBarsOptions();
+	pOptions->szIcons.cx = 19;
+	pOptions->szIcons.cy = 19;
+
 	// Add the menu bar
 	CXTPCommandBar* pMenuBar = m_pCommandBars->SetMenu(
 		_T("Menu Bar"), IDR_MAINFRAME);
@@ -136,6 +140,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create ToolBar
 	CXTPToolBar* pToolBarWnd = m_pCommandBars->Add(_T("Window"), xtpBarTop);
 	if (!pToolBarWnd || !pToolBarWnd->LoadToolBar(IDR_TOOLBARWND))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;
+	}
+	CXTPToolBar* pToolBarDbg = m_pCommandBars->Add(_T("Debug"), xtpBarTop);
+	if (!pToolBarDbg || !pToolBarDbg->LoadToolBar(IDR_TOOLBARDEBUG))
 	{
 		TRACE0("Failed to create toolbar\n");
 		return -1;

@@ -62,13 +62,14 @@ END
 
 IDR_TOOLBARWND          BITMAP                  "res\\toolbar1.bmp"
 IDB_BITMAP_ICONS        BITMAP                  "res\\PaneIcons.bmp"
+IDR_TOOLBARDEBUG        BITMAP                  "res\\bmp00001.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_TOOLBARWND TOOLBAR 16, 15
+IDR_TOOLBARWND TOOLBAR 19, 19
 BEGIN
     BUTTON      ID_VIEW_DISWND
     BUTTON      ID_VIEW_REGISTER
@@ -78,6 +79,15 @@ BEGIN
     BUTTON      ID_VIEW_MODULELIST
     BUTTON      ID_VIEW_BREAKPOINT
     BUTTON      ID_VIEW_CALLSTACK
+END
+
+IDR_TOOLBARDEBUG TOOLBAR 19, 19
+BEGIN
+    BUTTON      ID_STEP_IN
+    BUTTON      ID_STEP_OVER
+    BUTTON      ID_RUN_OUT
+    BUTTON      ID_RUN_TO_CURSOR
+    BUTTON      ID_RUN
 END
 
 
@@ -104,6 +114,14 @@ BEGIN
         MENUITEM "附加进程...",                     ID_FILE_ATTACH
         MENUITEM "停止调试",                        ID_FILE_STOP
         MENUITEM "退出(&X)",                      ID_APP_EXIT
+    END
+    POPUP "调试"
+    BEGIN
+        MENUITEM "单步步入",                        ID_STEP_IN
+        MENUITEM "单步步过",                        ID_STEP_OVER
+        MENUITEM "执行到返回",                       ID_RUN_OUT
+        MENUITEM "执行到选中行",                      ID_RUN_TO_CURSOR
+        MENUITEM "执行",                          ID_RUN
     END
     POPUP "视图(&V)"
     BEGIN
@@ -434,6 +452,24 @@ BEGIN
     ID_VIEW_REGISTER        "寄存器窗口"
     ID_VIEW_OUTPUT          "输出窗口"
     ID_VIEW_MEMORY          "内存查看窗口"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_CALLSTACK       "调用堆栈窗口"
+END
+
+STRINGTABLE
+BEGIN
+    ID_STEP_IN              "单步步入"
+    ID_STEP_OVER            "单步步过"
+    ID_RUN                  "执行"
+END
+
+STRINGTABLE
+BEGIN
+    ID_RUN_TO_CURSOR        "执行到选中行"
+    ID_RUN_OUT              "执行到返回"
 END
 
 #endif    // 中文(简体，中国) resources
