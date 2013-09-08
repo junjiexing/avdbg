@@ -88,6 +88,7 @@ BEGIN
     BUTTON      ID_RUN_OUT
     BUTTON      ID_RUN_TO_CURSOR
     BUTTON      ID_RUN
+    BUTTON      ID_BREAK_PROCESS
     BUTTON      ID_STOP_DEBUG
 END
 
@@ -123,6 +124,7 @@ BEGIN
         MENUITEM "执行到返回",                       ID_RUN_OUT
         MENUITEM "执行到选中行",                      ID_RUN_TO_CURSOR
         MENUITEM "执行",                          ID_RUN
+        MENUITEM "暂停执行",                        ID_BREAK_PROCESS
         MENUITEM "停止调试",                        ID_STOP_DEBUG
     END
     POPUP "视图(&V)"
@@ -473,6 +475,7 @@ BEGIN
     ID_RUN_TO_CURSOR        "执行到选中行"
     ID_RUN_OUT              "执行到返回"
     ID_STOP_DEBUG           "停止调试"
+    ID_BREAK_PROCESS        "暂停执行"
 END
 
 #endif    // 中文(简体，中国) resources

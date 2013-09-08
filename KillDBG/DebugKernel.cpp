@@ -136,6 +136,7 @@ void debug_kernel::debug_thread_proc()
 		debug_status_ = RUN;
 	}
 
+	debug_status_ = STOP;
 }
 
 bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )

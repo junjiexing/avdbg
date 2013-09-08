@@ -122,6 +122,15 @@ public:
 		return  continue_debug();
 	}
 
+	bool break_process()
+	{
+		return DebugBreakProcess(handle_) == true;
+	}
+
+	debug_status get_debug_status()
+	{
+		return debug_status_;
+	}
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件
 	DEBUG_EVENT debug_event_;

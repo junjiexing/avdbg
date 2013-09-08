@@ -60,6 +60,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_RUN_TO_CURSOR, &CMainFrame::OnRunToCursor)
 	ON_COMMAND(ID_RUN_OUT, &CMainFrame::OnRunOut)
 	ON_COMMAND(ID_STOP_DEBUG, &CMainFrame::OnStopDebug)
+	ON_COMMAND(ID_BREAK_PROCESS, &CMainFrame::OnBreakProcess)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 END_MESSAGE_MAP()
@@ -182,6 +183,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{ FVIRTKEY,VK_F4,ID_RUN_TO_CURSOR},
 		{ FVIRTKEY | FCONTROL, VK_F9,ID_RUN_OUT},
 		{ FVIRTKEY | FALT, VK_F2,ID_STOP_DEBUG},
+		{ FVIRTKEY, VK_F12,ID_BREAK_PROCESS},
 	};
 	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc)/sizeof(ACCEL));
 	return 0;
@@ -683,6 +685,25 @@ void CMainFrame::OnStopDebug()
 	}
 
 	debug_kernel_ptr.reset();
+}
+
+void CMainFrame::OnBreakProcess()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	if (debug_kernel_ptr->get_debug_status() != debug_kernel::RUN)
+	{
+		m_wndOutput.output_string(std::string("进程已经是中断或停止状态，不需要执行此功能。"),COutputWnd::OUT_ERROR);
+		return;
+	}
+
+	if (!debug_kernel_ptr->break_process())
+	{
+		m_wndOutput.output_string(std::string("中断被调试进程失败。"),COutputWnd::OUT_ERROR);
+	}
 }
 
 
