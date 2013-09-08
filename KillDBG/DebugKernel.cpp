@@ -95,7 +95,7 @@ void debug_kernel::debug_thread_proc()
 			break;
 		case EXIT_PROCESS_DEBUG_EVENT:
 			continue_debug = on_exit_process_event(debug_event_.u.ExitProcess);
-			continue;
+			//continue;
 			break;
 		case CREATE_THREAD_DEBUG_EVENT:
 			continue_debug = on_create_thread_event(debug_event_.u.CreateThread);
@@ -193,6 +193,7 @@ bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_pr
 
 	SymCleanup(handle_);
 	continue_status_= DBG_CONTINUE;
+	main_frame->m_wndAsmView.Invalidate(FALSE);
 	return true;
 }
 

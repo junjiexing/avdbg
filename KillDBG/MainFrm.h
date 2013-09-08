@@ -83,7 +83,7 @@ public:
 	afx_msg void OnSetBreakPoint();
 	afx_msg void OnRunToCursor();
 	afx_msg void OnRunOut();
-
+	afx_msg void OnStopDebug();
 	
 	//	afx_msg void OnDestroy();
 	afx_msg void OnFileOpen();

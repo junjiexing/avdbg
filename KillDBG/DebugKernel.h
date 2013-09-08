@@ -49,14 +49,14 @@ public:
 		}
 
 
-		return SetEvent(continue_event_);
+		return SetEvent(continue_event_) == TRUE;
 	}
 
-	void SetContinueStatus(DWORD continue_status)
+	void set_continue_status(DWORD continue_status)
 	{
 		continue_status_ = continue_status;
 	}
-	DWORD GetContinueStatus(void)
+	DWORD get_continue_status(void)
 	{
 		return continue_status_;
 	}
@@ -112,6 +112,15 @@ public:
 	bool symbol_from_addr(DWORD addr,std::string& symbol,bool allow_in_func = false);
 	bool symbol_from_addr( DWORD addr,PSYMBOL_INFO symbol_info);
 	bool stack_walk(STACKFRAME64& stack_frame, CONTEXT& context);
+	bool stop_debug()
+	{
+		if (!TerminateProcess(handle_,0))
+		{
+			return false;
+		}
+		set_continue_status(DBG_CONTINUE);
+		return  continue_debug();
+	}
 
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件

@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_SET_BREAKPOINT, &CMainFrame::OnSetBreakPoint)
 	ON_COMMAND(ID_RUN_TO_CURSOR, &CMainFrame::OnRunToCursor)
 	ON_COMMAND(ID_RUN_OUT, &CMainFrame::OnRunOut)
+	ON_COMMAND(ID_STOP_DEBUG, &CMainFrame::OnStopDebug)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 END_MESSAGE_MAP()
@@ -180,6 +181,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{ FVIRTKEY | FSHIFT,VK_F9,ID_RUN_UNHANDLE_EXCEPT},
 		{ FVIRTKEY,VK_F4,ID_RUN_TO_CURSOR},
 		{ FVIRTKEY | FCONTROL, VK_F9,ID_RUN_OUT},
+		{ FVIRTKEY | FALT, VK_F2,ID_STOP_DEBUG},
 	};
 	m_hAcc = CreateAcceleratorTable(acc,sizeof(acc)/sizeof(ACCEL));
 	return 0;
@@ -484,7 +486,7 @@ void CMainFrame::OnStepIn()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
 	debug_kernel_ptr->step_in();
 }
 
@@ -494,7 +496,7 @@ void CMainFrame::OnStepOver()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
 	debug_kernel_ptr->step_over();
 }
 
@@ -514,7 +516,7 @@ void CMainFrame::OnDebugRun()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
 	debug_kernel_ptr->continue_debug();
 }
 
@@ -554,7 +556,7 @@ void CMainFrame::OnStepInHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
 	debug_kernel_ptr->step_in();
 }
 
@@ -564,7 +566,7 @@ void CMainFrame::OnStepOverHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
 	debug_kernel_ptr->step_over();
 }
 
@@ -574,7 +576,7 @@ void CMainFrame::OnDebugRunHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->SetContinueStatus(DBG_EXCEPTION_NOT_HANDLED);
+	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
 	debug_kernel_ptr->continue_debug();
 }
 
@@ -627,7 +629,7 @@ void CMainFrame::OnRunToCursor()
 		return;
 	}
 
-	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
 	debug_kernel_ptr->continue_debug();
 }
 
@@ -663,8 +665,24 @@ void CMainFrame::OnRunOut()
 		return;
 	}
 
-	debug_kernel_ptr->SetContinueStatus(DBG_CONTINUE);
+	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
 	debug_kernel_ptr->continue_debug();
+}
+
+void CMainFrame::OnStopDebug()
+{
+	if (!debug_kernel_ptr)
+	{
+		return;
+	}
+
+	if (!debug_kernel_ptr->stop_debug())
+	{
+		m_wndOutput.output_string(std::string("结束被调试进程失败。"),COutputWnd::OUT_ERROR);
+		return;
+	}
+
+	debug_kernel_ptr.reset();
 }
 
 
