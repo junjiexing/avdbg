@@ -357,6 +357,8 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainFrame::OnClose()
 {
+	debug_kernel_ptr.reset();
+
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
 	m_paneManager.GetLayout(&layoutNormal);
 	layoutNormal.SaveToFile("FrameLayout","Default");
