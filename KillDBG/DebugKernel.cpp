@@ -6,7 +6,7 @@
 #include <string.h>
 
 debug_kernel::debug_kernel(void)
-	:continue_status_(DBG_CONTINUE),debug_status_(STOP)
+	:debug_status_(STOP)
 {
 	continue_event_ = CreateEvent(NULL,FALSE,TRUE,NULL);
 }
@@ -75,7 +75,12 @@ void debug_kernel::debug_thread_proc()
 	debugee_exit_ = false;
 	while (!debugee_exit_)
 	{
-		BOOL ret = WaitForDebugEvent(&debug_event_,INFINITE);
+		while (!WaitForDebugEvent(&debug_event_,0))
+		{
+			on_idle();
+		}
+
+		debug_status_ = BREAK;
 
 		HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
 		context_.ContextFlags = CONTEXT_ALL;
@@ -87,59 +92,44 @@ void debug_kernel::debug_thread_proc()
 		main_frame->m_wndRegister.PostMessage(WM_USER_SETCONTEXT,(WPARAM)&context_);
 		main_frame->m_wndStackView.SetAddrToView(context_.Esp);
 
-		bool continue_debug = true;
 		switch(debug_event_.dwDebugEventCode)
 		{
 		case CREATE_PROCESS_DEBUG_EVENT:	//创建被调试进程
-			continue_debug = on_create_process_event(debug_event_.u.CreateProcessInfo);
+			on_create_process_event(debug_event_.u.CreateProcessInfo);
 			break;
 		case EXIT_PROCESS_DEBUG_EVENT:
-			continue_debug = on_exit_process_event(debug_event_.u.ExitProcess);
+			on_exit_process_event(debug_event_.u.ExitProcess);
 			//continue;
 			break;
 		case CREATE_THREAD_DEBUG_EVENT:
-			continue_debug = on_create_thread_event(debug_event_.u.CreateThread);
+			on_create_thread_event(debug_event_.u.CreateThread);
 			break;
 		case EXIT_THREAD_DEBUG_EVENT:
-			continue_debug = on_exit_thread_event(debug_event_.u.ExitThread);
+			on_exit_thread_event(debug_event_.u.ExitThread);
 			//continue;
 			break;
 		case LOAD_DLL_DEBUG_EVENT:		//加载DLL
-			continue_debug = on_load_dll_event(debug_event_.u.LoadDll);
+			on_load_dll_event(debug_event_.u.LoadDll);
 			break;
 		case UNLOAD_DLL_DEBUG_EVENT:
-			continue_debug = on_unload_dll_event(debug_event_.u.UnloadDll);
+			on_unload_dll_event(debug_event_.u.UnloadDll);
 			break;
 		case OUTPUT_DEBUG_STRING_EVENT:
-			continue_debug = on_output_debug_string_event(debug_event_.u.DebugString);
+			on_output_debug_string_event(debug_event_.u.DebugString);
 			break;
 		case RIP_EVENT:
-			continue_debug = on_rip_event(debug_event_.u.RipInfo);
+			on_rip_event(debug_event_.u.RipInfo);
 			break;
 		case EXCEPTION_DEBUG_EVENT:
-			continue_debug = on_exception_event(debug_event_.u.Exception);
+			on_exception_event(debug_event_.u.Exception);
 			break;
 		}
-
-
-		update_breakpoint_starus();
-
-		if (!continue_debug)
-		{
-			debug_status_ = BREAK;
-
-			ResetEvent(continue_event_);
-			WaitForSingleObject(continue_event_,INFINITE);
-		}
-		ContinueDebugEvent(debug_event_.dwProcessId,debug_event_.dwThreadId,continue_status_);
-		
-		debug_status_ = RUN;
 	}
 
 	debug_status_ = STOP;
 }
 
-bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )
+void debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )
 {
 	std::string program_path;
 	debug_utils::get_file_name_frome_handle(create_process_info.hFile,program_path);
@@ -181,11 +171,10 @@ bool debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 
 	load_dll_info_.push_back(info);
 
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_process )
+void debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_process )
 {
 	boost::format fmter("被调试进程退出,退出代码为: %u");
 	fmter % exit_process.dwExitCode;
@@ -193,32 +182,29 @@ bool debug_kernel::on_exit_process_event( const EXIT_PROCESS_DEBUG_INFO& exit_pr
 	debugee_exit_ = true;
 
 	SymCleanup(handle_);
-	continue_status_= DBG_CONTINUE;
 	main_frame->m_wndAsmView.Invalidate(FALSE);
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_create_thread_event( const CREATE_THREAD_DEBUG_INFO& create_thread )
+void debug_kernel::on_create_thread_event( const CREATE_THREAD_DEBUG_INFO& create_thread )
 {
 	boost::format fmter("创建线程，起始地址为：0x%08X");
 	fmter % create_thread.lpStartAddress;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_exit_thread_event( const EXIT_THREAD_DEBUG_INFO& exit_thread )
+void debug_kernel::on_exit_thread_event( const EXIT_THREAD_DEBUG_INFO& exit_thread )
 {
 	boost::format fmter("线程退出，退出代码为：%u");
 	fmter % exit_thread.dwExitCode;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
+void debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 {
 	std::string dll_path;
 	debug_utils::get_file_name_frome_handle(load_dll.hFile,dll_path);
@@ -232,22 +218,20 @@ bool debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 
 	load_dll_info_.push_back(info);
 
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll )
+void debug_kernel::on_unload_dll_event( const UNLOAD_DLL_DEBUG_INFO& unload_dll )
 {
 	boost::format fmter("卸载模块:\"0x%08X\"");
 	fmter % unload_dll.lpBaseOfDll;
 	main_frame->m_wndOutput.output_string(fmter.str());
 
 	SymUnloadModule64(handle_,(DWORD)unload_dll.lpBaseOfDll);
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& debug_string )
+void debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO& debug_string )
 {
 	int str_len = debug_string.nDebugStringLength;		//字符串的长度（字节）
 	BYTE read_buffer[str_len];
@@ -259,7 +243,7 @@ bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO&
 	if (!read_memory((DWORD)debug_string.lpDebugStringData,read_buffer,str_len))
 	{
 		main_frame->m_wndOutput.output_string(std::string("获取调试字符串失败"),COutputWnd::OUT_WARNING);
-		return false;
+		return;
 	}
 
 	//据说这里永远是多字节字符，
@@ -278,17 +262,15 @@ bool debug_kernel::on_output_debug_string_event( const OUTPUT_DEBUG_STRING_INFO&
 	}
 	main_frame->m_wndOutput.output_string(std::string(output_str));
 
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_rip_event( const RIP_INFO& rip_info )
+void debug_kernel::on_rip_event( const RIP_INFO& rip_info )
 {
-	continue_status_= DBG_CONTINUE;
-	return true;
+	continue_debug();
 }
 
-bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_exception )
+void debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_exception )
 {
 	DWORD addr = (DWORD)debug_exception.ExceptionRecord.ExceptionAddress;
 	main_frame->m_wndAsmView.SetEIP(addr);
@@ -343,7 +325,6 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 
 			main_frame->m_wndAsmView.Invalidate(FALSE);
 			
-			continue_status_= DBG_CONTINUE;
 		}
 
 		break;
@@ -354,7 +335,6 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 			main_frame->m_wndAsmView.SetEIP((DWORD)addr);
 			main_frame->m_wndAsmView.Invalidate(FALSE);
 
-			continue_status_= DBG_CONTINUE;
 		}
 		break;
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
@@ -480,7 +460,6 @@ bool debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 		break;
 	}
 
-	return false;
 }
 
 void debug_kernel::refresh_memory_map( void )
@@ -1008,4 +987,164 @@ bool debug_kernel::stack_walk( STACKFRAME64& stack_frame, CONTEXT& context )
 	CloseHandle(thread);
 
 	return ret;
+}
+
+void debug_kernel::update_breakpoint_starus( bool disable_current_bp )
+{
+	for (int i=0;i<bp_vec_.size();++i)
+	{
+		breakpoint_t& bp = bp_vec_[i];
+		if (disable_current_bp && bp.address == context_.Eip)
+		{
+			invalid_breakpoint(&bp);
+			continue;
+		}
+
+		if (bp.user_enable == true && bp.valid == false)
+		{
+
+			valid_breakpoint(&bp);
+		}
+	}
+}
+
+bool debug_kernel::stop_debug()
+{
+	return TerminateProcess(handle_,0) == TRUE;
+}
+
+bool debug_kernel::get_memory_info_by_addr( const void* addr,memory_region_info_t& info )
+{
+	refresh_memory_map();
+	for each (memory_region_info_t tmp in memory_info_vector_)
+	{
+		if ((unsigned long)(tmp.start_addr) <= (unsigned long)addr && (unsigned long)addr < (unsigned long)(tmp.start_addr + tmp.size))
+		{
+			info = tmp;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool debug_kernel::continue_debug( DWORD continue_status /*= DBG_CONTINUE*/,bool disable_current_bp /*= false*/ )
+{
+	update_breakpoint_starus(disable_current_bp);
+
+	return ContinueDebugEvent(debug_event_.dwProcessId,debug_event_.dwThreadId,continue_status) == TRUE;
+}
+
+void debug_kernel::on_idle()
+{
+	while (ui_event_.size() != 0)
+	{
+		ui_event_t& event = ui_event_.front();
+
+		switch (event.type)
+		{
+		case ID_STEP_IN:
+			{
+				step_in();
+			}
+			break;
+		case ID_STEP_OVER:
+			{
+				step_over();
+			}
+			break;
+		case ID_RUN:
+			{
+				continue_debug(DBG_CONTINUE,true);
+			}
+			break;
+		case ID_STEPIN_UNHANDLE_EXCEPT:
+			{
+				step_in();
+			}
+			break;
+		case ID_STEPOVER_UNHANDLE_EXCEPT:
+			{
+				step_over();
+			}
+			break;
+		case ID_RUN_UNHANDLE_EXCEPT:
+			{
+				continue_debug(DBG_EXCEPTION_NOT_HANDLED,true);
+			}
+			break;
+		case ID_SET_BREAKPOINT:
+			{
+				add_breakpoint(event.param1);
+			}
+			break;
+		case ID_RUN_TO_CURSOR:
+			{
+				breakpoint_t* bp = find_breakpoint_by_address(event.param1);
+				if (!bp && !add_breakpoint(event.param1,true))
+				{
+					main_frame->m_wndOutput.output_string(str(boost::format("在地址 %08X 处设置断点失败！") % event.param1),COutputWnd::OUT_ERROR);
+					break;
+				}
+
+				continue_debug(DBG_CONTINUE);
+			}
+			break;
+		case ID_RUN_OUT:
+			{
+				CONTEXT context = get_current_context();
+				STACKFRAME64 frame = {0};
+				frame.AddrPC.Mode = AddrModeFlat;
+				frame.AddrPC.Offset = context.Eip;
+				frame.AddrStack.Mode = AddrModeFlat;
+				frame.AddrStack.Offset = context.Esp;
+				frame.AddrFrame.Mode = AddrModeFlat;
+				frame.AddrFrame.Offset = context.Ebp;
+
+				if (!stack_walk(frame,context))
+				{
+					main_frame->m_wndOutput.output_string(std::string("查找函数返回地址失败"),COutputWnd::OUT_ERROR);
+					break;
+				}
+
+				DWORD ret_addr = (DWORD)frame.AddrReturn.Offset;
+				breakpoint_t* bp = find_breakpoint_by_address(ret_addr);
+				if (!bp && !add_breakpoint(ret_addr,true))
+				{
+					main_frame->m_wndOutput.output_string(str(boost::format("在函数返回地址 %08X 处设置断点失败！") % ret_addr),COutputWnd::OUT_ERROR);
+					break;
+				}
+
+				continue_debug(DBG_CONTINUE);
+			}
+			break;
+		case ID_STOP_DEBUG:
+			{
+				if (!stop_debug())
+				{
+					main_frame->m_wndOutput.output_string(std::string("停止调试失败"));
+				}
+				continue_debug();
+			}
+			break;
+		case ID_BREAK_PROCESS:
+			{
+				if (get_debug_status() != debug_kernel::RUN)
+				{
+					main_frame->m_wndOutput.output_string(std::string("进程已经是中断或停止状态，不需要执行此功能。"),COutputWnd::OUT_ERROR);
+					break;
+				}
+
+				if (!break_process())
+				{
+					main_frame->m_wndOutput.output_string(std::string("中断被调试进程失败。"),COutputWnd::OUT_ERROR);
+				}
+			}
+			break;
+// 		case :
+// 			break;
+		}
+
+		ui_event_.pop_front();
+	}
 }

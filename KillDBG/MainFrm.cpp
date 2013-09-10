@@ -488,8 +488,7 @@ void CMainFrame::OnStepIn()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
-	debug_kernel_ptr->step_in();
+	debug_kernel_ptr->add_ui_event(ID_STEP_IN);
 }
 
 void CMainFrame::OnStepOver()
@@ -498,8 +497,7 @@ void CMainFrame::OnStepOver()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
-	debug_kernel_ptr->step_over();
+	debug_kernel_ptr->add_ui_event(ID_STEP_OVER);
 }
 
 void CMainFrame::OnFollowAddr()
@@ -518,8 +516,7 @@ void CMainFrame::OnDebugRun()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
-	debug_kernel_ptr->continue_debug();
+	debug_kernel_ptr->add_ui_event(ID_RUN);
 }
 
 void CMainFrame::OnSetBreakPoint()
@@ -537,12 +534,7 @@ void CMainFrame::OnSetBreakPoint()
 		return;
 	}
 
-	if (!debug_kernel_ptr->add_breakpoint(dwSelAddr))
-	{
-		char buffer[50];
-		sprintf(buffer,"在地址 %08X 处设置断点失败！",dwSelAddr);
-		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
-	}
+	debug_kernel_ptr->add_ui_event(ID_SET_BREAKPOINT,dwSelAddr);
 	m_wndAsmView.Invalidate(FALSE);
 }
 
@@ -558,8 +550,7 @@ void CMainFrame::OnStepInHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
-	debug_kernel_ptr->step_in();
+	debug_kernel_ptr->add_ui_event(ID_STEPIN_UNHANDLE_EXCEPT);
 }
 
 void CMainFrame::OnStepOverHandleException()
@@ -568,8 +559,7 @@ void CMainFrame::OnStepOverHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
-	debug_kernel_ptr->step_over();
+	debug_kernel_ptr->add_ui_event(ID_STEPOVER_UNHANDLE_EXCEPT);
 }
 
 void CMainFrame::OnDebugRunHandleException()
@@ -578,8 +568,7 @@ void CMainFrame::OnDebugRunHandleException()
 	{
 		return;
 	}
-	debug_kernel_ptr->set_continue_status(DBG_EXCEPTION_NOT_HANDLED);
-	debug_kernel_ptr->continue_debug();
+	debug_kernel_ptr->add_ui_event(ID_RUN_UNHANDLE_EXCEPT);
 }
 
 void CMainFrame::OnViewDiswnd()
@@ -622,17 +611,7 @@ void CMainFrame::OnRunToCursor()
 	}
 
 	DWORD dwSelAddr = m_wndAsmView.GetSelAddrStart();
-	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(dwSelAddr);
-	if (!bp && !debug_kernel_ptr->add_breakpoint(dwSelAddr,true))
-	{
-		char buffer[50];
-		sprintf(buffer,"在地址 %08X 处设置断点失败！",dwSelAddr);
-		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
-		return;
-	}
-
-	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
-	debug_kernel_ptr->continue_debug();
+	debug_kernel_ptr->add_ui_event(ID_RUN_TO_CURSOR,dwSelAddr);
 }
 
 void CMainFrame::OnRunOut()
@@ -642,33 +621,7 @@ void CMainFrame::OnRunOut()
 		return;
 	}
 
-	CONTEXT context = debug_kernel_ptr->get_current_context();
-	STACKFRAME64 frame = {0};
-	frame.AddrPC.Mode = AddrModeFlat;
-	frame.AddrPC.Offset = context.Eip;
-	frame.AddrStack.Mode = AddrModeFlat;
-	frame.AddrStack.Offset = context.Esp;
-	frame.AddrFrame.Mode = AddrModeFlat;
-	frame.AddrFrame.Offset = context.Ebp;
-
-	if (!debug_kernel_ptr->stack_walk(frame,context))
-	{
-		m_wndOutput.output_string(std::string("查找函数返回地址失败"),COutputWnd::OUT_ERROR);
-		return;
-	}
-
-	DWORD dwRetAddr = (DWORD)frame.AddrReturn.Offset;
-	debug_kernel::breakpoint_t* bp = debug_kernel_ptr->find_breakpoint_by_address(dwRetAddr);
-	if (!bp && !debug_kernel_ptr->add_breakpoint(dwRetAddr,true))
-	{
-		char buffer[60];
-		sprintf(buffer,"在函数返回地址 %08X 处设置断点失败！",dwRetAddr);
-		m_wndOutput.output_string(std::string(buffer),COutputWnd::OUT_ERROR);
-		return;
-	}
-
-	debug_kernel_ptr->set_continue_status(DBG_CONTINUE);
-	debug_kernel_ptr->continue_debug();
+	debug_kernel_ptr->add_ui_event(ID_RUN_OUT);
 }
 
 void CMainFrame::OnStopDebug()
@@ -678,11 +631,7 @@ void CMainFrame::OnStopDebug()
 		return;
 	}
 
-	if (!debug_kernel_ptr->stop_debug())
-	{
-		m_wndOutput.output_string(std::string("结束被调试进程失败。"),COutputWnd::OUT_ERROR);
-		return;
-	}
+	debug_kernel_ptr->add_ui_event(ID_STOP_DEBUG);
 
 	debug_kernel_ptr.reset();
 }
@@ -694,16 +643,7 @@ void CMainFrame::OnBreakProcess()
 		return;
 	}
 
-	if (debug_kernel_ptr->get_debug_status() != debug_kernel::RUN)
-	{
-		m_wndOutput.output_string(std::string("进程已经是中断或停止状态，不需要执行此功能。"),COutputWnd::OUT_ERROR);
-		return;
-	}
-
-	if (!debug_kernel_ptr->break_process())
-	{
-		m_wndOutput.output_string(std::string("中断被调试进程失败。"),COutputWnd::OUT_ERROR);
-	}
+	debug_kernel_ptr->add_ui_event(ID_BREAK_PROCESS);
 }
 
 

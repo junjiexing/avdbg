@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 
 class CMainFrame;
 
@@ -40,26 +41,7 @@ public:
 	bool step_over();
 
 	// 继续调试，运行被调试进程
-	bool continue_debug(void)
-	{
-		breakpoint_t* bp = find_breakpoint_by_address(context_.Eip);
-		if (bp)
-		{
-			invalid_breakpoint(bp);
-		}
-
-
-		return SetEvent(continue_event_) == TRUE;
-	}
-
-	void set_continue_status(DWORD continue_status)
-	{
-		continue_status_ = continue_status;
-	}
-	DWORD get_continue_status(void)
-	{
-		return continue_status_;
-	}
+	bool continue_debug(DWORD continue_status = DBG_CONTINUE,bool disable_current_bp = false);
 
 	bool add_breakpoint(DWORD address,bool is_once = false);
 
@@ -82,21 +64,7 @@ public:
 	bool invalid_breakpoint(breakpoint_t* bp);
 	bool invalid_breakpoint(DWORD address);
 	bool delete_breakpoint(DWORD address);
-	void update_breakpoint_starus()
-	{
-		for (int i=0;i<bp_vec_.size();++i)
-		{
-			breakpoint_t& bp = bp_vec_[i];
-			if (bp.user_enable == true && bp.valid == false)
-			{
-				valid_breakpoint(&bp);
-			}
-// 			else if(bp.user_enable == true && bp.valid == true)
-// 			{
-// 				invalid_breakpoint(&bp);
-// 			}
-		}
-	}
+	void update_breakpoint_starus(bool disable_current_bp);
 
 	std::vector<breakpoint_t>& get_bp_list()
 	{
@@ -112,15 +80,7 @@ public:
 	bool symbol_from_addr(DWORD addr,std::string& symbol,bool allow_in_func = false);
 	bool symbol_from_addr( DWORD addr,PSYMBOL_INFO symbol_info);
 	bool stack_walk(STACKFRAME64& stack_frame, CONTEXT& context);
-	bool stop_debug()
-	{
-		if (!TerminateProcess(handle_,0))
-		{
-			return false;
-		}
-		set_continue_status(DBG_CONTINUE);
-		return  continue_debug();
-	}
+	bool stop_debug();
 
 	bool break_process()
 	{
@@ -131,13 +91,17 @@ public:
 	{
 		return debug_status_;
 	}
+
+	void add_ui_event(DWORD type,DWORD param1 = 0,DWORD param2 = 0)
+	{
+		ui_event_t event = {type,param1,param2};
+		ui_event_.push_back(event);
+	}
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件
 	DEBUG_EVENT debug_event_;
 	// 最后一次调试事件时的线程context
 	CONTEXT context_;
-	// 异常是否已经处理
-	DWORD	continue_status_;
 	// 继续调试所用的事件
 	HANDLE continue_event_;
 	//HANDLE process_handle_;
@@ -163,21 +127,30 @@ private:
 
 	std::vector<load_dll_info_t> load_dll_info_;
 
+	struct ui_event_t
+	{
+		DWORD type;
+		DWORD param1;
+		DWORD param2;
+	};
+	std::deque<ui_event_t> ui_event_;
+
 // 	std::string exe_path_;
 // 	std::string command_str_;
 // 	std::string current_path_;
 
 private:
 	void debug_thread_proc();
-	bool on_create_process_event(const CREATE_PROCESS_DEBUG_INFO& create_process_info);
-	bool on_exit_process_event(const EXIT_PROCESS_DEBUG_INFO& exit_process);
-	bool on_create_thread_event(const CREATE_THREAD_DEBUG_INFO& create_thread);
-	bool on_exit_thread_event(const EXIT_THREAD_DEBUG_INFO& exit_thread);
-	bool on_load_dll_event(const LOAD_DLL_DEBUG_INFO& load_dll);
-	bool on_unload_dll_event(const UNLOAD_DLL_DEBUG_INFO& unload_dll);
-	bool on_output_debug_string_event(const OUTPUT_DEBUG_STRING_INFO& debug_string);
-	bool on_rip_event(const RIP_INFO& rip_info);
-	bool on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
+	void  on_idle();
+	void on_create_process_event(const CREATE_PROCESS_DEBUG_INFO& create_process_info);
+	void on_exit_process_event(const EXIT_PROCESS_DEBUG_INFO& exit_process);
+	void on_create_thread_event(const CREATE_THREAD_DEBUG_INFO& create_thread);
+	void on_exit_thread_event(const EXIT_THREAD_DEBUG_INFO& exit_thread);
+	void on_load_dll_event(const LOAD_DLL_DEBUG_INFO& load_dll);
+	void on_unload_dll_event(const UNLOAD_DLL_DEBUG_INFO& unload_dll);
+	void on_output_debug_string_event(const OUTPUT_DEBUG_STRING_INFO& debug_string);
+	void on_rip_event(const RIP_INFO& rip_info);
+	void on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
 
 	bool load_symbol(const load_dll_info_t& info);
 
@@ -224,20 +197,7 @@ public:
 	std::vector<module_info_t>	module_vector_;
 
 	void refresh_memory_map(void);
-	bool get_memory_info_by_addr(const void* addr,memory_region_info_t& info)
-	{
-		refresh_memory_map();
-		for each (memory_region_info_t tmp in memory_info_vector_)
-		{
-			if ((unsigned long)(tmp.start_addr) <= (unsigned long)addr && (unsigned long)addr < (unsigned long)(tmp.start_addr + tmp.size))
-			{
-				info = tmp;
-				return true;
-			}
-		}
-
-		return false;
-	}
+	bool get_memory_info_by_addr(const void* addr,memory_region_info_t& info);
 	void set_sym_search_path(const char* paths, bool reload);
 };
 
