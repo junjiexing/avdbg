@@ -634,6 +634,11 @@ void CMainFrame::OnStopDebug()
 	debug_kernel_ptr->add_ui_event(ID_STOP_DEBUG);
 
 	debug_kernel_ptr.reset();
+
+	m_wndAsmView.Invalidate();
+	m_wndOutput.Invalidate();
+	m_wndStackView.Invalidate();
+	m_wndCallStack.Invalidate();
 }
 
 void CMainFrame::OnBreakProcess()
