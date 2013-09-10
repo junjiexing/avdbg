@@ -95,8 +95,6 @@ public:
 	// 调试模块
 	afx_msg void OnUpdateFileOpen(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFileAttach(CCmdUI *pCmdUI);
-	afx_msg void OnFileStop();
-	afx_msg void OnUpdateFileStop(CCmdUI *pCmdUI);
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

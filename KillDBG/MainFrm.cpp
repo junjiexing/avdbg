@@ -33,7 +33,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 
 	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
 	ON_COMMAND(ID_FILE_ATTACH, &CMainFrame::OnFileAttach)
-	ON_COMMAND(ID_FILE_STOP, &CMainFrame::OnFileStop)
 	ON_COMMAND(ID_FILE_SETSYMPATH, &CMainFrame::OnFileSetsympath)
 	ON_COMMAND(ID_VIEW_REGISTER, &CMainFrame::OnViewRegister)
 	ON_COMMAND(ID_VIEW_MEMORY, &CMainFrame::OnViewMemory)
@@ -47,7 +46,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateFileOpen)
 	ON_UPDATE_COMMAND_UI(ID_FILE_ATTACH, &CMainFrame::OnUpdateFileAttach)
-	ON_UPDATE_COMMAND_UI(ID_FILE_STOP, &CMainFrame::OnUpdateFileStop)
 	
 	ON_COMMAND(ID_STEP_IN, &CMainFrame::OnStepIn)
 	ON_COMMAND(ID_STEP_OVER, &CMainFrame::OnStepOver)
@@ -72,13 +70,6 @@ static UINT indicators[] =
 	ID_INDICATOR_NUM,
 	ID_INDICATOR_SCRL,
 };
-
-static UINT uHideCmds[] =
-{
-	ID_FILE_PRINT,
-	ID_FILE_PRINT_PREVIEW,
-};
-
 
 // CMainFrame construction/destruction
 
@@ -157,18 +148,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CXTPPaintManager::SetTheme(xtpThemeVisualStudio2010);
 
-	// Hide array of commands
-	//pCommandBars->HideCommands(uHideCmds, _countof(uHideCmds));
-
-	// Set "Always Show Full Menus" option to the FALSE
-	//pCommandBars->GetCommandBarsOptions()->bAlwaysShowFullMenus = FALSE;
-
-	//pCommandBars->GetShortcutManager()->SetAccelerators(IDR_MAINFRAME);
-
-	// Load the previous state for toolbars and menus.
-
 	SetupDockPane();
-//	LoadCommandBars(_T("CommandBars"));
 
 	ACCEL acc[] = 
 	{
@@ -459,19 +439,17 @@ LRESULT CMainFrame::OnDebugStop( WPARAM wParam, LPARAM lParam )
 
 void CMainFrame::OnUpdateFileOpen(CCmdUI *pCmdUI)
 {
+	if (debug_kernel_ptr)
+	{
+		pCmdUI->Enable(FALSE);
+		return;
+	}
+	pCmdUI->Enable(TRUE);
 }
 
 void CMainFrame::OnUpdateFileAttach(CCmdUI *pCmdUI)
 {
 	OnUpdateFileOpen(pCmdUI);
-}
-
-void CMainFrame::OnFileStop()
-{
-}
-
-void CMainFrame::OnUpdateFileStop(CCmdUI *pCmdUI)
-{
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)

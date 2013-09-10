@@ -114,7 +114,6 @@ BEGIN
         MENUITEM "打开...",                       ID_FILE_OPEN
         MENUITEM "设置符号目录",                      ID_FILE_SETSYMPATH
         MENUITEM "附加进程...",                     ID_FILE_ATTACH
-        MENUITEM "停止调试",                        ID_FILE_STOP
         MENUITEM "退出(&X)",                      ID_APP_EXIT
     END
     POPUP "调试"
