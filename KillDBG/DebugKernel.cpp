@@ -8,7 +8,6 @@
 debug_kernel::debug_kernel(void)
 	:debug_status_(STOP)
 {
-	continue_event_ = CreateEvent(NULL,FALSE,TRUE,NULL);
 }
 
 
@@ -19,55 +18,71 @@ debug_kernel::~debug_kernel(void)
 		CloseHandle(info.file_handle);
 	}
 
-	debugee_exit_ = true;
+	TerminateThread(debug_thread_,1);
 
-	debug_thread_.timed_join(boost::posix_time::seconds(1));
+	CloseHandle(debug_thread_);
+}
+
+
+unsigned __stdcall debug_kernel::load_exe_thread_func(void* pArg)
+{
+	debug_kernel* p = (debug_kernel*)pArg;
+	STARTUPINFO si = {0};
+	si.cb = sizeof(si);
+	PROCESS_INFORMATION pi = {0};
+	GetStartupInfo(&si);
+	DebugSetProcessKillOnExit(TRUE);
+
+	char command_copy[p->command_str_.size()+1];
+	strcpy(command_copy,p->command_str_.c_str());
+	if (!CreateProcess(p->exe_path_.c_str(), command_copy, 
+		NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, p->current_path_.c_str(), &si, &pi))
+	{
+		main_frame->m_wndOutput.output_string(std::string("创建调试进程失败！！"),COutputWnd::OUT_ERROR);
+		return 1;
+	}
+
+	p->pid_ = pi.dwProcessId;
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+
+	p->debug_thread_proc();
+
+	return 0;
 }
 
 bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std::string& current_path)
 {
-	debug_thread_ = boost::thread([this,exe_path,command_str,current_path]()
+	exe_path_ = exe_path;
+	command_str_ = command_str;
+	current_path_ = current_path;
+	debug_thread_ = (HANDLE)_beginthreadex(NULL,0,&load_exe_thread_func,this,0,NULL);
+
+	return debug_thread_ != NULL;
+}
+
+
+unsigned __stdcall debug_kernel::attach_process_thread_func( void* pArg )
+{
+	debug_kernel* p = (debug_kernel*)pArg;
+
+	DebugSetProcessKillOnExit(FALSE);
+	if (!DebugActiveProcess(p->pid_))
 	{
-		STARTUPINFO si = {0};
-		si.cb = sizeof(si);
-		PROCESS_INFORMATION pi = {0};
-		GetStartupInfo(&si);
-		DebugSetProcessKillOnExit(TRUE);
+		main_frame->m_wndOutput.output_string(std::string("附加指定进程失败！！"),COutputWnd::OUT_ERROR);
+		return 1;
+	}		
+	p->debug_thread_proc();
 
-		char command_copy[command_str.size()+1];
-		strcpy(command_copy,command_str.c_str());
-		if (!CreateProcess(exe_path.c_str(), command_copy, 
-			NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, current_path.c_str(), &si, &pi))
-		{
-			main_frame->m_wndOutput.output_string(std::string("创建调试进程失败！！"),COutputWnd::OUT_ERROR);
-			return;
-		}
-
-		pid_ = pi.dwProcessId;
-		CloseHandle(pi.hThread);
-		CloseHandle(pi.hProcess);
-
-		debug_thread_proc();
-	});
-
-	return true;
+	return 0;
 }
 
 bool debug_kernel::attach_process(DWORD pid)
 {
 	pid_ = pid;
-	debug_thread_ = boost::thread([this]()
-	{
-		DebugSetProcessKillOnExit(FALSE);
-		if (!DebugActiveProcess(pid_))
-		{
-			main_frame->m_wndOutput.output_string(std::string("附加指定进程失败！！"),COutputWnd::OUT_ERROR);
-			return;
-		}		
-		debug_thread_proc();
-	});
+	debug_thread_ = (HANDLE)_beginthreadex(NULL,0,&attach_process_thread_func,this,0,NULL);
 
-	return true;
+	return debug_thread_ != NULL;
 }
 
 void debug_kernel::debug_thread_proc()
@@ -83,9 +98,12 @@ void debug_kernel::debug_thread_proc()
 		debug_status_ = BREAK;
 
 		HANDLE thd_handle = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,FALSE,debug_event_.dwThreadId);
-		context_.ContextFlags = CONTEXT_ALL;
-		GetThreadContext(thd_handle,&context_);
-		CloseHandle(thd_handle);
+		if (thd_handle)
+		{
+			context_.ContextFlags = CONTEXT_ALL;
+			GetThreadContext(thd_handle,&context_);
+			CloseHandle(thd_handle);
+		}
 
 		main_frame->m_wndCallStack.Invalidate(FALSE);
 
@@ -99,14 +117,12 @@ void debug_kernel::debug_thread_proc()
 			break;
 		case EXIT_PROCESS_DEBUG_EVENT:
 			on_exit_process_event(debug_event_.u.ExitProcess);
-			//continue;
 			break;
 		case CREATE_THREAD_DEBUG_EVENT:
 			on_create_thread_event(debug_event_.u.CreateThread);
 			break;
 		case EXIT_THREAD_DEBUG_EVENT:
 			on_exit_thread_event(debug_event_.u.ExitThread);
-			//continue;
 			break;
 		case LOAD_DLL_DEBUG_EVENT:		//加载DLL
 			on_load_dll_event(debug_event_.u.LoadDll);
@@ -1124,7 +1140,7 @@ void debug_kernel::on_idle()
 				{
 					main_frame->m_wndOutput.output_string(std::string("停止调试失败"));
 				}
-				continue_debug();
+				//continue_debug();
 			}
 			break;
 		case ID_BREAK_PROCESS:

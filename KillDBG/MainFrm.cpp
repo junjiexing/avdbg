@@ -337,6 +337,8 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainFrame::OnClose()
 {
+	debug_kernel_ptr->add_ui_event(ID_STOP_DEBUG);
+
 	debug_kernel_ptr.reset();
 
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
@@ -612,8 +614,8 @@ void CMainFrame::OnStopDebug()
 	}
 
 	debug_kernel_ptr->add_ui_event(ID_STOP_DEBUG);
-
-	debug_kernel_ptr.reset();
+//  	debug_kernel_ptr->wait_for_debug_thread_exit();
+//  	debug_kernel_ptr.reset();
 
 	m_wndAsmView.Invalidate();
 	m_wndOutput.Invalidate();

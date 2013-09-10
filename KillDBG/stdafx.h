@@ -64,7 +64,7 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <boost/thread.hpp>
+#include <process.h>
 #include <boost/format.hpp>
 #include <memory>
 // #include <ImageHlp.h>

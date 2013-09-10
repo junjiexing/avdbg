@@ -97,13 +97,17 @@ public:
 		ui_event_t event = {type,param1,param2};
 		ui_event_.push_back(event);
 	}
+
+	void wait_for_debug_thread_exit()
+	{
+		WaitForSingleObject(debug_thread_,INFINITE);
+	}
+
 private:
 	// 最后一次WaitForDebugEvent获取到的调试事件
 	DEBUG_EVENT debug_event_;
 	// 最后一次调试事件时的线程context
 	CONTEXT context_;
-	// 继续调试所用的事件
-	HANDLE continue_event_;
 	//HANDLE process_handle_;
 	bool debugee_exit_;
 	//DWORD process_id_;
@@ -135,8 +139,7 @@ private:
 	};
 	std::deque<ui_event_t> ui_event_;
 
-	boost::thread debug_thread_;
-
+	HANDLE debug_thread_;
 
 private:
 	void debug_thread_proc();
@@ -152,6 +155,14 @@ private:
 	void on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
 
 	bool load_symbol(const load_dll_info_t& info);
+
+
+	std::string exe_path_;
+	std::string command_str_;
+	std::string current_path_;
+
+	static unsigned __stdcall load_exe_thread_func(void* pArg);
+	static unsigned __stdcall attach_process_thread_func(void* pArg);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
