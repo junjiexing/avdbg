@@ -18,11 +18,15 @@ debug_kernel::~debug_kernel(void)
 	{
 		CloseHandle(info.file_handle);
 	}
+
+	debugee_exit_ = true;
+
+	debug_thread_.timed_join(boost::posix_time::seconds(1));
 }
 
 bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std::string& current_path)
 {
-	std::thread debug_thread([this,exe_path,command_str,current_path]()
+	debug_thread_ = boost::thread([this,exe_path,command_str,current_path]()
 	{
 		STARTUPINFO si = {0};
 		si.cb = sizeof(si);
@@ -46,15 +50,13 @@ bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std:
 		debug_thread_proc();
 	});
 
-	debug_thread.detach();
-
 	return true;
 }
 
 bool debug_kernel::attach_process(DWORD pid)
 {
 	pid_ = pid;
-	std::thread debug_thread([this]()
+	debug_thread_ = boost::thread([this]()
 	{
 		DebugSetProcessKillOnExit(FALSE);
 		if (!DebugActiveProcess(pid_))
@@ -64,8 +66,6 @@ bool debug_kernel::attach_process(DWORD pid)
 		}		
 		debug_thread_proc();
 	});
-
-	debug_thread.detach();
 
 	return true;
 }

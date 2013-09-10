@@ -135,9 +135,8 @@ private:
 	};
 	std::deque<ui_event_t> ui_event_;
 
-// 	std::string exe_path_;
-// 	std::string command_str_;
-// 	std::string current_path_;
+	boost::thread debug_thread_;
+
 
 private:
 	void debug_thread_proc();
