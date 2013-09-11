@@ -102,4 +102,5 @@ public:
 	afx_msg void OnViewDiswnd();
 	afx_msg void OnFileSetsympath();
 	afx_msg void OnViewCallstack();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

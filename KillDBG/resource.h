@@ -15,6 +15,7 @@
 #define ID_RUN_OUT                      121
 #define ID_STOP_DEBUG                   122
 #define ID_BREAK_PROCESS                123
+#define ID_TIMER_RESET_DBGKRNL          124
 #define IDD_SYMBOL_SEARCH_PATHS         144
 #define IDR_TOOLBARDEBUG                145
 #define ID_FILE_ATTACH                  201
@@ -90,6 +91,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        147
 #define _APS_NEXT_COMMAND_VALUE         32822
 #define _APS_NEXT_CONTROL_VALUE         1023
-#define _APS_NEXT_SYMED_VALUE           124
+#define _APS_NEXT_SYMED_VALUE           125
 #endif
 #endif
