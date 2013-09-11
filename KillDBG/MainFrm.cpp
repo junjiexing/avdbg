@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 
 	ON_MESSAGE(WM_USER_DEBUGSTOP, &CMainFrame::OnDebugStop)
 	ON_WM_TIMER()
+	ON_COMMAND(ID_DETACH_DEBUGGER, &CMainFrame::OnDetachDebugger)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -338,6 +339,11 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 void CMainFrame::OnClose()
 {
+	if (debug_kernel_ptr)
+	{
+		debug_kernel_ptr.reset();
+	}
+
 	CXTPDockingPaneLayout layoutNormal(&m_paneManager);
 	m_paneManager.GetLayout(&layoutNormal);
 	layoutNormal.SaveToFile("FrameLayout","Default");
@@ -611,14 +617,7 @@ void CMainFrame::OnStopDebug()
 	}
 
 	debug_kernel_ptr->add_ui_event(ID_STOP_DEBUG);
-//  	while (debug_kernel_ptr->get_debug_status() != debug_kernel::STOP)
-//  	{
-// 		Sleep(1);
-//  	}
-//  	debug_kernel_ptr.reset();
-	SetTimer(ID_TIMER_RESET_DBGKRNL,20,NULL);
-
-
+	SetTimer(ID_TIMER_STOP_DEBUG,20,NULL);
 }
 
 void CMainFrame::OnBreakProcess()
@@ -632,11 +631,20 @@ void CMainFrame::OnBreakProcess()
 }
 
 
-
-
 void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 {
-	if (nIDEvent == ID_TIMER_RESET_DBGKRNL && debug_kernel_ptr->get_debug_status() == debug_kernel::STOP)
+	if (nIDEvent == ID_TIMER_STOP_DEBUG && debug_kernel_ptr->get_debug_status() == debug_kernel::STOP)
+	{
+		debug_kernel_ptr.reset();
+
+		m_wndAsmView.Invalidate();
+		m_wndOutput.Invalidate();
+		m_wndStackView.Invalidate();
+		m_wndCallStack.Invalidate();
+
+		KillTimer(nIDEvent);
+	}
+	else if (nIDEvent == ID_TIMER_DETACH_DEBUGGER)
 	{
 		debug_kernel_ptr.reset();
 
@@ -649,4 +657,11 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 	}
 
 	CXTPFrameWnd::OnTimer(nIDEvent);
+}
+
+
+void CMainFrame::OnDetachDebugger()
+{
+	debug_kernel_ptr->add_ui_event(ID_DETACH_DEBUGGER);
+	SetTimer(ID_TIMER_DETACH_DEBUGGER,20,NULL);
 }

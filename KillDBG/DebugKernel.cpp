@@ -10,7 +10,6 @@ debug_kernel::debug_kernel(void)
 {
 }
 
-
 debug_kernel::~debug_kernel(void)
 {
 	for each (load_dll_info_t info in load_dll_info_)
@@ -18,7 +17,11 @@ debug_kernel::~debug_kernel(void)
 		CloseHandle(info.file_handle);
 	}
 
-	TerminateThread(debug_thread_,1);
+	debugee_exit_ = true;
+	if (WaitForSingleObject(debug_thread_,1*1000) != WAIT_OBJECT_0)
+	{
+		TerminateThread(debug_thread_,1);
+	}
 
 	CloseHandle(debug_thread_);
 }
@@ -60,7 +63,6 @@ bool debug_kernel::load_exe(std::string& exe_path, std::string& command_str,std:
 
 	return debug_thread_ != NULL;
 }
-
 
 unsigned __stdcall debug_kernel::attach_process_thread_func( void* pArg )
 {
@@ -627,7 +629,7 @@ void debug_kernel::refresh_memory_map( void )
 
 }
 
-bool debug_kernel::step_in()
+bool debug_kernel::step_in( DWORD continue_status )
 {
 	if (debug_status_ != BREAK)
 	{
@@ -657,7 +659,7 @@ bool debug_kernel::step_in()
 	}
 	CloseHandle(thd_handle);
 	
-	continue_debug();
+	continue_debug(continue_status,true);
 	return true;
 }
 
@@ -858,7 +860,7 @@ bool debug_kernel::delete_breakpoint( DWORD address )
 	return false;
 }
 
-bool debug_kernel::step_over()
+bool debug_kernel::step_over( DWORD continue_status )
 {
 	x86dis decoder(X86_OPSIZE32,X86_ADDRSIZE32);
 	byte buffer[15];
@@ -889,9 +891,9 @@ bool debug_kernel::step_over()
 			return false;
 		}
 		
-		return continue_debug();
+		return continue_debug(continue_status,true);
 	}
-	return step_in();
+	return step_in(continue_status);
 }
 
 bool debug_kernel::symbol_from_addr( DWORD addr,std::string& symbol,bool allow_in_func )
@@ -1051,6 +1053,19 @@ bool debug_kernel::continue_debug( DWORD continue_status /*= DBG_CONTINUE*/,bool
 	return ContinueDebugEvent(debug_event_.dwProcessId,debug_event_.dwThreadId,continue_status) == TRUE;
 }
 
+bool debug_kernel::detach_debugger()
+{
+	for (int i=0;i<bp_vec_.size();++i)
+	{
+		breakpoint_t& bp = bp_vec_[i];
+		invalid_breakpoint(&bp);
+	}
+
+	ContinueDebugEvent(debug_event_.dwProcessId,debug_event_.dwThreadId,DBG_CONTINUE);
+
+	return DebugActiveProcessStop(pid_) == TRUE;
+}
+
 void debug_kernel::on_idle()
 {
 	while (ui_event_.size() != 0)
@@ -1061,12 +1076,12 @@ void debug_kernel::on_idle()
 		{
 		case ID_STEP_IN:
 			{
-				step_in();
+				step_in(DBG_CONTINUE);
 			}
 			break;
 		case ID_STEP_OVER:
 			{
-				step_over();
+				step_over(DBG_CONTINUE);
 			}
 			break;
 		case ID_RUN:
@@ -1076,12 +1091,12 @@ void debug_kernel::on_idle()
 			break;
 		case ID_STEPIN_UNHANDLE_EXCEPT:
 			{
-				step_in();
+				step_in(DBG_EXCEPTION_NOT_HANDLED);
 			}
 			break;
 		case ID_STEPOVER_UNHANDLE_EXCEPT:
 			{
-				step_over();
+				step_over(DBG_EXCEPTION_NOT_HANDLED);
 			}
 			break;
 		case ID_RUN_UNHANDLE_EXCEPT:
@@ -1157,10 +1172,15 @@ void debug_kernel::on_idle()
 				}
 			}
 			break;
-// 		case :
-// 			break;
+		case ID_DETACH_DEBUGGER:
+			if (!detach_debugger())
+			{
+				main_frame->m_wndOutput.output_string(std::string("·ÖÀëµ÷ÊÔÆ÷Ê§°Ü¡£"),COutputWnd::OUT_ERROR);
+			}
+			break;
 		}
 
 		ui_event_.pop_front();
 	}
 }
+

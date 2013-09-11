@@ -125,6 +125,7 @@ BEGIN
         MENUITEM "执行",                          ID_RUN
         MENUITEM "暂停执行",                        ID_BREAK_PROCESS
         MENUITEM "停止调试",                        ID_STOP_DEBUG
+        MENUITEM "分离调试器",                       ID_DETACH_DEBUGGER
     END
     POPUP "视图(&V)"
     BEGIN

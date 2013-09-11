@@ -103,4 +103,5 @@ public:
 	afx_msg void OnFileSetsympath();
 	afx_msg void OnViewCallstack();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnDetachDebugger();
 };

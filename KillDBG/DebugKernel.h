@@ -36,9 +36,9 @@ public:
 	bool attach_process(DWORD pid);
 
 	// 单步步入
-	bool step_in();
+	bool step_in(DWORD continue_status);
 	// 单步步过
-	bool step_over();
+	bool step_over(DWORD continue_status);
 
 	// 继续调试，运行被调试进程
 	bool continue_debug(DWORD continue_status = DBG_CONTINUE,bool disable_current_bp = false);
@@ -81,7 +81,7 @@ public:
 	bool symbol_from_addr( DWORD addr,PSYMBOL_INFO symbol_info);
 	bool stack_walk(STACKFRAME64& stack_frame, CONTEXT& context);
 	bool stop_debug();
-
+	bool detach_debugger();
 	bool break_process()
 	{
 		return DebugBreakProcess(handle_) == true;
