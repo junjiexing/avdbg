@@ -1089,16 +1089,16 @@ void debug_kernel::on_idle()
 				continue_debug(DBG_CONTINUE,true);
 			}
 			break;
-		case ID_STEPIN_UNHANDLE_EXCEPT:
-			{
-				step_in(DBG_EXCEPTION_NOT_HANDLED);
-			}
-			break;
-		case ID_STEPOVER_UNHANDLE_EXCEPT:
-			{
-				step_over(DBG_EXCEPTION_NOT_HANDLED);
-			}
-			break;
+// 		case ID_STEPIN_UNHANDLE_EXCEPT:
+// 			{
+// 				step_in(DBG_EXCEPTION_NOT_HANDLED);
+// 			}
+// 			break;
+// 		case ID_STEPOVER_UNHANDLE_EXCEPT:
+// 			{
+// 				step_over(DBG_EXCEPTION_NOT_HANDLED);
+// 			}
+// 			break;
 		case ID_RUN_UNHANDLE_EXCEPT:
 			{
 				continue_debug(DBG_EXCEPTION_NOT_HANDLED,true);
