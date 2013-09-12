@@ -51,40 +51,24 @@ private:
 	BOOL m_bLButtonDown;
 	std::string m_strSelWord;
 
+	CHeaderCtrl m_Header;
+
+	int m_nAddrWidth;
+	int m_nHexWidth;
+	int m_nDisasmWidth;
+	int m_nCommicWidth;
+
 	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount);
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-	BOOL SetPaintFont(const LOGFONT& font)
-	{
-		m_Font.Detach();
-
-		if (! m_Font.CreateFontIndirect(&font))
-		{
-			return FALSE;
-		}
-
-		CDC* pDC = GetDC();
-		CFont* pFont = pDC->SelectObject(&m_Font);
-		pFont->DeleteObject();
-		TEXTMETRIC	text_metrit = {0};
-		if (!pDC->GetTextMetrics(&text_metrit))
-		{
-			return FALSE;
-		}
-		;
-		// 默认行高
-		m_nLineHight = text_metrit.tmHeight + text_metrit.tmExternalLeading + 5 ;
-		// 默认字体宽度
-		m_nFontWidth = text_metrit.tmAveCharWidth;
-		ReleaseDC(pDC);
-
-		return TRUE;
-	}
+	BOOL SetPaintFont(const LOGFONT& font);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnHdnEndtrack(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 

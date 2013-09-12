@@ -16,9 +16,9 @@ protected:
 
 	CHeaderCtrl m_Header;
 
-	int m_AddrWidth;
-	int m_HexWidth;
-	int m_AsciiWidth;
+	int m_nAddrWidth;
+	int m_nHexWidth;
+	int m_nAsciiWidth;
 	CFont m_Font;
 
 	DWORD m_dwSelStart;
@@ -33,8 +33,6 @@ protected:
 	CMenu m_Menu;
 public:
 	afx_msg void OnPaint();
-	afx_msg void OnHdnBegindrag(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnHdnBegintrack(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnHdnEndtrack(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

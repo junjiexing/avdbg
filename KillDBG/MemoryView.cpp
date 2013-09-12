@@ -21,7 +21,7 @@ extern std::shared_ptr<debug_kernel> debug_kernel_ptr;
 IMPLEMENT_DYNAMIC(CMemoryWnd, CWnd)
 
 CMemoryWnd::CMemoryWnd()
-	:m_AddrWidth(0),m_HexWidth(0),m_AsciiWidth(0),
+	:m_nAddrWidth(0),m_nHexWidth(0),m_nAsciiWidth(0),
 	m_dwSelEnd(0),m_dwSelStart(0),m_bLBtnDwn(false),
 	m_nLineHight(20),m_nFontWidth(20),m_dwStartAddr(0)
 {
@@ -101,7 +101,7 @@ void CMemoryWnd::OnPaint()
 		RECT rc = {0};
 		rc.top = y;
 		rc.bottom = rc.top + m_nLineHight;
-		rc.right = m_AddrWidth;
+		rc.right = m_nAddrWidth;
 		dcMem.ExtTextOut(0,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,8,NULL);
 
 		// 绘制hex数据
@@ -110,8 +110,8 @@ void CMemoryWnd::OnPaint()
 		{
 			DWORD pos = i*16+j;
 
-			rc.left = m_AddrWidth + width;
-			rc.right = m_AddrWidth + width + m_nFontWidth*3;
+			rc.left = m_nAddrWidth + width;
+			rc.right = m_nAddrWidth + width + m_nFontWidth*3;
 			rc.top = y;
 			rc.bottom = rc.top + m_nLineHight;
 			if (pos+m_dwStartAddr>=dwSelStart && pos+m_dwStartAddr<=dwSelEnd)
@@ -128,14 +128,14 @@ void CMemoryWnd::OnPaint()
 				strcpy(buffer,"?? ");
 			}
 
-			dcMem.ExtTextOut(m_AddrWidth + width,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,3,NULL);
+			dcMem.ExtTextOut(m_nAddrWidth + width,y,ETO_CLIPPED|ETO_OPAQUE,&rc,buffer,3,NULL);
 			dcMem.SetBkColor(0x00FFFFFF);
 			width += m_nFontWidth*3;
 		}
 
 		// 绘制字符数据
-		rc.left = m_AddrWidth+m_HexWidth;
-		rc.right = m_AddrWidth+m_HexWidth+m_nFontWidth*16;
+		rc.left = m_nAddrWidth+m_nHexWidth;
+		rc.right = m_nAddrWidth+m_nHexWidth+m_nFontWidth*16;
 		rc.top = y;
 		rc.bottom = y + m_nLineHight;
 		dcMem.ExtTextOut(0,0,ETO_OPAQUE,&rc,NULL,0,NULL);
@@ -157,20 +157,20 @@ void CMemoryWnd::OnPaint()
 		else if (dwLineStart>dwSelStart && dwLineStart<dwSelEnd && dwLineEnd>dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.right = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelEnd-dwLineStart);
+			tmp.right = m_nAddrWidth+m_nHexWidth+m_nFontWidth*(dwSelEnd-dwLineStart);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 		else if (dwLineStart<dwSelStart && dwLineEnd>dwSelStart && dwLineEnd<dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
+			tmp.left = m_nAddrWidth+m_nHexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
 			tmp.right = tmp.left+m_nFontWidth*(num-(dwSelStart-dwLineStart));
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
 		else if (dwLineStart<=dwSelStart && dwLineEnd>=dwSelEnd)
 		{
 			RECT tmp = rc;
-			tmp.left = m_AddrWidth+m_HexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
+			tmp.left = m_nAddrWidth+m_nHexWidth+m_nFontWidth*(dwSelStart-dwLineStart);
 			tmp.right = tmp.left+m_nFontWidth*(dwSelEnd-dwSelStart+1);
 			dcMem.ExtTextOut(0,0,ETO_OPAQUE,&tmp,NULL,0,NULL);
 		}
@@ -185,7 +185,7 @@ void CMemoryWnd::OnPaint()
 		{
 			strcpy(buffer,"????????????????");
 		}
-		dcMem.ExtTextOut(m_AddrWidth+m_HexWidth,y,ETO_CLIPPED,&rc,buffer,num,NULL);
+		dcMem.ExtTextOut(m_nAddrWidth+m_nHexWidth,y,ETO_CLIPPED,&rc,buffer,num,NULL);
 	}
 }
 
@@ -203,13 +203,13 @@ void CMemoryWnd::OnHdnEndtrack( NMHDR *pNMHDR, LRESULT *pResult )
 	switch (phdr->iItem)
 	{
 	case 0:
-		m_AddrWidth = pitem->cxy;
+		m_nAddrWidth = pitem->cxy;
 		break;
 	case 1:
-		m_HexWidth = pitem->cxy;
+		m_nHexWidth = pitem->cxy;
 		break;
 	case 2:
-		m_AsciiWidth = pitem->cxy;
+		m_nAsciiWidth = pitem->cxy;
 		break;
 	}
 
@@ -223,15 +223,15 @@ void CMemoryWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	RECT rc = {0};
 	GetClientRect(&rc);
 	rc.top = 20;
-	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
+	rc.left = m_nAddrWidth;
+	rc.right = m_nAddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt))
 	{
 		m_bLBtnDwn = true;
 
 		int line = (point.y-20) / m_nLineHight;
-		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
+		int nChar = (point.x-m_nAddrWidth)/(m_nFontWidth*3);
 
 		m_dwSelEnd = m_dwSelStart = m_dwStartAddr + line*16+nChar;
 
@@ -246,15 +246,15 @@ void CMemoryWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	RECT rc = {0};
 	GetClientRect(&rc);
 	rc.top = 20;
-	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
+	rc.left = m_nAddrWidth;
+	rc.right = m_nAddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt))
 	{
 		m_bLBtnDwn = false;
 
 		int line = (point.y-20) / m_nLineHight;
-		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
+		int nChar = (point.x-m_nAddrWidth)/(m_nFontWidth*3);
 
 		m_dwSelEnd = m_dwStartAddr + line*16+nChar;
 
@@ -269,13 +269,13 @@ void CMemoryWnd::OnMouseMove(UINT nFlags, CPoint point)
 	RECT rc = {0};
 	GetClientRect(&rc);
 	rc.top = 20;
-	rc.left = m_AddrWidth;
-	rc.right = m_AddrWidth+m_nFontWidth*3*16; 
+	rc.left = m_nAddrWidth;
+	rc.right = m_nAddrWidth+m_nFontWidth*3*16; 
 	POINT pt = {point.x,point.y};
 	if (PtInRect(&rc,pt) && m_bLBtnDwn)
 	{
 		int line = (point.y-20) / m_nLineHight;
-		int nChar = (point.x-m_AddrWidth)/(m_nFontWidth*3);
+		int nChar = (point.x-m_nAddrWidth)/(m_nFontWidth*3);
 
 		m_dwSelEnd = m_dwStartAddr + line*16+nChar;
 
@@ -304,13 +304,13 @@ int CMemoryWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_Header.Create(NULL,rc,this,123);
 	HDITEM	item = {0};
 	item.mask = HDI_WIDTH | HDI_TEXT;
-	m_AddrWidth = item.cxy = 120;
+	m_nAddrWidth = item.cxy = 120;
 	item.pszText = "地址";
 	m_Header.InsertItem(0,&item);
-	m_HexWidth = item.cxy = 240;
+	m_nHexWidth = item.cxy = 240;
 	item.pszText = "HEX";
 	m_Header.InsertItem(1,&item);
-	m_AsciiWidth = item.cxy = 120;
+	m_nAsciiWidth = item.cxy = 120;
 	item.pszText = "ASCII";
 	m_Header.InsertItem(2,&item);
 	m_Header.ShowWindow(SW_SHOW);
