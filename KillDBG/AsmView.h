@@ -36,8 +36,15 @@ private:
 	void PreviousCode(DWORD dwTargetAddr,DWORD* pdwPreInsn);
 	void UpdateScrollInfo();
 
+	struct ASM_STR
+	{
+		char szAddr[10];
+		std::string strAsmCode;
+		std::string strCommit;
+	};
+
 	std::vector<DWORD> m_vecAddress;
-	std::vector<std::string> m_vecAsm;
+	std::vector<ASM_STR> m_vecAsm;
 	CFont m_Font;
 	int m_nLineHight;
 	int m_nFontWidth;
