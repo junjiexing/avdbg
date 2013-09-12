@@ -58,7 +58,7 @@ private:
 	int m_nDisasmWidth;
 	int m_nCommicWidth;
 
-	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCTSTR lpszString, UINT nCount);
+	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCRECT lpRect, LPCTSTR lpszString, UINT nCount);
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
