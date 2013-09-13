@@ -147,6 +147,55 @@ void debug_kernel::debug_thread_proc()
 	debug_status_ = STOP;
 }
 
+void debug_kernel::get_module_info( DWORD base,const std::string& path )
+{
+	IMAGE_DOS_HEADER dos_header;
+	read_memory(base,&dos_header,sizeof(IMAGE_DOS_HEADER));
+	IMAGE_NT_HEADERS nt_header;
+	read_memory(base + dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS));
+
+	module_info_t info;
+	info.base_addr = base;
+	info.size = nt_header.OptionalHeader.SizeOfImage;
+	info.path = path;
+
+	std::string::const_iterator it = path.end();
+	--it;
+	for (;it!=path.begin();--it)
+	{
+		if (*it == '.')
+		{
+			info.module_name.clear();
+			continue;
+		}
+
+		if (*it == '\\' || *it == '/')
+		{
+			break;
+		}
+
+		//info.module_name.push_back(*it);
+		info.module_name.insert(0,1,*it);
+	}
+
+	//读取所有的区段头
+	int sec_num = nt_header.FileHeader.NumberOfSections;
+	IMAGE_SECTION_HEADER sce_hdrs[sec_num];
+	if (read_memory(base+dos_header.e_lfanew+sizeof(IMAGE_NT_HEADERS),sce_hdrs,sizeof(IMAGE_SECTION_HEADER)*sec_num))
+	{
+		for (int i=0;i<sec_num;++i)
+		{
+			section_info_t sec_info;
+			strncpy(sec_info.name,(const char*)sce_hdrs[i].Name,IMAGE_SIZEOF_SHORT_NAME);
+			sec_info.start_addr = base+sce_hdrs[i].VirtualAddress;
+			sec_info.size = sce_hdrs[i].Misc.VirtualSize;
+			info.section_info.push_back(sec_info);
+		}
+	}
+
+	module_vector_.push_back(info);
+}
+
 void debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& create_process_info )
 {
 	std::string program_path;
@@ -156,9 +205,9 @@ void debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	main_frame->m_wndOutput.output_string( fmter.str());
 
 	handle_ = create_process_info.hProcess;
+	DWORD base = (DWORD)create_process_info.lpBaseOfImage;
 
 	IMAGE_DOS_HEADER dos_header;
-	DWORD base = (DWORD)create_process_info.lpBaseOfImage;
 	read_memory(base,&dos_header,sizeof(IMAGE_DOS_HEADER));
 	IMAGE_NT_HEADERS nt_header;
 	read_memory(base + dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS));
@@ -166,13 +215,7 @@ void debug_kernel::on_create_process_event( const CREATE_PROCESS_DEBUG_INFO& cre
 	main_frame->m_wndMemView.SetAddrToView(base + nt_header.OptionalHeader.AddressOfEntryPoint);
 	CloseHandle(create_process_info.hThread);
 
-// 	char buffer[512];
-// 	sprintf( buffer,"srv*%s*http://msdl.microsoft.com/download/symbols", "E:\\123");
-// 
-// 	if( !SetEnvironmentVariable( _T( "_NT_SYMBOL_PATH" ), buffer ) )
-// 	{
-// 		return FALSE;
-// 	}
+	get_module_info(base,program_path);
 
 	DWORD Options = SymGetOptions(); 
 
@@ -230,6 +273,8 @@ void debug_kernel::on_load_dll_event( const LOAD_DLL_DEBUG_INFO& load_dll )
 	boost::format fmter("加载模块:\"%s\"");
 	fmter % dll_path;
 	main_frame->m_wndOutput.output_string(fmter.str());
+
+	get_module_info((DWORD)load_dll.lpBaseOfDll,dll_path);
 
 	load_dll_info_t info = {load_dll.hFile,(DWORD)load_dll.lpBaseOfDll,dll_path};
 	load_symbol(info);
@@ -482,149 +527,62 @@ void debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 
 void debug_kernel::refresh_memory_map( void )
 {
-	memory_info_vector_.clear();
-
-	//获取进程中所有模块和模块信息
-	HANDLE hsnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,pid_);
-	debug_utils::scope_exit  close_hsnap([&hsnap](){CloseHandle(hsnap);hsnap = NULL;});
-	if (hsnap == INVALID_HANDLE_VALUE)
-	{
-		return;
-	}
-
-	MODULEENTRY32	module_entry = {0};
-	module_entry.dwSize = sizeof(MODULEENTRY32);
-	if (!Module32First(hsnap,&module_entry))
-	{
-		return;
-	}
-
-	module_vector_.clear();
-	do 
-	{
-		module_info_t module_info = {0};
-		module_info.module_base_addr = module_entry.modBaseAddr;
-		module_info.module_base_size = module_entry.modBaseSize;
-		strcpy(module_info.module_name,module_entry.szModule);
-
-		//读取dos头
-		IMAGE_DOS_HEADER dos_header;
-		if (!read_memory((DWORD)module_entry.modBaseAddr,&dos_header,sizeof(IMAGE_DOS_HEADER))
-			|| dos_header.e_magic != IMAGE_DOS_SIGNATURE)
-		{
-			return;
-		}
-
-		//读取PE文件头
-		IMAGE_NT_HEADERS nt_header;
-		if (!read_memory((DWORD)module_entry.modBaseAddr+dos_header.e_lfanew,&nt_header,sizeof(IMAGE_NT_HEADERS)) 
-			|| nt_header.Signature != IMAGE_NT_SIGNATURE)
-		{
-			return;
-		}
-		//判断区段数量是否正确
-		if (nt_header.FileHeader.NumberOfSections<0
-			|| nt_header.FileHeader.NumberOfSections>96)
-		{
-			return;
-		}
-		module_info.section_nums = nt_header.FileHeader.NumberOfSections;
-
-		//模块入口点
-		module_info.entry_vector.push_back((BYTE*)(nt_header.OptionalHeader.ImageBase + nt_header.OptionalHeader.AddressOfEntryPoint));
-
-		//从模块开始到区段表结束之前的大小
-		module_info.pe_header_addr = dos_header.e_lfanew 
-			+ sizeof(IMAGE_NT_HEADERS) 
-			+ sizeof(IMAGE_SECTION_HEADER)*module_info.section_nums;
-
-		//读取所有的区段头
-		IMAGE_SECTION_HEADER sectionHeaders[nt_header.FileHeader.NumberOfSections];
-		if (!read_memory((DWORD)module_entry.modBaseAddr+dos_header.e_lfanew+sizeof(IMAGE_NT_HEADERS),sectionHeaders,sizeof(IMAGE_SECTION_HEADER)*nt_header.FileHeader.NumberOfSections))
-		{
-			return;
-		}
-
-		for (int i=0;i<module_info.section_nums;++i)
-		{
-			strncpy(module_info.section_info[i].name,(const char*)sectionHeaders[i].Name,IMAGE_SIZEOF_SHORT_NAME);
-			module_info.section_info[i].start_addr = module_entry.modBaseAddr+sectionHeaders[i].VirtualAddress;
-			//ModuleInfo.stSections[i].nSize = sectionHeaders[i].SizeOfRawData;
-			module_info.section_info[i].size = sectionHeaders[i].Misc.VirtualSize;
-		}
-
-		module_vector_.push_back(module_info);
-	} while (Module32Next(hsnap,&module_entry));
-
-
-	PBYTE	Address = NULL;
+	DWORD	addr = NULL;
 	MEMORY_BASIC_INFORMATION	info = {0};
-	while (VirtualQueryEx(handle_,Address,&info,sizeof(info)) == sizeof(info))
+	while (VirtualQueryEx(handle_,(LPCVOID)addr,&info,sizeof(info)) == sizeof(info))
 	{
-		//AtlTrace("%08X\n",Address);
-		memory_region_info_t	MemInfo = {0};
-		MemInfo.start_addr = Address;	//起始地址
-		MemInfo.protect = info.Protect;	//访问属性
-		MemInfo.alloc_protect = info.AllocationProtect;		//初始访问属性
-		MemInfo.type = info.Type;		//类型
-		MemInfo.size = info.RegionSize - (Address - (BYTE*)info.BaseAddress);
+		memory_region_info_t	mem_info = {0};
+		mem_info.start_addr = addr;	//起始地址
+		mem_info.protect = info.Protect;	//访问属性
+		mem_info.alloc_protect = info.AllocationProtect;		//初始访问属性
+		mem_info.type = info.Type;		//类型
+		mem_info.size = info.RegionSize-(addr-(DWORD)info.BaseAddress);
 
-		byte*	pRgnStart = MemInfo.start_addr;
-		byte*	pRgnEnd = pRgnStart + MemInfo.size;
+		DWORD rgn_start = mem_info.start_addr;
+		DWORD rgn_end = rgn_start + mem_info.size;
 
-		//查找该段内存属于哪个模块
 		for (std::vector<module_info_t>::iterator it=module_vector_.begin();
 			it!=module_vector_.end();++it)
 		{
 			module_info_t& info = *it;
 			//查找该段内存属于哪个模块
-			if (pRgnStart<info.module_base_addr || pRgnStart>=(info.module_base_addr+info.module_base_size))
+			if (rgn_start<info.base_addr || rgn_start>=(info.base_addr+info.size))
 			{
 				continue;
 			}
 
-			MemInfo.owner_name = info.module_name;
+			mem_info.owner_name = info.module_name;
 
-			AtlTrace("RgnDtart:%08X\n",pRgnStart);
+			AtlTrace("RgnDtart:%08X\n",rgn_start);
 
-			if (pRgnStart == info.module_base_addr)
+			if (rgn_start == info.base_addr)
 			{
-				MemInfo.section_name = "PE头";
+				mem_info.section_name = "PE头";
 			}
 
 			//查找该段内存属于哪个区段
-			for (int i=0;i<info.section_nums;++i)
+			for each (section_info_t sec_info in info.section_info)
 			{
-				section_info_t& SecInfo = info.section_info[i];
-				byte*	pSecStart = SecInfo.start_addr;
-				byte*	pSecEnd = pSecStart + SecInfo.size;
-				AtlTrace("SecStart:%08X,SecEnd:%08X\n",pSecStart,pSecEnd);
+				DWORD sec_start = sec_info.start_addr;
+				DWORD sec_end = sec_start + sec_info.size;
+				AtlTrace("SecStart:%08X,SecEnd:%08X\n",sec_start,sec_end);
 
-				if (pRgnStart == pSecStart)
+				if (rgn_start == sec_start)
 				{
-					MemInfo.section_name = SecInfo.name;
+					mem_info.section_name = sec_info.name;
 				}
-				else if (pSecStart>pRgnStart && pSecStart<pRgnEnd)
+				else if (sec_start>rgn_start && sec_start<rgn_end)
 				{
-					//MemInfo.strSectionName = "";
-					MemInfo.size = pSecStart - pRgnStart;
+					mem_info.size = sec_start - rgn_start;
 					break;
-				}
-			}
-
-			for each (BYTE* it in info.entry_vector)
-			{
-				if (it>=MemInfo.start_addr && it<(MemInfo.start_addr + MemInfo.size))
-				{
-					MemInfo.entry_vector.push_back(it);
 				}
 			}
 
 			break;
 		}
-		memory_info_vector_.push_back(MemInfo);
-		Address += MemInfo.size;
-		AtlTrace("%X\n",MemInfo.size);
+		memory_info_vector_.push_back(mem_info);
+		addr += mem_info.size;
+		AtlTrace("%X\n",mem_info.size);
 	}
 
 }

@@ -74,9 +74,9 @@ void CModuleList::OnRefresh()
 	for each (debug_kernel::module_info_t info in debug_kernel_ptr->module_vector_)
 	{
 		char buffer[10];
-		sprintf(buffer,"%08X",info.module_base_addr);
+		sprintf(buffer,"%08X",info.base_addr);
 		InsertItem(i,buffer);
-		sprintf(buffer,"%d",info.module_base_size);
+		sprintf(buffer,"%d",info.size);
 		SetItemText(i,1,buffer);
 	}
 }

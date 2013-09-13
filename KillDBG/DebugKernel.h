@@ -155,7 +155,7 @@ private:
 	void on_exception_event(const EXCEPTION_DEBUG_INFO& debug_exception);
 
 	bool load_symbol(const load_dll_info_t& info);
-
+	void get_module_info(DWORD base,const std::string& path);
 
 	std::string exe_path_;
 	std::string command_str_;
@@ -171,25 +171,23 @@ public:
 	struct section_info_t
 	{
 		char	name[IMAGE_SIZEOF_SHORT_NAME+1];
-		byte*	start_addr;
+		DWORD	start_addr;
 		DWORD	size;
 	};
 
 	struct module_info_t 
 	{
-		BYTE  * module_base_addr;        // Base address of module in th32ProcessID's context
-		DWORD   module_base_size;        // Size in bytes of module starting at modBaseAddr
-		char    module_name[MAX_MODULE_NAME32 + 1];
+		DWORD base_addr;        // Base address of module in th32ProcessID's context
+		DWORD   size;        // Size in bytes of module starting at modBaseAddr
+		std::string module_name;
+		std::string path;
 		DWORD	pe_header_addr;
-		int		section_nums;
-		section_info_t	section_info[96];
-
-		std::vector<BYTE*> entry_vector;
+		std::vector<section_info_t>	section_info;
 	};
 
 	struct memory_region_info_t 
 	{
-		BYTE*	start_addr;
+		DWORD	start_addr;
 		DWORD	size;
 		std::string	owner_name;
 		std::string section_name;

@@ -26,18 +26,31 @@ CAsmWnd::CAsmWnd()
 			return NULL;
 		}
 
-		static std::string symbol;
-		if (debug_kernel_ptr->symbol_from_addr(addr.addr32.offset,symbol))
+		DWORD dwAddr = addr.addr32.offset;
+		static std::string result;
+		result.clear();
+		std::string symbol;
+		for each (debug_kernel::module_info_t info in debug_kernel_ptr->module_vector_)
 		{
-			*symstrlen = symbol.size();
-			return symbol.c_str();
+			if (dwAddr>=info.base_addr && dwAddr<=(info.base_addr+info.size))
+			{
+				result += info.module_name;
+				result += ".";
+				break;
+			}
 		}
 
-		if (type == X86_OPTYPE_MEM)
+		if (debug_kernel_ptr->symbol_from_addr(dwAddr,symbol))
+		{
+			result += symbol;
+			*symstrlen = result.size();
+			return result.c_str();
+		}
+		else if (type == X86_OPTYPE_MEM)
 		{
 			SIZE_T num_read = 0;
 			DWORD	target_addr = 0;
-			if (!debug_kernel_ptr->read_memory(addr.addr32.offset,&target_addr,4,&num_read) || num_read != 4)
+			if (!debug_kernel_ptr->read_memory(dwAddr,&target_addr,4,&num_read) || num_read != 4)
 			{
 				return NULL;
 			}
@@ -46,8 +59,9 @@ CAsmWnd::CAsmWnd()
 			{
 				return NULL;
 			}
-			*symstrlen = symbol.size();
-			return symbol.c_str();
+			result += symbol;
+			*symstrlen = result.size();
+			return result.c_str();
 		}
 		
 		return NULL;
