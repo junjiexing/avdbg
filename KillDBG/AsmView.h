@@ -66,6 +66,10 @@ private:
 	int m_nCommicWidth;
 
 	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCRECT lpRect, LPCTSTR lpszString, UINT nCount);
+	void DrawUnknownData(const RECT& rcClient,CDC& dc);
+	void DrawSelLine(CDC& dc,int y,int right,DWORD dwAddr);
+	void DrawAddress(CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str);
+	void DrawHexData(CDC& dc,int y,byte* data,int size);
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

@@ -45,11 +45,12 @@ CAsmWnd::CAsmWnd()
 			}
 
 			char buffer[10];
-			sprintf(buffer,"%08X",dwAddr);
+			sprintf(buffer,"%X",dwAddr);
 			result += buffer;
 			return true;
 		}
-		else if (type == X86_OPTYPE_MEM)
+		
+		if (type == X86_OPTYPE_MEM)
 		{
 			SIZE_T num_read = 0;
 			DWORD	target_addr = 0;
@@ -155,27 +156,7 @@ void CAsmWnd::OnPaint()
 	SIZE_T num_read;
 	if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,rcClient.bottom/m_nLineHight*15,&num_read))
 	{
-		int y = 20;
-		for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
-		{
-			char szUnknownInsn[10];
-			sprintf(szUnknownInsn,"%08X",m_AddrToShow+i);
-			m_vecAddress.push_back(m_AddrToShow+i);
-
-			RECT rc;
-			rc.top = y;
-			rc.bottom = y+m_nLineHight;
-			rc.left = 0;
-			rc.right = m_nAddrWidth;
-			dcMem.ExtTextOut(0,y,ETO_CLIPPED,&rc,szUnknownInsn,8,NULL);
-
-			rc.left = m_nAddrWidth;
-			rc.right = rc.left+m_nHexWidth;
-			dcMem.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,"???",3,NULL);
-
-			y+=m_nLineHight;
-		}
-
+		DrawUnknownData(rcClient,dcMem);
 		return;
 	}
 	
@@ -184,88 +165,28 @@ void CAsmWnd::OnPaint()
 	for (unsigned int i=0,j=0;i<num_read;++j)
 	{
 		x86dis_insn insn = *(x86dis_insn*)m_Decoder.decode(buffer+i,num_read-i,curAddr);
-		if ((uint32)m_AddrToShow>curAddr.addr32.offset && (uint32)m_AddrToShow < curAddr.addr32.offset + insn.size)
+		DWORD dwAddr = curAddr.addr32.offset;
+		if ((uint32)m_AddrToShow>dwAddr && (uint32)m_AddrToShow < dwAddr + insn.size)
 		{
 			break;
 		}
 
-		m_vecAddress.push_back(curAddr.addr32.offset);
+		m_vecAddress.push_back(dwAddr);
 
 		auto type = m_Decoder.is_branch(&insn);
 
 		int y = j*m_nLineHight+20;
 
-		{
-			// 绘制被选中的行
-			RECT rc;
-			rc.left = 0;
-			rc.top = y;
-			rc.bottom = y+m_nLineHight;
-			rc.right = rcClient.right;
-
-			if (curAddr.addr32.offset >= m_dwSelAddrStart && curAddr.addr32.offset <= m_dwSelAddrEnd) // 这一行被选中了
-			{
-				dcMem.SetBkColor(0x00C0C0C0);
-				dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-			}
-		}
+		// 绘制被选中的行
+		DrawSelLine(dcMem,y,rcClient.right,dwAddr);
 
 		ASM_STR asm_str;
 
-		{
-			// 绘制地址.
-			RECT rc;
-			rc.top = y;
-			rc.bottom = y+m_nLineHight;
-			rc.left = 0;
-			rc.right = m_nAddrWidth;
+		// 绘制地址.
+		DrawAddress(dcMem,y,dwAddr,asm_str);
 
-			//char szAddr[10];
-			sprintf(asm_str.szAddr,"%08X",curAddr.addr32.offset);
-
-			debug_kernel::breakpoint_t* bp;
-			dcMem.SetTextColor(0x00000000);
-			if (curAddr.addr32.offset == (uint32)m_Eip)	// EIP在这一行
-			{
-				dcMem.SetBkColor(0x00000000);
-				dcMem.SetTextColor(0x00FFFFFF);
-				dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-			}
-			else if (bp = debug_kernel_ptr->find_breakpoint_by_address(curAddr.addr32.offset))  // 这一行有断点
-			{
-				if (bp->user_enable) // 是否启用了
-				{
-					dcMem.SetBkColor(0x000000FF);
-				}
-				else
-				{
-					dcMem.SetBkColor(0x00990066);
-				}
-				dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-			}
-			ExtTextOutWithSelection(dcMem,0,y,&rc,asm_str.szAddr,8);
-		}
-
-		{
-			// 绘制HEX
-			dcMem.SetTextColor(0x00000000);
-
-			RECT rc;
-			rc.top = y;
-			rc.bottom = y+m_nLineHight;
-			rc.left = m_nAddrWidth+20;
-			rc.right = m_nAddrWidth + m_nHexWidth;
-
-			char szHex[15*3+1];
-			int num = 0;
-			for (byte* p=buffer+i;p!=buffer+i+insn.size;++p)
-			{
-				num += sprintf(szHex+num,"%02X ",*p);
-				assert(num<15*3+1);
-			}
-
-			dcMem.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,szHex,num,NULL);
-		}
+		// 绘制HEX
+		DrawHexData(dcMem,y,buffer+i,insn.size);
 
 		{
 			int nDasmLeft = m_nAddrWidth+m_nHexWidth+10;
@@ -342,7 +263,7 @@ void CAsmWnd::OnPaint()
 
 			if (insn_str.operand[0][0])
 			{
-				std::string ope0_str("  ");
+				std::string ope0_str(" ");
 
 				bool bIsCallApi = false;
 				do 
@@ -384,8 +305,8 @@ void CAsmWnd::OnPaint()
 					ope0_str += insn_str.operand[0];
 				}
 
-				rc.left = nDasmLeft+(asm_code.size()+2)*m_nFontWidth;
-				rc.right = rc.left+(ope0_str.size()-2)*m_nFontWidth;
+				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
+				rc.right = rc.left+(ope0_str.size()-1)*m_nFontWidth;
 				if (insn.op[0].type == X86_OPTYPE_MEM)
 				{
 					dcMem.SetBkColor(0x00FFFF00);
@@ -428,8 +349,20 @@ void CAsmWnd::OnPaint()
 				std::string ope2_str(",");
 				ope2_str += insn_str.operand[1];
 
+				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
+				rc.right = rc.left+(ope2_str.size()-1)*m_nFontWidth;
+				if (insn.op[2].type == X86_OPTYPE_MEM)
+				{
+					dcMem.SetBkColor(0x00FFFF00);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
+				else if (insn.op[2].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[2].imm))
+				{
+					dcMem.SetBkColor(0x0000FFFF);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
 				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				//dcMem.ExtTextOut(rc.left,rc.top,ETO_CLIPPED,&rc,ope2_str.c_str(),ope2_str.size(),NULL);
+				rc.right = rc.left+m_nDisasmWidth;
 				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope2_str.c_str(),ope2_str.size());
 				asm_code += ope2_str;
 			}
@@ -438,8 +371,20 @@ void CAsmWnd::OnPaint()
 				std::string ope3_str(",");
 				ope3_str += insn_str.operand[1];
 
+				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
+				rc.right = rc.left+(ope3_str.size()-1)*m_nFontWidth;
+				if (insn.op[3].type == X86_OPTYPE_MEM)
+				{
+					dcMem.SetBkColor(0x00FFFF00);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
+				else if (insn.op[3].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[3].imm))
+				{
+					dcMem.SetBkColor(0x0000FFFF);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
 				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				//dcMem.ExtTextOut(rc.left,rc.top,ETO_CLIPPED,&rc,ope3_str.c_str(),ope3_str.size(),NULL);
+				rc.right = rc.left+m_nDisasmWidth;
 				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope3_str.c_str(),ope3_str.size());
 				asm_code += ope3_str;
 			}
@@ -448,8 +393,20 @@ void CAsmWnd::OnPaint()
 				std::string ope4_str(",");
 				ope4_str += insn_str.operand[1];
 
+				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
+				rc.right = rc.left+(ope4_str.size()-1)*m_nFontWidth;
+				if (insn.op[4].type == X86_OPTYPE_MEM)
+				{
+					dcMem.SetBkColor(0x00FFFF00);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
+				else if (insn.op[4].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[4].imm))
+				{
+					dcMem.SetBkColor(0x0000FFFF);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
 				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				//dcMem.ExtTextOut(rc.left,rc.top,ETO_CLIPPED,&rc,ope4_str.c_str(),ope4_str.size(),NULL);
+				rc.right = rc.left+m_nDisasmWidth;
 				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope4_str.c_str(),ope4_str.size());
 				asm_code += ope4_str;
 			}
@@ -926,4 +883,99 @@ BOOL CAsmWnd::SetPaintFont( const LOGFONT& font )
 	ReleaseDC(pDC);
 
 	return TRUE;
+}
+
+void CAsmWnd::DrawUnknownData( const RECT& rcClient,CDC& dc )
+{
+	int y = 20;
+	for (int i=0;i<rcClient.bottom/m_nLineHight;++i)
+	{
+		char szUnknownInsn[10];
+		sprintf(szUnknownInsn,"%08X",m_AddrToShow+i);
+		m_vecAddress.push_back(m_AddrToShow+i);
+
+		RECT rc;
+		rc.top = y;
+		rc.bottom = y+m_nLineHight;
+		rc.left = 0;
+		rc.right = m_nAddrWidth;
+		dc.ExtTextOut(0,y,ETO_CLIPPED,&rc,szUnknownInsn,8,NULL);
+
+		rc.left = m_nAddrWidth;
+		rc.right = rc.left+m_nHexWidth;
+		dc.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,"???",3,NULL);
+
+		y+=m_nLineHight;
+	}
+}
+
+void CAsmWnd::DrawSelLine( CDC& dc,int y,int right,DWORD dwAddr )
+{
+	RECT rc;
+	rc.left = 0;
+	rc.top = y;
+	rc.bottom = y+m_nLineHight;
+	rc.right = right;
+
+	if (dwAddr >= m_dwSelAddrStart && dwAddr <= m_dwSelAddrEnd) // 这一行被选中了
+	{
+		dc.SetBkColor(0x00C0C0C0);
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+	}
+}
+
+void CAsmWnd::DrawAddress( CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str )
+{
+	RECT rc;
+	rc.top = y;
+	rc.bottom = y+m_nLineHight;
+	rc.left = 0;
+	rc.right = m_nAddrWidth;
+
+	//char szAddr[10];
+	sprintf(asm_str.szAddr,"%08X",dwAddr);
+
+	debug_kernel::breakpoint_t* bp;
+	dc.SetTextColor(0x00000000);
+	if (dwAddr == (uint32)m_Eip)	// EIP在这一行
+	{
+		dc.SetBkColor(0x00000000);
+		dc.SetTextColor(0x00FFFFFF);
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+	}
+	else if (bp = debug_kernel_ptr->find_breakpoint_by_address(dwAddr))  // 这一行有断点
+	{
+		if (bp->user_enable) // 是否启用了
+		{
+			dc.SetBkColor(0x000000FF);
+		}
+		else
+		{
+			dc.SetBkColor(0x00990066);
+		}
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+	}
+	ExtTextOutWithSelection(dc,0,y,&rc,asm_str.szAddr,8);
+
+}
+
+void CAsmWnd::DrawHexData( CDC& dc,int y,byte* data,int size )
+{
+	dc.SetTextColor(0x00000000);
+
+	RECT rc;
+	rc.top = y;
+	rc.bottom = y+m_nLineHight;
+	rc.left = m_nAddrWidth+20;
+	rc.right = m_nAddrWidth + m_nHexWidth;
+
+	char szHex[15*3+1];
+	int num = 0;
+	for (byte* p=data;p!=data+size;++p)
+	{
+		num += sprintf(szHex+num,"%02X ",*p);
+		assert(num<15*3+1);
+	}
+
+	dc.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,szHex,num,NULL);
 }
