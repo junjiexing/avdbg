@@ -36,9 +36,17 @@ CAsmWnd::CAsmWnd()
 			result += ".";
 		}
 
-		if (debug_kernel_ptr->symbol_from_addr(dwAddr,symbol))
+		if (type == X86_OPTYPE_IMM)
 		{
-			result += symbol;
+			if (debug_kernel_ptr->symbol_from_addr(dwAddr,symbol))
+			{
+				result += symbol;
+				return true;
+			}
+
+			char buffer[10];
+			sprintf(buffer,"%08X",dwAddr);
+			result += buffer;
 			return true;
 		}
 		else if (type == X86_OPTYPE_MEM)
