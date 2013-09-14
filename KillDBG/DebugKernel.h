@@ -204,6 +204,8 @@ public:
 	std::vector<memory_region_info_t>	memory_info_vector_;
 	std::vector<module_info_t>	module_vector_;
 
+	bool find_module_by_addr(DWORD addr,module_info_t* info_ptr = NULL);
+
 	void refresh_memory_map(void);
 	bool get_memory_info_by_addr(const void* addr,memory_region_info_t& info);
 	void set_sym_search_path(const char* paths, bool reload);

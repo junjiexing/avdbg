@@ -38,7 +38,7 @@ static int sibscale[4] = {1, 2, 4, 8};
 */
 
 x86dis::x86dis(X86OpSize aOpsize, X86AddrSize aAddrsize)
-	:addr_sym_func(NULL),opsize(aOpsize),addrsize(aAddrsize)
+	:opsize(aOpsize),addrsize(aAddrsize)
 {
 	insn.invalid = true;
 	x86_insns = &x86_32_insns;
@@ -1334,13 +1334,12 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 		{
 			CPU_ADDR a;
 			filloffset(a, op->imm);
-			int slen;
-			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_IMM) : NULL;
-			if (s)
+			std::string result;
+			bool ret = (addr_sym_func) ? addr_sym_func(a, result, X86_OPTYPE_IMM) : false;
+			if (ret)
 			{
-				memcpy(opstr, s, slen);
-				opstr[slen] = 0;
-				*opstrlen = slen;
+				strcpy(opstr, result.c_str());
+				*opstrlen = result.size();
 			}
 			else 
 			{
@@ -1544,9 +1543,9 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 			{
 				CPU_ADDR a;
 				filloffset(a, op->mem.disp);
-				int slen;
-				const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_MEM) : 0;
-				if (s)
+				std::string result;
+				bool ret = (addr_sym_func) ? addr_sym_func(a, result, X86_OPTYPE_MEM) : false;
+				if (ret)
 				{
 					if (!first)
 					{
@@ -1554,8 +1553,8 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 						*(d++)='+';
 						//strcpy(d, cs_default); d += strlen(cs_default);
 					}
-					memcpy(d, s, slen);
-					d+=slen;
+					memcpy(d, result.c_str(), result.size());
+					d+=result.size();
 					*opstrlen=d-opstr;
 				}
 				else
@@ -1613,13 +1612,12 @@ void x86dis::str_op( char *opstr, int *opstrlen, const x86dis_insn *insn, const 
 			CPU_ADDR a;
 			a.addr32.seg = op->farptr.seg;
 			a.addr32.offset = op->farptr.offset;
-			int slen;
-			const char *s=(addr_sym_func) ? addr_sym_func(a, &slen, X86_OPTYPE_FARPTR) : 0;
-			if (s)
+			std::string result;
+			bool ret = (addr_sym_func) ? addr_sym_func(a, result, X86_OPTYPE_FARPTR) : false;
+			if (ret)
 			{
-				memcpy(opstr, s, slen);
-				opstr[slen]=0;
-				*opstrlen=slen;
+				strcpy(opstr, result.c_str());
+				*opstrlen=result.size();
 			}
 			else
 			{
@@ -2173,9 +2171,9 @@ bool x86dis::selectNext(dis_insn *disasm_insn)
 // 	highlight = false;
 // }
 
-void x86dis::set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, X86_Optype type),void* pContext )
+void x86dis::set_addr_sym_func(addr_sym_func_t fn,void* pContext )
 {
-	addr_sym_func = pfn;
+	addr_sym_func = fn;
 }
 
 bool x86dis::str_insn( const x86dis_insn* insn,int opt, x86dis_str& result )

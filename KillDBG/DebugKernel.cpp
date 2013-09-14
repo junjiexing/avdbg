@@ -1142,3 +1142,20 @@ void debug_kernel::on_idle()
 	}
 }
 
+bool debug_kernel::find_module_by_addr( DWORD addr,module_info_t* info_ptr /*= NULL*/ )
+{
+	for each (debug_kernel::module_info_t info in debug_kernel_ptr->module_vector_)
+	{
+		if (addr>=info.base_addr && addr<=(info.base_addr+info.size))
+		{
+			if (info_ptr)
+			{
+				*info_ptr = info;
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+

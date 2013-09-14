@@ -24,6 +24,7 @@
 
 #include "x86opc.h"
 #include <string>
+#include <functional>
 
 /* generic disassembler styles */
 //#define DIS_STYLE_HIGHLIGHT		0x80000000		/* create highlighting information in strf() */
@@ -202,7 +203,11 @@ protected:
 	//Disassembler
 	int options;
 	//bool highlight;
-	const char* (*addr_sym_func)(CPU_ADDR addr, int *symstrlen, X86_Optype type);
+public:
+	typedef std::function<bool(CPU_ADDR addr,std::string& result,X86_Optype type)> addr_sym_func_t;
+private:
+	addr_sym_func_t addr_sym_func;
+
 
 	//const char *get_cs(AsmSyntaxHighlightEnum style);
 	void hexd(char **s, int size, int options, uint32 imm);
@@ -227,7 +232,7 @@ public:
 	//Disassembler
 	virtual	dis_insn *createInvalidInsn();
 	virtual	bool selectNext(dis_insn *disasm_insn);
-	void set_addr_sym_func(const char* (*pfn)(CPU_ADDR addr, int *symstrlen, X86_Optype type),void* pContext);
+	void set_addr_sym_func(addr_sym_func_t fn,void* pContext);
 
 	enum BRANCHTYPE				//用于判断是否是转移指令
 	{

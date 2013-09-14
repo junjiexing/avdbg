@@ -19,7 +19,7 @@ CAsmWnd::CAsmWnd()
 	m_dwSelAddrEnd(NULL),m_dwSelAddrStart(NULL),m_nLineHight(20),m_nFontWidth(20),
 	m_bLButtonDown(FALSE),m_nMargenWidth(20)
 {
-	m_Decoder.set_addr_sym_func([](CPU_ADDR addr, int *symstrlen, X86_Optype type)->const char*
+	m_Decoder.set_addr_sym_func([](CPU_ADDR addr, std::string& result, X86_Optype type)->bool
 	{
 		if (!debug_kernel_ptr)
 		{
@@ -27,24 +27,19 @@ CAsmWnd::CAsmWnd()
 		}
 
 		DWORD dwAddr = addr.addr32.offset;
-		static std::string result;
 		result.clear();
 		std::string symbol;
-		for each (debug_kernel::module_info_t info in debug_kernel_ptr->module_vector_)
+		debug_kernel::module_info_t info;
+		if (debug_kernel_ptr->find_module_by_addr(dwAddr,&info))
 		{
-			if (dwAddr>=info.base_addr && dwAddr<=(info.base_addr+info.size))
-			{
-				result += info.module_name;
-				result += ".";
-				break;
-			}
+			result += info.module_name;
+			result += ".";
 		}
 
 		if (debug_kernel_ptr->symbol_from_addr(dwAddr,symbol))
 		{
 			result += symbol;
-			*symstrlen = result.size();
-			return result.c_str();
+			return true;
 		}
 		else if (type == X86_OPTYPE_MEM)
 		{
@@ -52,19 +47,18 @@ CAsmWnd::CAsmWnd()
 			DWORD	target_addr = 0;
 			if (!debug_kernel_ptr->read_memory(dwAddr,&target_addr,4,&num_read) || num_read != 4)
 			{
-				return NULL;
+				return false;
 			}
 
 			if (!debug_kernel_ptr->symbol_from_addr(target_addr,symbol))
 			{
-				return NULL;
+				return false;
 			}
 			result += symbol;
-			*symstrlen = result.size();
-			return result.c_str();
+			return true;
 		}
 		
-		return NULL;
+		return false;
 	},NULL);
 }
 
@@ -275,7 +269,7 @@ void CAsmWnd::OnPaint()
 			rc.bottom = y+m_nLineHight;
 
 			x86dis_str insn_str = {0};
-			m_Decoder.str_insn(&insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,insn_str);
+			m_Decoder.str_insn(&insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,insn_str);
 
 			std::string& asm_code = asm_str.strAsmCode;
 			int x = 0;
@@ -367,7 +361,7 @@ void CAsmWnd::OnPaint()
 								break;
 							}
 
-							const char* target_str = m_Decoder.strf(&target_insn,DIS_STYLE_HEX_ASMSTYLE | DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
+							const char* target_str = m_Decoder.strf(&target_insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
 							ope0_str += "<";
 							ope0_str += target_str;
 							ope0_str += ">";
@@ -382,8 +376,20 @@ void CAsmWnd::OnPaint()
 					ope0_str += insn_str.operand[0];
 				}
 
+				rc.left = nDasmLeft+(asm_code.size()+2)*m_nFontWidth;
+				rc.right = rc.left+(ope0_str.size()-2)*m_nFontWidth;
+				if (insn.op[0].type == X86_OPTYPE_MEM)
+				{
+					dcMem.SetBkColor(0x00FFFF00);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
+				else if (insn.op[0].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[0].imm))
+				{
+					dcMem.SetBkColor(0x0000FFFF);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
 				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				//dcMem.ExtTextOut(rc.left,rc.top,ETO_CLIPPED,&rc,ope0_str.c_str(),ope0_str.size(),NULL);
+				rc.right = rc.left+m_nDisasmWidth;
 				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope0_str.c_str(),ope0_str.size());
 				asm_code += ope0_str;
 			}
@@ -392,8 +398,20 @@ void CAsmWnd::OnPaint()
 				std::string ope1_str(",");
 				ope1_str += insn_str.operand[1];
 
+				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
+				rc.right = rc.left+(ope1_str.size()-1)*m_nFontWidth;
+				if (insn.op[1].type == X86_OPTYPE_MEM)
+				{
+					dcMem.SetBkColor(0x00FFFF00);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
+				else if (insn.op[1].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[1].imm))
+				{
+					dcMem.SetBkColor(0x0000FFFF);
+					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+				}
 				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				//dcMem.ExtTextOut(rc.left,rc.top,ETO_CLIPPED,&rc,ope1_str.c_str(),ope1_str.size(),NULL);
+				rc.right = rc.left+m_nDisasmWidth;
 				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope1_str.c_str(),ope1_str.size());
 				asm_code += ope1_str;
 			}
