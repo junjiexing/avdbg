@@ -70,6 +70,8 @@ private:
 	void DrawSelLine(CDC& dc,int y,int right,DWORD dwAddr);
 	void DrawAddress(CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str);
 	void DrawHexData(CDC& dc,int y,byte* data,int size);
+	void DrawDasmStr(CDC& dc,int y,int right,ASM_STR& asm_str,x86dis_insn& insn);
+	void DrawOperand(CDC& dc,int y,int nDasmLeft,int nLeftCharNum,std::string strOperand,x86_insn_op operand);
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

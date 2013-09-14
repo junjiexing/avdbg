@@ -173,8 +173,6 @@ void CAsmWnd::OnPaint()
 
 		m_vecAddress.push_back(dwAddr);
 
-		auto type = m_Decoder.is_branch(&insn);
-
 		int y = j*m_nLineHight+20;
 
 		// 绘制被选中的行
@@ -188,229 +186,8 @@ void CAsmWnd::OnPaint()
 		// 绘制HEX
 		DrawHexData(dcMem,y,buffer+i,insn.size);
 
-		{
-			int nDasmLeft = m_nAddrWidth+m_nHexWidth+10;
-
-			RECT rc;
-			rc.left = nDasmLeft;
-			rc.right = rc.left+m_nDisasmWidth;
-			rc.top = y;
-			rc.bottom = y+m_nLineHight;
-
-			x86dis_str insn_str = {0};
-			m_Decoder.str_insn(&insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,insn_str);
-
-			std::string& asm_code = asm_str.strAsmCode;
-			int x = 0;
-			if (insn_str.prefix[0])
-			{
-				asm_code += insn_str.prefix;
-				dcMem.SetBkColor(0x000000FF);
-				dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				dcMem.SetTextColor(0x00E037D7);
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,insn_str.prefix,strlen(insn_str.prefix));
-				//ExtTextOutWithSelection(dcMem,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,asm_str.c_str()+x,asm_str.size()-x);
-				//x += strlen(insn_str.prefix);
-			}
-
-			if (insn_str.opcode[0])
-			{
-				std::string opc_str(insn_str.opcode);
-
-				COLORREF TextColor = 0x00000000;
-				COLORREF BkColor = 0x00000000;
-
-				if (type != x86Analysis::BR_NONE)
-				{
-					switch (type)
-					{
-					case x86dis::BR_JMP:
-						TextColor = 0x000000FF;
-						BkColor = 0x0000FFFF;
-						break;
-					case x86dis::BR_JCC:
-						TextColor = 0x000000CC;
-						BkColor = 0x0000FFFF;
-						break;
-					case x86dis::BR_LOOP:
-						TextColor = 0x000000CC;
-						BkColor = 0x0000FFFF;
-						break;
-					case x86dis::BR_CALL:
-						TextColor = 0x00000000;
-						BkColor = 0x00FFFF00;
-						break;
-					case x86dis::BR_RET:
-						TextColor = 0x00FF00FF;
-						BkColor = 0x00FFFF00;
-						break;
-					}
-
-					rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-					rc.right = rc.left + opc_str.size()*m_nFontWidth;
-					dcMem.SetBkColor(BkColor);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-
-
-				rc.right = rcClient.right;
-				dcMem.SetTextColor(TextColor);
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,opc_str.c_str(),opc_str.size());
-				asm_code += opc_str;
-			}
-
-			dcMem.SetTextColor(0x00000000);
-
-			if (insn_str.operand[0][0])
-			{
-				std::string ope0_str(" ");
-
-				bool bIsCallApi = false;
-				do 
-				{
-					if (type == x86dis::BR_CALL)
-					{
-						std::string tmp;
-						x86_insn_op op = insn.op[0];
-						if (op.type == X86_OPTYPE_IMM
-							&& !debug_kernel_ptr->symbol_from_addr(op.imm,tmp))
-						{
-							byte opcode_buffer[16] = {0};
-							SIZE_T num_read = 0;
-							if (!debug_kernel_ptr->read_memory(op.imm,opcode_buffer,15,&num_read))
-							{
-								break;
-							}
-
-							CPU_ADDR addr = {0};
-							addr.addr32.offset = op.imm;
-							x86dis_insn target_insn = *(x86dis_insn*)m_Decoder.decode(opcode_buffer,num_read,addr);
-							if (m_Decoder.is_branch(&target_insn) != x86dis::BR_JMP)
-							{
-								break;
-							}
-
-							const char* target_str = m_Decoder.strf(&target_insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD,DISASM_STRF_SMALL_FORMAT);
-							ope0_str += "<";
-							ope0_str += target_str;
-							ope0_str += ">";
-							bIsCallApi = true;
-							break;
-						}
-					}
-				} while (0);
-
-				if (!bIsCallApi)
-				{
-					ope0_str += insn_str.operand[0];
-				}
-
-				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
-				rc.right = rc.left+(ope0_str.size()-1)*m_nFontWidth;
-				if (insn.op[0].type == X86_OPTYPE_MEM)
-				{
-					dcMem.SetBkColor(0x00FFFF00);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				else if (insn.op[0].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[0].imm))
-				{
-					dcMem.SetBkColor(0x0000FFFF);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				rc.right = rc.left+m_nDisasmWidth;
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope0_str.c_str(),ope0_str.size());
-				asm_code += ope0_str;
-			}
-			if (insn_str.operand[1][0])
-			{
-				std::string ope1_str(",");
-				ope1_str += insn_str.operand[1];
-
-				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
-				rc.right = rc.left+(ope1_str.size()-1)*m_nFontWidth;
-				if (insn.op[1].type == X86_OPTYPE_MEM)
-				{
-					dcMem.SetBkColor(0x00FFFF00);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				else if (insn.op[1].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[1].imm))
-				{
-					dcMem.SetBkColor(0x0000FFFF);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				rc.right = rc.left+m_nDisasmWidth;
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope1_str.c_str(),ope1_str.size());
-				asm_code += ope1_str;
-			}
-			if (insn_str.operand[2][0])
-			{
-				std::string ope2_str(",");
-				ope2_str += insn_str.operand[1];
-
-				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
-				rc.right = rc.left+(ope2_str.size()-1)*m_nFontWidth;
-				if (insn.op[2].type == X86_OPTYPE_MEM)
-				{
-					dcMem.SetBkColor(0x00FFFF00);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				else if (insn.op[2].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[2].imm))
-				{
-					dcMem.SetBkColor(0x0000FFFF);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				rc.right = rc.left+m_nDisasmWidth;
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope2_str.c_str(),ope2_str.size());
-				asm_code += ope2_str;
-			}
-			if (insn_str.operand[3][0])
-			{
-				std::string ope3_str(",");
-				ope3_str += insn_str.operand[1];
-
-				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
-				rc.right = rc.left+(ope3_str.size()-1)*m_nFontWidth;
-				if (insn.op[3].type == X86_OPTYPE_MEM)
-				{
-					dcMem.SetBkColor(0x00FFFF00);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				else if (insn.op[3].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[3].imm))
-				{
-					dcMem.SetBkColor(0x0000FFFF);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				rc.right = rc.left+m_nDisasmWidth;
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope3_str.c_str(),ope3_str.size());
-				asm_code += ope3_str;
-			}
-			if (insn_str.operand[4][0])
-			{
-				std::string ope4_str(",");
-				ope4_str += insn_str.operand[1];
-
-				rc.left = nDasmLeft+(asm_code.size()+1)*m_nFontWidth;
-				rc.right = rc.left+(ope4_str.size()-1)*m_nFontWidth;
-				if (insn.op[4].type == X86_OPTYPE_MEM)
-				{
-					dcMem.SetBkColor(0x00FFFF00);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				else if (insn.op[4].type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(insn.op[4].imm))
-				{
-					dcMem.SetBkColor(0x0000FFFF);
-					dcMem.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
-				}
-				rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
-				rc.right = rc.left+m_nDisasmWidth;
-				ExtTextOutWithSelection(dcMem,rc.left,rc.top,&rc,ope4_str.c_str(),ope4_str.size());
-				asm_code += ope4_str;
-			}
-		}
+		// 绘制反汇编字符串
+		DrawDasmStr(dcMem,y,rcClient.right,asm_str,insn);
 
 		m_vecAsm.push_back(asm_str);
 		
@@ -978,4 +755,184 @@ void CAsmWnd::DrawHexData( CDC& dc,int y,byte* data,int size )
 	}
 
 	dc.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,szHex,num,NULL);
+}
+
+void CAsmWnd::DrawDasmStr( CDC& dc,int y,int right,ASM_STR& asm_str,x86dis_insn& insn )
+{
+	int nDasmLeft = m_nAddrWidth+m_nHexWidth+10;
+
+	RECT rc;
+	rc.left = nDasmLeft;
+	rc.right = rc.left+m_nDisasmWidth;
+	rc.top = y;
+	rc.bottom = y+m_nLineHight;
+
+	auto type = m_Decoder.is_branch(&insn);
+
+	x86dis_str insn_str = {0};
+	m_Decoder.str_insn(&insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD | DIS_STYLE_SIGNED,insn_str);
+
+	std::string& asm_code = asm_str.strAsmCode;
+	int x = 0;
+	if (insn_str.prefix[0])
+	{
+		asm_code += insn_str.prefix;
+		dc.SetBkColor(0x000000FF);
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+		dc.SetTextColor(0x00E037D7);
+		ExtTextOutWithSelection(dc,rc.left,rc.top,&rc,insn_str.prefix,strlen(insn_str.prefix));
+		//ExtTextOutWithSelection(dc,x*m_nFontWidth+m_nMargenWidth,j*m_nLineHight,asm_str.c_str()+x,asm_str.size()-x);
+		//x += strlen(insn_str.prefix);
+	}
+
+	if (insn_str.opcode[0])
+	{
+		std::string opc_str(insn_str.opcode);
+
+		COLORREF TextColor = 0x00000000;
+		COLORREF BkColor = 0x00000000;
+
+		if (type != x86Analysis::BR_NONE)
+		{
+			switch (type)
+			{
+			case x86dis::BR_JMP:
+				TextColor = 0x000000FF;
+				BkColor = 0x0000FFFF;
+				break;
+			case x86dis::BR_JCC:
+				TextColor = 0x000000CC;
+				BkColor = 0x0000FFFF;
+				break;
+			case x86dis::BR_LOOP:
+				TextColor = 0x000000CC;
+				BkColor = 0x0000FFFF;
+				break;
+			case x86dis::BR_CALL:
+				TextColor = 0x00000000;
+				BkColor = 0x00FFFF00;
+				break;
+			case x86dis::BR_RET:
+				TextColor = 0x00FF00FF;
+				BkColor = 0x00FFFF00;
+				break;
+			}
+
+			rc.left = nDasmLeft+asm_code.size()*m_nFontWidth;
+			rc.right = rc.left + opc_str.size()*m_nFontWidth;
+			dc.SetBkColor(BkColor);
+			dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+		}
+
+
+		rc.right = right;
+		dc.SetTextColor(TextColor);
+		ExtTextOutWithSelection(dc,rc.left,rc.top,&rc,opc_str.c_str(),opc_str.size());
+		asm_code += opc_str;
+	}
+
+	dc.SetTextColor(0x00000000);
+
+	if (insn_str.operand[0][0])
+	{
+		std::string strOperand(" ");
+
+		bool bIsCallApi = false;
+		do 
+		{
+			if (type == x86dis::BR_CALL)
+			{
+				std::string tmp;
+				x86_insn_op op = insn.op[0];
+				if (op.type == X86_OPTYPE_IMM
+					&& !debug_kernel_ptr->symbol_from_addr(op.imm,tmp))
+				{
+					byte opcode_buffer[16] = {0};
+					SIZE_T num_read = 0;
+					if (!debug_kernel_ptr->read_memory(op.imm,opcode_buffer,15,&num_read))
+					{
+						break;
+					}
+
+					CPU_ADDR addr = {0};
+					addr.addr32.offset = op.imm;
+					x86dis_insn target_insn = *(x86dis_insn*)m_Decoder.decode(opcode_buffer,num_read,addr);
+					if (m_Decoder.is_branch(&target_insn) != x86dis::BR_JMP)
+					{
+						break;
+					}
+
+					const char* target_str = m_Decoder.strf(&target_insn,DIS_STYLE_HEX_UPPERCASE | DIS_STYLE_HEX_NOZEROPAD | DIS_STYLE_SIGNED,DISASM_STRF_SMALL_FORMAT);
+					strOperand += "<";
+					strOperand += target_str;
+					strOperand += ">";
+					bIsCallApi = true;
+					break;
+				}
+			}
+		} while (0);
+
+		if (!bIsCallApi)
+		{
+			strOperand += insn_str.operand[0];
+		}
+
+		DrawOperand(dc,y,nDasmLeft,asm_code.size(),strOperand,insn.op[0]);
+		asm_code += strOperand;
+	}
+	if (insn_str.operand[1][0])
+	{
+		std::string strOperand(",");
+		strOperand += insn_str.operand[1];
+
+		DrawOperand(dc,y,nDasmLeft,asm_code.size(),strOperand,insn.op[1]);
+		asm_code += strOperand;
+	}
+	if (insn_str.operand[2][0])
+	{
+		std::string strOperand(",");
+		strOperand += insn_str.operand[1];
+
+		DrawOperand(dc,y,nDasmLeft,asm_code.size(),strOperand,insn.op[2]);
+		asm_code += strOperand;
+	}
+	if (insn_str.operand[3][0])
+	{
+		std::string strOperand(",");
+		strOperand += insn_str.operand[1];
+
+		DrawOperand(dc,y,nDasmLeft,asm_code.size(),strOperand,insn.op[3]);
+		asm_code += strOperand;
+	}
+	if (insn_str.operand[4][0])
+	{
+		std::string strOperand(",");
+		strOperand += insn_str.operand[1];
+
+		DrawOperand(dc,y,nDasmLeft,asm_code.size(),strOperand,insn.op[4]);
+		asm_code += strOperand;
+	}
+}
+
+void CAsmWnd::DrawOperand( CDC& dc,int y,int nDasmLeft,int nLeftCharNum,std::string strOperand,x86_insn_op operand )
+{
+	RECT rc;
+	rc.top = y;
+	rc.bottom = y+m_nLineHight;
+	rc.left = nDasmLeft+(nLeftCharNum+1)*m_nFontWidth;// 加一是为了去掉操作数前面的空格或逗号
+	rc.right = rc.left+(strOperand.size()-1)*m_nFontWidth;
+
+	if (operand.type == X86_OPTYPE_MEM)
+	{
+		dc.SetBkColor(0x00FFFF00);
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+	}
+	else if (operand.type == X86_OPTYPE_IMM && debug_kernel_ptr->find_module_by_addr(operand.imm))
+	{
+		dc.SetBkColor(0x0000FFFF);
+		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
+	}
+	rc.left = nDasmLeft+nLeftCharNum*m_nFontWidth;
+	rc.right = rc.left+m_nDisasmWidth;
+	ExtTextOutWithSelection(dc,rc.left,rc.top,&rc,strOperand.c_str(),strOperand.size());
 }
