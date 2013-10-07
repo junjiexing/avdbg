@@ -12,7 +12,9 @@ avdbg
  
  步骤：1.git更新源码。由于界面库Xtreme toolkit pro 15.3.1是商业软件，不能开源，所以我把这个界面库作为子模块放到了私有仓库，大家可以自己想办法解决这个界面库的源码问题，解决不了的可以加群讨论。
        
-       2.首先编译3rdparty\Scintilla\Scintilla.sln,然后编译Xtreme toolkit pro，都完成后打开KillDBG.sln进行编译。
+       2.如果问我要了私有仓库的密码，首先更新子模块，然后编译3rdparty\Scintilla\Scintilla.sln,然后编译Xtreme toolkit pro，都完成后打开KillDBG.sln进行编译。如果自己下载了XTP的源码，则需要修改KillDBG项目的链接属性，将里面的ToolkitPro.lib改为自己编译的XTP的库文件
+	   
+	   3.下载boost库http://www.boost.org/并解压编译和配置（关于编译和配置boost的方法我就不赘述了，网上很多了）
        
 
 讨论群：
