@@ -115,6 +115,9 @@ private:
 
 	std::vector<breakpoint_t> bp_vec_;
 
+	// 是否遇到了调试器无法处理的异常
+	bool unhandle_exp_;
+
 	// 被调试进程的进程句柄
 	HANDLE handle_;
 	// 被调试进程的进程ID

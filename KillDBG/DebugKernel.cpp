@@ -6,7 +6,7 @@
 #include <string.h>
 
 debug_kernel::debug_kernel(void)
-	:debug_status_(STOP)
+	:debug_status_(STOP),unhandle_exp_(false)
 {
 }
 
@@ -347,12 +347,14 @@ void debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 	{
 	case EXCEPTION_ACCESS_VIOLATION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_ACCESS_VIOLATION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_DATATYPE_MISALIGNMENT:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_DATATYPE_MISALIGNMENT",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
@@ -402,108 +404,126 @@ void debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 		break;
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_ARRAY_BOUNDS_EXCEEDED",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_DENORMAL_OPERAND:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_DENORMAL_OPERAND",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_DIVIDE_BY_ZERO:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_DIVIDE_BY_ZERO",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_INEXACT_RESULT:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_INEXACT_RESULT",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_INVALID_OPERATION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_INVALID_OPERATION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_OVERFLOW:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_OVERFLOW",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_STACK_CHECK:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_STACK_CHECK",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_FLT_UNDERFLOW:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_FLT_UNDERFLOW",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_INT_DIVIDE_BY_ZERO",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INT_OVERFLOW:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_INT_OVERFLOW",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_PRIV_INSTRUCTION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_PRIV_INSTRUCTION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_IN_PAGE_ERROR:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_IN_PAGE_ERROR",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_ILLEGAL_INSTRUCTION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_ILLEGAL_INSTRUCTION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_NONCONTINUABLE_EXCEPTION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_NONCONTINUABLE_EXCEPTION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_STACK_OVERFLOW:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_STACK_OVERFLOW",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INVALID_DISPOSITION:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_INVALID_DISPOSITION",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_GUARD_PAGE:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_GUARD_PAGE",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	case EXCEPTION_INVALID_HANDLE:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"EXCEPTION_INVALID_HANDLE",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
@@ -512,12 +532,14 @@ void debug_kernel::on_exception_event( const EXCEPTION_DEBUG_INFO& debug_excepti
 // 		break;
 	case CONTROL_C_EXIT:
 		{
+			unhandle_exp_ = true;
 			sprintf(out_str,fmt,"CONTROL_C_EXIT",addr,chance);
 			main_frame->m_wndOutput.output_string(std::string(out_str));
 		}
 		break;
 	default:
 		{
+			unhandle_exp_ = true;
 			main_frame->m_wndOutput.output_string(std::string("δ֪�쳣"));
 		}
 		break;
@@ -1047,19 +1069,37 @@ void debug_kernel::on_idle()
 				continue_debug(DBG_CONTINUE,true);
 			}
 			break;
-// 		case ID_STEPIN_UNHANDLE_EXCEPT:
-// 			{
-// 				step_in(DBG_EXCEPTION_NOT_HANDLED);
-// 			}
-// 			break;
-// 		case ID_STEPOVER_UNHANDLE_EXCEPT:
-// 			{
-// 				step_over(DBG_EXCEPTION_NOT_HANDLED);
-// 			}
-// 			break;
+		case ID_STEPIN_UNHANDLE_EXCEPT:
+			{
+				if (unhandle_exp_)
+				{
+					step_in(DBG_EXCEPTION_NOT_HANDLED);
+					unhandle_exp_ = false;
+					break;
+				}
+				step_in(DBG_CONTINUE);
+			}
+			break;
+		case ID_STEPOVER_UNHANDLE_EXCEPT:
+			{
+				if (unhandle_exp_)
+				{
+					step_over(DBG_EXCEPTION_NOT_HANDLED);
+					unhandle_exp_ = false;
+					break;
+				}
+				step_over(DBG_CONTINUE);
+			}
+			break;
 		case ID_RUN_UNHANDLE_EXCEPT:
 			{
-				continue_debug(DBG_EXCEPTION_NOT_HANDLED,true);
+				if (unhandle_exp_)
+				{
+					continue_debug(DBG_EXCEPTION_NOT_HANDLED,true);
+					unhandle_exp_ = false;
+					break;
+				}
+				continue_debug(DBG_CONTINUE,true);
 			}
 			break;
 		case ID_SET_BREAKPOINT:
