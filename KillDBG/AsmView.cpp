@@ -226,7 +226,7 @@ BOOL CAsmWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 			if (!debug_kernel_ptr->read_memory(m_AddrToShow,buffer,15*5,&num_read))
 			{
 				m_AddrToShow += 1;
-				break;;
+				break;
 			}
 
 			CPU_ADDR	curAddr = {0};
