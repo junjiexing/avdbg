@@ -159,10 +159,12 @@ void CAsmWnd::OnPaint()
 		DrawUnknownData(rcClient,dcMem);
 		return;
 	}
-	
+
+//////////////////////////////////////////////////////////////////////////
+//TODO:用新的算法建立地址表代替此部分..需要等完善代码分析功能后添加
 	CPU_ADDR	curAddr = {0};
 	curAddr.addr32.offset = (uint32)m_AddrToShow;
-	for (unsigned int i=0,j=0;i<num_read;++j)
+	for (unsigned int i=0;i<num_read;)
 	{
 		x86dis_insn insn = *(x86dis_insn*)m_Decoder.decode(buffer+i,num_read-i,curAddr);
 		DWORD dwAddr = curAddr.addr32.offset;
@@ -172,8 +174,21 @@ void CAsmWnd::OnPaint()
 		}
 
 		m_vecAddress.push_back(dwAddr);
+		
+		i += insn.size;
+		curAddr.addr32.offset += insn.size;
 
-		int y = j*m_nLineHight+20;
+	}
+//////////////////////////////////////////////////////////////////////////
+
+	int i=0;
+	for (DWORD dwAddr : m_vecAddress)
+	{
+		curAddr.addr32.offset = dwAddr;
+		int off = dwAddr - m_AddrToShow;
+		x86dis_insn insn = *(x86dis_insn*)m_Decoder.decode(buffer+off,num_read-off,curAddr);
+
+		int y = i*m_nLineHight+20;
 
 		// 绘制被选中的行
 		DrawSelLine(dcMem,y,rcClient.right,dwAddr);
@@ -184,16 +199,15 @@ void CAsmWnd::OnPaint()
 		DrawAddress(dcMem,y,dwAddr,asm_str);
 
 		// 绘制HEX
-		DrawHexData(dcMem,y,buffer+i,insn.size);
+		DrawHexData(dcMem,y,buffer+off,insn.size);
 
 		// 绘制反汇编字符串
 		DrawDasmStr(dcMem,y,rcClient.right,asm_str,insn);
 
 		m_vecAsm.push_back(asm_str);
-		
-		i += insn.size;
-		curAddr.addr32.offset += insn.size;
 
+		off += insn.size;
+		++i;
 	}
 }
 
