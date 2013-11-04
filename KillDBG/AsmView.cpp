@@ -173,6 +173,13 @@ void CAsmWnd::OnPaint()
 			break;
 		}
 
+		auto type = m_Decoder.is_branch(&insn);
+		if ((type == x86dis::BR_JCC || type == x86dis::BR_JMP || type == x86dis::BR_LOOP) && insn.op[0].type == X86_OPTYPE_IMM)
+		{
+			JUMP_MAP jmap = {curAddr.addr32.offset,insn.op[0].imm};
+			m_vecJumpMap.push_back(jmap);
+		}
+
 		m_vecAddress.push_back(dwAddr);
 		
 		i += insn.size;
@@ -193,22 +200,29 @@ void CAsmWnd::OnPaint()
 		// 绘制被选中的行
 		DrawSelLine(dcMem,y,rcClient.right,dwAddr);
 
-		ASM_STR asm_str;
+		ASM_LINE asm_line;
+		asm_line.y = y;
+		asm_line.nSize = insn.size;
 
 		// 绘制地址.
-		DrawAddress(dcMem,y,dwAddr,asm_str);
+		DrawAddress(dcMem,y,dwAddr,asm_line);
 
 		// 绘制HEX
 		DrawHexData(dcMem,y,buffer+off,insn.size);
 
 		// 绘制反汇编字符串
-		DrawDasmStr(dcMem,y,rcClient.right,asm_str,insn);
+		DrawDasmStr(dcMem,y,rcClient.right,asm_line,insn);
 
-		m_vecAsm.push_back(asm_str);
+		m_vecAsm.push_back(asm_line);
+
+		// 绘制跳转箭头
+		DrawJumpArrow(dcMem,y,dwAddr);
 
 		off += insn.size;
 		++i;
 	}
+
+	DrawJumpLine(dcMem);
 }
 
 BOOL CAsmWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
@@ -436,7 +450,9 @@ void CAsmWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			if (point.x<m_nAddrWidth)	// 在地址那一列
 			{
-				m_strSelWord = m_vecAsm[index].szAddr;
+				char szAddr[10];
+				sprintf(szAddr,"%08X",m_vecAsm[index].dwAddr);
+				m_strSelWord = szAddr;
 			}
 			
 			if (point.x>m_nAddrWidth+m_nHexWidth 
@@ -715,7 +731,7 @@ void CAsmWnd::DrawSelLine( CDC& dc,int y,int right,DWORD dwAddr )
 	}
 }
 
-void CAsmWnd::DrawAddress( CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str )
+void CAsmWnd::DrawAddress( CDC& dc,int y,DWORD dwAddr,ASM_LINE& asm_str )
 {
 	RECT rc;
 	rc.top = y;
@@ -723,8 +739,7 @@ void CAsmWnd::DrawAddress( CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str )
 	rc.left = 0;
 	rc.right = m_nAddrWidth;
 
-	//char szAddr[10];
-	sprintf(asm_str.szAddr,"%08X",dwAddr);
+	asm_str.dwAddr = dwAddr;
 
 	debug_kernel::breakpoint_t* bp;
 	dc.SetTextColor(0x00000000);
@@ -746,7 +761,10 @@ void CAsmWnd::DrawAddress( CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str )
 		}
 		dc.ExtTextOut(NULL,NULL,ETO_OPAQUE,&rc,NULL,NULL,NULL);
 	}
-	ExtTextOutWithSelection(dc,0,y,&rc,asm_str.szAddr,8);
+
+	char szAddr[10];
+	sprintf(szAddr,"%08X",asm_str.dwAddr);
+	ExtTextOutWithSelection(dc,0,y,&rc,szAddr,8);
 
 }
 
@@ -771,9 +789,9 @@ void CAsmWnd::DrawHexData( CDC& dc,int y,byte* data,int size )
 	dc.ExtTextOut(rc.left,y,ETO_CLIPPED,&rc,szHex,num,NULL);
 }
 
-void CAsmWnd::DrawDasmStr( CDC& dc,int y,int right,ASM_STR& asm_str,x86dis_insn& insn )
+void CAsmWnd::DrawDasmStr( CDC& dc,int y,int right,ASM_LINE& asm_str,x86dis_insn& insn )
 {
-	int nDasmLeft = m_nAddrWidth+m_nHexWidth+10;
+	int nDasmLeft = m_nAddrWidth+m_nHexWidth+20;
 
 	RECT rc;
 	rc.left = nDasmLeft;
@@ -949,4 +967,116 @@ void CAsmWnd::DrawOperand( CDC& dc,int y,int nDasmLeft,int nLeftCharNum,std::str
 	rc.left = nDasmLeft+nLeftCharNum*m_nFontWidth;
 	rc.right = rc.left+m_nDisasmWidth;
 	ExtTextOutWithSelection(dc,rc.left,rc.top,&rc,strOperand.c_str(),strOperand.size());
+}
+
+void CAsmWnd::DrawJumpLine( CDC& dc )
+{
+	int x = m_nAddrWidth+m_nHexWidth;
+
+	for (auto jmap : m_vecJumpMap)
+	{
+		if (jmap.src == m_dwSelAddrStart || jmap.dst == m_dwSelAddrStart)
+		{
+			// 绘制跳转线
+			int nSrcY = 0;
+			int nDstY = 0;
+
+			if (jmap.src < m_AddrToShow)
+			{
+				nSrcY = -1;
+			}
+			else if (jmap.src > m_vecAsm[m_vecAsm.size()-1].dwAddr)
+			{
+				RECT rc;
+				GetClientRect(&rc);
+				nSrcY = rc.bottom+50;
+			}
+
+			if (jmap.dst < m_AddrToShow)
+			{
+				nDstY = -1;
+			}
+			else if (jmap.dst > m_vecAsm[m_vecAsm.size()-1].dwAddr)
+			{
+				RECT rc;
+				GetClientRect(&rc);
+				nDstY = rc.bottom+50;
+			}
+
+			for (auto asm_line : m_vecAsm)
+			{
+				if (nSrcY ==0 && jmap.src >= asm_line.dwAddr && jmap.src < asm_line.dwAddr+asm_line.nSize)
+				{
+					nSrcY = asm_line.y;
+				}
+				if (nDstY == 0 && jmap.dst >= asm_line.dwAddr && jmap.dst < asm_line.dwAddr+asm_line.nSize)
+				{
+					nDstY = asm_line.y;
+				}
+			}
+
+			if (nSrcY && nDstY)
+			{
+				CPen pen(PS_SOLID,1,RGB(255,0,0));
+				CPen* pOld = dc.SelectObject(&pen);
+				dc.MoveTo(x+20,nSrcY+(m_nLineHight/2));
+				dc.LineTo(x+13,nSrcY+(m_nLineHight/2));
+				dc.LineTo(x+13,nDstY+(m_nLineHight/2));
+				dc.LineTo(x+20,nDstY+(m_nLineHight/2));
+
+				dc.MoveTo(x+16,nDstY+(m_nLineHight/2)-2);
+				dc.LineTo(x+20,nDstY+(m_nLineHight/2));
+				dc.LineTo(x+15,nDstY+(m_nLineHight/2)+2);
+
+				dc.SelectObject(pOld);
+			}
+		}
+
+	}
+}
+
+void CAsmWnd::DrawJumpArrow( CDC& dc,int y,DWORD dwAddr )
+{
+	int x = m_nAddrWidth+m_nHexWidth;
+	bool bDrawDot = true;
+	for (auto jmap : m_vecJumpMap)
+	{
+		if (jmap.src == dwAddr)
+		{
+			// 绘制跳箭头
+			if (jmap.dst >= dwAddr)
+			{
+				dc.MoveTo(x+1,y+m_nLineHight-5);
+				dc.LineTo(x+4,y+m_nLineHight);
+				dc.LineTo(x+7,y+m_nLineHight-6);
+			}
+			else
+			{
+				dc.MoveTo(x+1,y+m_nLineHight);
+				dc.LineTo(x+4,y+m_nLineHight-5);
+				dc.LineTo(x+7,y+m_nLineHight);
+			}
+			bDrawDot = false;
+			break;
+		}
+
+		if (jmap.dst == dwAddr)
+		{
+			dc.MoveTo(x+1,y+m_nLineHight-6);
+			dc.LineTo(x+6,y+m_nLineHight-3);
+			dc.LineTo(x+1,y+m_nLineHight);
+			bDrawDot = false;
+			break;
+		}
+
+	}
+
+	if (bDrawDot)
+	{
+		CPen pen(PS_SOLID,3,(COLORREF)0x00000000);
+		CPen* pOld = dc.SelectObject(&pen);
+		dc.MoveTo(x+2,y+m_nLineHight-5);
+		dc.LineTo(x+2,y+m_nLineHight-5);
+		dc.SelectObject(pOld);
+	}
 }

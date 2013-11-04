@@ -36,15 +36,17 @@ private:
 	void PreviousCode(DWORD dwTargetAddr,DWORD* pdwPreInsn);
 	void UpdateScrollInfo();
 
-	struct ASM_STR
+	struct ASM_LINE
 	{
-		char szAddr[10];
+		DWORD dwAddr;
 		std::string strAsmCode;
 		std::string strCommit;
+		int y;
+		int nSize;
 	};
 
 	std::vector<DWORD> m_vecAddress;
-	std::vector<ASM_STR> m_vecAsm;
+	std::vector<ASM_LINE> m_vecAsm;
 	CFont m_Font;
 	int m_nLineHight;
 	int m_nFontWidth;
@@ -68,10 +70,12 @@ private:
 	BOOL ExtTextOutWithSelection(CDC& dc, int x, int y, LPCRECT lpRect, LPCTSTR lpszString, UINT nCount);
 	void DrawUnknownData(const RECT& rcClient,CDC& dc);
 	void DrawSelLine(CDC& dc,int y,int right,DWORD dwAddr);
-	void DrawAddress(CDC& dc,int y,DWORD dwAddr,ASM_STR& asm_str);
+	void DrawAddress(CDC& dc,int y,DWORD dwAddr,ASM_LINE& asm_str);
 	void DrawHexData(CDC& dc,int y,byte* data,int size);
-	void DrawDasmStr(CDC& dc,int y,int right,ASM_STR& asm_str,x86dis_insn& insn);
+	void DrawDasmStr(CDC& dc,int y,int right,ASM_LINE& asm_str,x86dis_insn& insn);
 	void DrawOperand(CDC& dc,int y,int nDasmLeft,int nLeftCharNum,std::string strOperand,x86_insn_op operand);
+	void DrawJumpArrow(CDC& dc,int y,DWORD dwAddr);
+	void DrawJumpLine(CDC& dc);
 
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -82,6 +86,14 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnHdnEndtrack(NMHDR *pNMHDR, LRESULT *pResult);
+
+public:
+	struct JUMP_MAP 
+	{
+		DWORD src;
+		DWORD dst;
+	};
+	std::vector<JUMP_MAP> m_vecJumpMap;
 };
 
 
