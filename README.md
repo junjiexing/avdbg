@@ -8,7 +8,7 @@ avdbg
 
 编译方法：
  
- 环境：VS2012、Intel C++ Composer XE 2013 sp1
+ 环境：VS2012（或VS2010）、Intel C++ Composer XE 2013 sp1
  
  步骤：
 
