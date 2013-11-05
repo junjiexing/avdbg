@@ -17,6 +17,8 @@ avdbg
 	2.如果问我要了私有仓库的密码，首先更新子模块，然后编译3rdparty\Scintilla\Scintilla.sln,然后编译Xtreme toolkit pro，都完成后打开KillDBG.sln进行编译。如果自己下载了XTP的源码，则需要修改KillDBG项目的链接属性，将里面的ToolkitPro.lib改为自己编译的XTP的库文件
 	   
 	3.下载boost库http://www.boost.org/并解压编译和配置（关于编译和配置boost的方法我就不赘述了，网上很多了）
+	
+编译好的：http://pan.baidu.com/s/1gQFLQ
        
 
 讨论群：
